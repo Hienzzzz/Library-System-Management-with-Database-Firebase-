@@ -1,16 +1,17 @@
 package Main_System;
 
-import java.awt.*;
+import Login_screen.*;
 import javax.swing.*;
-import Admin_Screen.Dashboard;
 
 public class MainFrame extends javax.swing.JFrame{
+    
     public MainFrame(){
-        setContentPane(new Dashboard(this));
+        setTitle("Library System");
+        setContentPane(new Register(this));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         pack();
-        setLocationRelative(null);
+        setLocationRelativeTo(null);
         setResizable(false);
         setVisible(true);
 

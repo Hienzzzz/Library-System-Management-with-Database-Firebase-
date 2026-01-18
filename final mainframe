@@ -1,0 +1,93 @@
+package Main_System;
+
+import Login_Screen.Login;
+import Login_Screen.Register;
+
+import Admin_Screen.Dashboard_page.Dashboard;
+import Admin_Screen.Bookmanagement.BookMagement;
+import Admin_Screen.Sidebar.Sidebar;
+
+import Librarian_Screen.LibrarianContainer;
+import Student_Screen.StudentContainer;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class MainFrame extends JFrame {
+
+    // ROOT: Login / Register / Roles
+    private CardLayout rootLayout;
+    private JPanel rootPanel;
+
+    // ADMIN: pages inside admin
+    private CardLayout adminLayout;
+    private JPanel adminContent;
+
+    public MainFrame() {
+
+        setTitle("Library Management System");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+
+        // ===== ROOT PANEL =====
+        rootLayout = new CardLayout();
+        rootPanel = new JPanel(rootLayout);
+        setContentPane(rootPanel);
+
+        // ===== LOGIN & REGISTER =====
+        rootPanel.add(new Login(this), "LOGIN");
+        rootPanel.add(new Register(this), "REGISTER");
+
+        // ===== ADMIN CONTAINER =====
+        JPanel adminContainer = new JPanel(new BorderLayout());
+
+        adminLayout = new CardLayout();
+        adminContent = new JPanel(adminLayout);
+        adminContent.setOpaque(false);
+
+        // 🔹 ONLY ADMIN PAGES YOU HAVE NOW
+        adminContent.add(new Dashboard(), "DASHBOARD");
+        adminContent.add(new BookMagement(), "BOOKS");
+
+        Sidebar adminSidebar = new Sidebar(adminLayout, adminContent);
+
+        adminContainer.add(adminSidebar, BorderLayout.WEST);
+        adminContainer.add(adminContent, BorderLayout.CENTER);
+
+        rootPanel.add(adminContainer, "ADMIN");
+
+        // ===== LIBRARIAN & STUDENT (PLACEHOLDERS FOR NOW) =====
+        rootPanel.add(new LibrarianContainer(), "LIBRARIAN");
+        rootPanel.add(new StudentContainer(), "STUDENT");
+
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        // Start at login
+        rootLayout.show(rootPanel, "LOGIN");
+    }
+
+    // ===== NAVIGATION METHODS (CALLED FROM LOGIN / REGISTER) =====
+
+    public void showLogin() {
+        rootLayout.show(rootPanel, "LOGIN");
+    }
+
+    public void showRegister() {
+        rootLayout.show(rootPanel, "REGISTER");
+    }
+
+    public void showAdmin() {
+        rootLayout.show(rootPanel, "ADMIN");
+        adminLayout.show(adminContent, "DASHBOARD");
+    }
+
+    public void showLibrarian() {
+        rootLayout.show(rootPanel, "LIBRARIAN");
+    }
+
+    public void showStudent() {
+        rootLayout.show(rootPanel, "STUDENT");
+    }
+}

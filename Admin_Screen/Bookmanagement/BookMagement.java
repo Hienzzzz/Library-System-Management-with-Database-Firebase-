@@ -1,14 +1,14 @@
-package Admin_Screen.Dasgboard_page;
+package Admin_Screen.Bookmanagement;
 
 import Main_System.MainFrame;
 import java.awt.Dimension;
 import javax.swing.*;
 
 
-public class Dashboard extends javax.swing.JPanel {
+public class BookMagement extends javax.swing.JPanel {
     private MainFrame frame;
 
-    public Dashboard(MainFrame frame){
+    public BookMagement(MainFrame frame){
         this.frame = frame;
         panel();
     }
