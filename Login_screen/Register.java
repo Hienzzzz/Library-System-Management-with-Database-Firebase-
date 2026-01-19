@@ -24,8 +24,13 @@ public class Register extends javax.swing.JPanel{
 
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images\\LoginScreen_register.png"));
+        background.setIcon(new ImageIcon("Images\\Login_REGISTER PAGE.png"));
         background.setLayout(null);
+
+        JLabel gif = new JLabel();
+        gif.setIcon(new ImageIcon("Images\\\\Login_registration.gif"));
+        gif.setBounds(865, 138, 624, 624);
+
 
         //Firstname===========================================================================================
 
@@ -395,6 +400,7 @@ public class Register extends javax.swing.JPanel{
             }
 
 
+
                 JOptionPane.showMessageDialog(
                     frame,
                     "Registration successful!",
@@ -405,6 +411,7 @@ public class Register extends javax.swing.JPanel{
 
 
 
+        background.add(gif);
         background.add(createButton);
         background.add(clearButton);
         background.add(show_verifyPassword);
