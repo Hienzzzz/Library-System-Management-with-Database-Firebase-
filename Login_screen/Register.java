@@ -29,7 +29,7 @@ public class Register extends javax.swing.JPanel{
 
         //Firstname===========================================================================================
 
-        String firstname_placeHolder = "Enter first name";
+        String firstname_placeHolder = "Enter Firstname";
 
         JTextField firstname = new JTextField(firstname_placeHolder);
         firstname.setBounds(200, 284, 370, 50);
@@ -55,7 +55,7 @@ public class Register extends javax.swing.JPanel{
             }
         });
         //lastname=============================================================================================                     
-        String lastname_placeHolder = "Enter last name";
+        String lastname_placeHolder = "Enter Lastname";
 
         JTextField lastname = new JTextField(lastname_placeHolder);
         lastname.setBounds(200, 355, 370, 50);
@@ -81,7 +81,7 @@ public class Register extends javax.swing.JPanel{
             }
         });
         // Email ======================================================================================================
-        String Email_palceHolder = "Enter Email";
+        String Email_palceHolder = "Enter Email Address";
 
         JTextField email = new JTextField(Email_palceHolder);
         email.setBounds(200, 426, 370, 50);
@@ -109,7 +109,7 @@ public class Register extends javax.swing.JPanel{
         });
 
         //Student ID No.===============================================================================================
-        String ID_placeHolder = "Enter last name";
+        String ID_placeHolder = "Enter Student ID No.";
 
         JTextField Student_ID = new JTextField(ID_placeHolder);
         Student_ID.setBounds(200, 495, 370, 50);
@@ -283,8 +283,129 @@ public class Register extends javax.swing.JPanel{
             }
         });
 
+        // Create Buttons
+
+        JButton createButton = new JButton();
+        createButton.setBounds(398, 733, 193,62);
+        createButton.setContentAreaFilled(false);
+        createButton.setBorder(null);
+        createButton.setOpaque(false);
+        createButton.setFocusPainted(false);
+
+        createButton.addActionListener(e -> {
+
+            Color errorRed = new Color(220, 80, 80);
+
+            boolean firstEmpty =
+                firstname.getText().trim().isEmpty() ||
+                firstname.getText().equals(firstname_placeHolder);
+
+            boolean lastEmpty =
+                lastname.getText().trim().isEmpty() ||
+                lastname.getText().equals(lastname_placeHolder);
+
+            boolean emailEmpty =
+                email.getText().trim().isEmpty() ||
+                email.getText().equals(Email_palceHolder);
+
+            boolean idEmpty =
+                Student_ID.getText().trim().isEmpty() ||
+                Student_ID.getText().equals(ID_placeHolder);
+
+            boolean passwordEmpty =
+                password.getPassword().length == 0 ||
+                new String(password.getPassword()).equals(password_placeHolder);
+
+            boolean verifyEmpty =
+                verify_password.getPassword().length == 0 ||
+                new String(verify_password.getPassword()).equals(verify_placeHolder);
+
+ 
+            if (firstEmpty && lastEmpty && emailEmpty && idEmpty && passwordEmpty && verifyEmpty) {
+
+                firstname.setForeground(errorRed);
+                lastname.setForeground(errorRed);
+                email.setForeground(errorRed);
+                Student_ID.setForeground(errorRed);
+                password.setForeground(errorRed);
+                verify_password.setForeground(errorRed);
+
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Please fill out all required fields.",
+                    "Required Fields",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
 
 
+            if (firstEmpty) {
+                firstname.setForeground(errorRed);
+                JOptionPane.showMessageDialog(frame,
+                    "Please enter your first name",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                    return;
+            }
+
+            if (lastEmpty) {
+                lastname.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(frame,
+                    "Please enter your last name",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                    return;
+            }
+
+            if (emailEmpty) {
+                email.setForeground(errorRed);
+                JOptionPane.showMessageDialog(frame,
+                    "Please enter your email address",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                    return;
+            }
+
+            if (idEmpty) {
+                Student_ID.setForeground(errorRed);
+                JOptionPane.showMessageDialog(frame,
+                    "Please enter your student ID number",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (passwordEmpty) {
+                password.setForeground(errorRed);
+                JOptionPane.showMessageDialog(frame,
+                    "Please create a password",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (verifyEmpty) {
+                verify_password.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(frame,
+                    "Please verify your password",
+                    "Required Field",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Registration successful!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+        });
+
+
+
+        background.add(createButton);
         background.add(clearButton);
         background.add(show_verifyPassword);
         background.add(verify_password);
