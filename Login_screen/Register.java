@@ -100,7 +100,7 @@ public class Register extends javax.swing.JPanel{
             @Override
             public void focusLost(FocusEvent e){
                 if(Student_ID.getText().isEmpty()){
-                    Student_ID.setText(ID_placeHolder);
+                    Student_ID.setText(ID_placeHolder );
                     Student_ID.setForeground(Color.GRAY);
                 }
             }
