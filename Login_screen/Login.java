@@ -174,7 +174,8 @@ public class Login extends javax.swing.JPanel{
  
             }
         });
- 
+
+        background.add(showPassword);
         background.add(loginButton);
         background.add(clearButton);
         background.add(showPassword);
