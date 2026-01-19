@@ -2,6 +2,8 @@ package Login_screen;
 
 import Main_System.MainFrame;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.*;
@@ -252,9 +254,38 @@ public class Register extends javax.swing.JPanel{
             }
         });
 
+        // clear button ============================================================================================
+        JButton clearButton = new JButton();
+        clearButton.setBounds(181, 733, 192,62);
+        clearButton.setContentAreaFilled(false);
+        clearButton.setBorder(null);
+        clearButton.setFocusPainted(false);
+        clearButton.setOpaque(false);
+
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                firstname.setText(firstname_placeHolder);
+                firstname.setForeground(Color.GRAY);
+                lastname.setText(lastname_placeHolder);
+                lastname.setForeground(Color.GRAY);
+                email.setText(Email_palceHolder);
+                email.setForeground(Color.GRAY);
+                Student_ID.setText(ID_placeHolder);
+                Student_ID.setForeground(Color.GRAY);
+                password.setText(password_placeHolder);
+                password.setEchoChar((char) 0);
+                password.setForeground(Color.GRAY);
+                verify_password.setText((verify_placeHolder));
+                verify_password.setEchoChar((char) 0);
+                verify_password.setForeground(Color.GRAY);
+
+            }
+        });
 
 
 
+        background.add(clearButton);
         background.add(show_verifyPassword);
         background.add(verify_password);
         background.add(showPassword);
