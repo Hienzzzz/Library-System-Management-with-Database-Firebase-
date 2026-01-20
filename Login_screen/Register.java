@@ -7,6 +7,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+
+import java.util.regex.*;
 
 public class Register extends javax.swing.JPanel{
 
@@ -116,29 +124,85 @@ public class Register extends javax.swing.JPanel{
         //Student ID No.===============================================================================================
         String ID_placeHolder = "Enter Student ID No.";
 
+
         JTextField Student_ID = new JTextField(ID_placeHolder);
         Student_ID.setBounds(200, 495, 370, 50);
         Student_ID.setBackground(new Color(245, 246, 250));
         Student_ID.setBorder(null);
         Student_ID.setFont(new Font("Sanchez", Font.PLAIN, 20));
         Student_ID.setForeground(Color.gray);
+        final boolean[] isIDPlaceholder = { true };
 
-        Student_ID.addFocusListener(new FocusAdapter(){
+
+        Student_ID.addFocusListener(new FocusAdapter() {
+    @Override
+    public void focusGained(FocusEvent e) {
+        if (isIDPlaceholder[0]) {
+            isIDPlaceholder[0] = false;
+            Student_ID.setText("");
+            Student_ID.setForeground(Color.BLACK);
+        }
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+        if (Student_ID.getText().isEmpty()) {
+            isIDPlaceholder[0] = true;
+            Student_ID.setText(ID_placeHolder);
+            Student_ID.setForeground(Color.GRAY);
+        }
+    }
+});
+
+        ((AbstractDocument) Student_ID.getDocument())
+        .setDocumentFilter(new DocumentFilter() {
+
             @Override
-            public void focusGained(FocusEvent e){
-                if(Student_ID.getText().equals(ID_placeHolder)){
-                    Student_ID.setText("");
-                    Student_ID.setForeground(Color.BLACK);
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+                throws BadLocationException {
+                replace(fb, offset, 0, string, attr);
                 }
-            }
+
             @Override
-            public void focusLost(FocusEvent e){
-                if(Student_ID.getText().isEmpty()){
-                    Student_ID.setText(ID_placeHolder );
-                    Student_ID.setForeground(Color.GRAY);
-                }
+public void replace(FilterBypass fb, int offset, int length,
+        String text, AttributeSet attrs)
+        throws BadLocationException {
+
+    if (isIDPlaceholder[0]) {
+        fb.replace(0, fb.getDocument().getLength(), text, attrs);
+        return;
+    }
+
+    String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
+    String newText = currentText.substring(0, offset)
+            + text
+            + currentText.substring(offset + length);
+
+    String digits = newText.replaceAll("\\D", "");
+
+    if (digits.length() > 11) {
+        digits = digits.substring(0, 11);
+    }
+
+    String formatted;
+    if (digits.length() > 4) {
+        formatted = digits.substring(0, 4) + " - " + digits.substring(4);
+    } else {
+        formatted = digits;
+    }
+
+    fb.replace(0, fb.getDocument().getLength(), formatted, attrs);
+}
+
+
+            @Override
+            public void remove(FilterBypass fb, int offset, int length)
+                throws BadLocationException {
+                replace(fb, offset, length, "", null);
+
             }
         });
+
 
         //Password ====================================================================================================
         String password_placeHolder = "Set password";
@@ -267,26 +331,29 @@ public class Register extends javax.swing.JPanel{
         clearButton.setFocusPainted(false);
         clearButton.setOpaque(false);
 
-        clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e){
-                firstname.setText(firstname_placeHolder);
-                firstname.setForeground(Color.GRAY);
-                lastname.setText(lastname_placeHolder);
-                lastname.setForeground(Color.GRAY);
-                email.setText(Email_palceHolder);
-                email.setForeground(Color.GRAY);
-                Student_ID.setText(ID_placeHolder);
-                Student_ID.setForeground(Color.GRAY);
-                password.setText(password_placeHolder);
-                password.setEchoChar((char) 0);
-                password.setForeground(Color.GRAY);
-                verify_password.setText((verify_placeHolder));
-                verify_password.setEchoChar((char) 0);
-                verify_password.setForeground(Color.GRAY);
+        clearButton.addActionListener(e -> {
+    firstname.setText(firstname_placeHolder);
+    firstname.setForeground(Color.GRAY);
 
-            }
-        });
+    lastname.setText(lastname_placeHolder);
+    lastname.setForeground(Color.GRAY);
+
+    email.setText(Email_palceHolder);
+    email.setForeground(Color.GRAY);
+
+    isIDPlaceholder[0] = true;
+    Student_ID.setText(ID_placeHolder);
+    Student_ID.setForeground(Color.GRAY);
+
+    password.setText(password_placeHolder);
+    password.setEchoChar((char) 0);
+    password.setForeground(Color.GRAY);
+
+    verify_password.setText(verify_placeHolder);
+    verify_password.setEchoChar((char) 0);
+    verify_password.setForeground(Color.GRAY);
+});
+
 
         // Create Buttons
 
@@ -300,6 +367,7 @@ public class Register extends javax.swing.JPanel{
         createButton.addActionListener(e -> {
 
             Color errorRed = new Color(220, 80, 80);
+            Color normalColor = Color.BLACK;
 
             boolean firstEmpty =
                 firstname.getText().trim().isEmpty() ||
@@ -325,9 +393,7 @@ public class Register extends javax.swing.JPanel{
                 verify_password.getPassword().length == 0 ||
                 new String(verify_password.getPassword()).equals(verify_placeHolder);
 
- 
             if (firstEmpty && lastEmpty && emailEmpty && idEmpty && passwordEmpty && verifyEmpty) {
-
                 firstname.setForeground(errorRed);
                 lastname.setForeground(errorRed);
                 email.setForeground(errorRed);
@@ -339,74 +405,132 @@ public class Register extends javax.swing.JPanel{
                     frame,
                     "Please fill out all required fields.",
                     "Required Fields",
-                    JOptionPane.WARNING_MESSAGE
+                    JOptionPane.ERROR_MESSAGE
                 );
                 return;
             }
 
-
             if (firstEmpty) {
                 firstname.setForeground(errorRed);
-                JOptionPane.showMessageDialog(frame,
-                    "Please enter your first name",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Please enter your first name",
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
                     return;
+            }else if (!firstname.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")) {
+                firstname.setForeground(errorRed);
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Enter a valid first name",
+                    "Invalid Name",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }else{
+                firstname.setForeground(normalColor);
             }
 
             if (lastEmpty) {
                 lastname.setForeground(errorRed);
-                    JOptionPane.showMessageDialog(frame,
+                JOptionPane.showMessageDialog(frame, 
                     "Please enter your last name",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
-                    return;
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }else if(!lastname.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")){
+                lastname.setForeground(errorRed);
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Enter a valid Lastname",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }else{
+                lastname.setForeground(normalColor);
             }
 
             if (emailEmpty) {
                 email.setForeground(errorRed);
-                JOptionPane.showMessageDialog(frame,
-                    "Please enter your email address",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
-                    return;
-            }
-
-            if (idEmpty) {
-                Student_ID.setForeground(errorRed);
-                JOptionPane.showMessageDialog(frame,
-                    "Please enter your student ID number",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Please enter your email address",
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
+            }
+            if(!email.getText().trim().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")){
+                email.setForeground(errorRed);
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Please enter a valid Email Address",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }else{
+                email.setForeground(normalColor);
+            }
+            
+                if (idEmpty) {
+                Student_ID.setForeground(errorRed);
+                JOptionPane.showMessageDialog(frame, 
+                    "Please enter your student ID number",
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            } else if(!Student_ID.getText().matches("^\\d{4} - \\d{7}$")){
+                    Student_ID.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                    frame,
+                    "Please enter a valid Student ID No." ,
+                    "Ivalid input",
+                    JOptionPane.ERROR_MESSAGE);
+                    return;
+            }else if(Student_ID.getText().isEmpty()){
+                    Student_ID.setText(ID_placeHolder );
+                    Student_ID.setForeground(Color.GRAY);
+            }else{
+                Student_ID.setForeground(normalColor);
             }
 
             if (passwordEmpty) {
                 password.setForeground(errorRed);
-                JOptionPane.showMessageDialog(frame,
+                JOptionPane.showMessageDialog(frame, 
                     "Please create a password",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
+            }else{
+                password.setForeground(normalColor);
             }
+            
 
-            if (verifyEmpty) {
+            if(verifyEmpty) {
                 verify_password.setForeground(errorRed);
-                    JOptionPane.showMessageDialog(frame,
+                JOptionPane.showMessageDialog(frame, 
                     "Please verify your password",
-                    "Required Field",
-                    JOptionPane.WARNING_MESSAGE);
+                    "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
+            }else if(!verify_password.getPassword().equals(password.getPassword())){
+                verify_password.setForeground(errorRed);
+                JOptionPane.showConfirmDialog(
+                    frame, 
+                    "Password do not match. Please try again",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }else{
+                verify_password.setForeground(normalColor);
             }
 
-
-
-                JOptionPane.showMessageDialog(
-                    frame,
-                    "Registration successful!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
+            JOptionPane.showMessageDialog(
+                frame,
+                "Registration successful!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            System.out.println("Switching to Login page");
+            frame.setContentPane(new Login(frame));
+            frame.revalidate();
         });
 
 
