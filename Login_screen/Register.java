@@ -24,11 +24,11 @@ public class Register extends javax.swing.JPanel{
 
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images\\Login_REGISTER PAGE.png"));
+        background.setIcon(new ImageIcon("Images/Login_REGISTER PAGE.png"));
         background.setLayout(null);
 
         JLabel gif = new JLabel();
-        gif.setIcon(new ImageIcon("Images\\\\Login_registration.gif"));
+        gif.setIcon(new ImageIcon("Images/Login_registration.gif"));
         gif.setBounds(865, 138, 624, 624);
 
 
@@ -152,10 +152,10 @@ public class Register extends javax.swing.JPanel{
         password.setEchoChar((char) 0);
 
         ImageIcon show = new ImageIcon( // open eye icon
-            new ImageIcon("Images\\eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images/eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
         ImageIcon hide = new ImageIcon(
-            new ImageIcon("Images\\hidden.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images/hidden.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
 
         JCheckBox showPassword = new JCheckBox();
