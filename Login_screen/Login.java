@@ -145,12 +145,55 @@ public class Login extends javax.swing.JPanel{
             public void actionPerformed(ActionEvent e){
                 System.out.println("switching to Dashboard");
  
-                if(username.getText().trim().isEmpty() || username.getText().equals(nameText_placaeHolder) && password.getPassword().length == 0 || new String(password.getPassword()).equals(passText_Placeholder)){
-                    JOptionPane.showMessageDialog(frame, "Email and password are empty", "Invalid ", JOptionPane.ERROR_MESSAGE);
-                }else if(username.getText().trim().isEmpty() || username.getText().equals(nameText_placaeHolder)){
-                    JOptionPane.showMessageDialog(frame,"Email is empty", "inavalid", JOptionPane.ERROR_MESSAGE);
-                }else if(new String (password.getPassword()).equals(passText_Placeholder) || password.getText().length() == 0){
-                    JOptionPane.showMessageDialog(frame, "Passowrd is empty", "invalid", JOptionPane.ERROR_MESSAGE);
+                Color errorRed = new Color(220, 80, 80);
+                Color normalColor = Color.BLACK;
+
+                boolean username_empty = 
+                username.getText().trim().isEmpty() ||
+                username.getText().equals(nameText_placaeHolder);
+
+                boolean password_empty =
+                password.getPassword().length == 0 ||
+                new String(password.getPassword()).equals(passText_Placeholder);
+
+                if(username_empty && password_empty){
+                    username.setForeground(errorRed);
+                    password.setForeground(errorRed);
+
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "Please fill out all required fields",
+                        "Required Fields",
+                    JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if(username_empty){
+                    username.setForeground(errorRed);
+
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                    "Please enter your username",
+                    "Required Field",
+                    JOptionPane.ERROR_MESSAGE);
+                    return;
+                }else if(!username.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")){
+                        username.setForeground(errorRed);
+                        JOptionPane.showMessageDialog(
+                            frame, 
+                            "Enter a valid username",
+                            "Invalid Input",
+                            JOptionPane.ERROR_MESSAGE);
+                            return;
+                }
+
+                if(password_empty){
+                    password.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                    "Please enter your password",
+                    "Required field",
+                    JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
         });
