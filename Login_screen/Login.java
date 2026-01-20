@@ -21,7 +21,7 @@ public class Login extends javax.swing.JPanel{
  
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images\\LoginScreen_Login.png"));
+        background.setIcon(new ImageIcon("Images/LoginScreen_Login.png"));
         background.setLayout(null);
  
         //username========================================================================

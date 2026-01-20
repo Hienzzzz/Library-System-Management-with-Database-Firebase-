@@ -14,6 +14,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import java.util.Arrays;
 import java.util.regex.*;
 
 public class Register extends javax.swing.JPanel{
@@ -332,27 +333,27 @@ public void replace(FilterBypass fb, int offset, int length,
         clearButton.setOpaque(false);
 
         clearButton.addActionListener(e -> {
-    firstname.setText(firstname_placeHolder);
-    firstname.setForeground(Color.GRAY);
+            firstname.setText(firstname_placeHolder);
+            firstname.setForeground(Color.GRAY);
 
-    lastname.setText(lastname_placeHolder);
-    lastname.setForeground(Color.GRAY);
+            lastname.setText(lastname_placeHolder);
+            lastname.setForeground(Color.GRAY);
 
-    email.setText(Email_palceHolder);
-    email.setForeground(Color.GRAY);
+            email.setText(Email_palceHolder);
+            email.setForeground(Color.GRAY);
 
-    isIDPlaceholder[0] = true;
-    Student_ID.setText(ID_placeHolder);
-    Student_ID.setForeground(Color.GRAY);
+            isIDPlaceholder[0] = true;
+            Student_ID.setText(ID_placeHolder);
+            Student_ID.setForeground(Color.GRAY);
 
-    password.setText(password_placeHolder);
-    password.setEchoChar((char) 0);
-    password.setForeground(Color.GRAY);
+            password.setText(password_placeHolder);
+            password.setEchoChar((char) 0);
+            password.setForeground(Color.GRAY);
 
-    verify_password.setText(verify_placeHolder);
-    verify_password.setEchoChar((char) 0);
-    verify_password.setForeground(Color.GRAY);
-});
+            verify_password.setText(verify_placeHolder);
+            verify_password.setEchoChar((char) 0);
+            verify_password.setForeground(Color.GRAY);
+        });
 
 
         // Create Buttons
@@ -392,6 +393,7 @@ public void replace(FilterBypass fb, int offset, int length,
             boolean verifyEmpty =
                 verify_password.getPassword().length == 0 ||
                 new String(verify_password.getPassword()).equals(verify_placeHolder);
+
 
             if (firstEmpty && lastEmpty && emailEmpty && idEmpty && passwordEmpty && verifyEmpty) {
                 firstname.setForeground(errorRed);
@@ -468,7 +470,7 @@ public void replace(FilterBypass fb, int offset, int length,
                 email.setForeground(normalColor);
             }
             
-                if (idEmpty) {
+            if (idEmpty) {
                 Student_ID.setForeground(errorRed);
                 JOptionPane.showMessageDialog(frame, 
                     "Please enter your student ID number",
@@ -509,13 +511,14 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Required Fields",
                     JOptionPane.ERROR_MESSAGE);
                 return;
-            }else if(!verify_password.getPassword().equals(password.getPassword())){
+            }else if(!Arrays.equals(password.getPassword(), verify_password.getPassword())) {
                 verify_password.setForeground(errorRed);
-                JOptionPane.showConfirmDialog(
-                    frame, 
-                    "Password do not match. Please try again",
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Passwords do not match. Please try again",
                     "Invalid Input",
                     JOptionPane.ERROR_MESSAGE
+                    
                 );
                 return;
             }else{
@@ -528,13 +531,36 @@ public void replace(FilterBypass fb, int offset, int length,
                 "Success",
                 JOptionPane.INFORMATION_MESSAGE
             );
+            
             System.out.println("Switching to Login page");
             frame.setContentPane(new Login(frame));
             frame.revalidate();
+
+            Arrays.fill(password.getPassword(), '\0');
+            Arrays.fill(verify_password.getPassword(), '\0');
+
+        
+        });
+
+        JButton login = new JButton();
+        login.setBounds(425,823,84,17);
+        login.setContentAreaFilled(false);
+        login.setOpaque(false);
+        login.setFocusPainted(false);
+        login.setBorderPainted(false);
+
+        login.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                System.out.println("Switching to Login page");
+                frame.setContentPane(new Login(frame));
+                frame.revalidate();
+            }
         });
 
 
 
+        background.add(login);
         background.add(gif);
         background.add(createButton);
         background.add(clearButton);
