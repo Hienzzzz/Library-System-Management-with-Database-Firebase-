@@ -1,20 +1,26 @@
 package Login_screen;
 
-import java.util.ArrayList;
+public class User{
+    private String name;
+    private String surname;
+    private String email;
+    private int student_ID;
+    private String pasword;
 
-public class Data {
 
-        ArrayList<String>  NameData = new ArrayList<>();
-        ArrayList<String> Password = new ArrayList<>();
+    public User(String name, String surname, String email, int studentID, String password){
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.student_ID = studentID;
+        this.pasword = password;
+    }
+    public String getFullName(){
+        return name + " " + surname;
+    }
 
-        void getNameData(){
-            this.NameData = NameData;
-        }
+    public String getEmail(){
+        return email;
+    }
 
-        void setNameData(String name){
-            
-        }
-
-    
-    
 }
