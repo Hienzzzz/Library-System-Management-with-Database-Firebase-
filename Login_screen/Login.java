@@ -184,6 +184,8 @@ public class Login extends javax.swing.JPanel{
                             "Invalid Input",
                             JOptionPane.ERROR_MESSAGE);
                             return;
+                }else{
+                    username.setForeground(normalColor);
                 }
 
                 if(password_empty){
