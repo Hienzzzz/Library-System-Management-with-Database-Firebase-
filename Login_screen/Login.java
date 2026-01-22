@@ -1,9 +1,10 @@
 package Login_screen;
  
-import Main_System.MainFrame;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import Main_system.MainFrame;
  
 public class Login extends javax.swing.JPanel{
  
@@ -147,6 +148,10 @@ public class Login extends javax.swing.JPanel{
  
                 Color errorRed = new Color(220, 80, 80);
                 Color normalColor = Color.BLACK;
+                
+                String loginInput = username.getText().trim();
+                String passInput = new String (password.getPassword());
+                
 
                 boolean username_empty = 
                 username.getText().trim().isEmpty() ||
@@ -178,7 +183,7 @@ public class Login extends javax.swing.JPanel{
                 }else{
                     username.setForeground(normalColor);
                 }
-
+                
                 if(password_empty){
                     password.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
@@ -187,7 +192,56 @@ public class Login extends javax.swing.JPanel{
                     "Required field",
                     JOptionPane.ERROR_MESSAGE);
                     return;
+                }else{
+                    password.setForeground(normalColor);
                 }
+
+                if(!Data.userExists(loginInput)){
+                    JOptionPane.showMessageDialog( 
+                    frame,
+                    "Username/Email does not exist",
+                    "Login Failed",
+                JOptionPane.ERROR_MESSAGE
+                );
+                return;
+                }
+
+                if(!Data.passwordCorrect(loginInput, passInput)){
+                    JOptionPane.showMessageDialog(
+                        frame,
+                        "Incoeecet password",
+                        "Login failed",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                User loggedInUser = Data.login(loginInput, passInput);
+                String role = loggedInUser.getRole();
+
+                JOptionPane.showMessageDialog( 
+                    frame,
+                    "Login Successful!\nRole: " + role
+                );
+
+                switch(role){
+                    case "ADMIN":
+                        //frame.setContentPane(new adminDashBoard(frame)); 
+                        break;
+
+                    case "LIBRARIAN":
+                        //frame.setContentPane(new LibrarianDashBoard(frame)); 
+                        break;
+                    case "STUDENT":
+                        //frame.setContentPane(new StudentDasgboard(frame)); 
+                        break;
+                }
+
+                frame.revalidate();
+
+
+                
+                
             }
         });
  

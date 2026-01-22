@@ -1,4 +1,4 @@
-package Main_System;
+package Main_system;
 
 import Login_screen.*;
 import javax.swing.*;
@@ -7,7 +7,7 @@ public class MainFrame extends javax.swing.JFrame{
     
     public MainFrame(){
         setTitle("Library System");
-        setContentPane(new Register(this));
+        setContentPane(new Login(this));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         pack();
