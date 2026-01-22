@@ -1,26 +1,38 @@
 package Login_screen;
 
-public class User{
-    private String name;
+
+public  class User{
+    private String firstName;
     private String surname;
-    private String email;
-    private int student_ID;
-    private String pasword;
+    private String username;
+    private String emial;
+    private String role;
+    private String password;
 
-
-    public User(String name, String surname, String email, int studentID, String password){
-        this.name = name;
+    public User(String firstName, String surname, String email, String role, String password){
+        this.firstName = firstName;
         this.surname = surname;
-        this.email = email;
-        this.student_ID = studentID;
-        this.pasword = password;
+        this.username = firstName + " " + surname;
+        this.emial = email;
+        this.role = role;
+        this.password = password; 
     }
-    public String getFullName(){
-        return name + " " + surname;
+
+ 
+    public String getUsername(){
+        return  username;
     }
 
     public String getEmail(){
-        return email;
+        return emial;
+    }
+
+    public String getPassword(){
+        return  password;
+    }
+
+    public String getRole(){
+        return role;
     }
 
 }

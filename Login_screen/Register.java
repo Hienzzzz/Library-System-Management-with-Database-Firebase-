@@ -1,6 +1,5 @@
 package Login_screen;
 
-import Main_System.MainFrame;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +11,8 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+
+import Main_system.MainFrame;
 
 public class Register extends javax.swing.JPanel{
 
@@ -567,13 +568,25 @@ public void replace(FilterBypass fb, int offset, int length,
                 verify_password.setForeground(normalColor);
             }
 
-            JOptionPane.showMessageDialog(
+            String firstName = firstname.getText();
+            String surname = lastname.getText();
+            String Email = email.getText();
+            String id = Student_ID.getText();
+            String Password = new String(password.getPassword());
+
+            boolean success = Data.regsiterUser(firstName, surname, Email, id, Password);
+
+            if(success){
+                JOptionPane.showMessageDialog(
                 frame,
-                "Registration successful!",
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            
+                "Registration successful!");
+            }else{
+                JOptionPane.showMessageDialog(
+                frame, 
+                "User already exists!"
+                );
+            }
+
             System.out.println("Switching to Login page");
             frame.setContentPane(new Login(frame));
             frame.revalidate();
