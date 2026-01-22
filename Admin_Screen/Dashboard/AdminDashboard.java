@@ -1,15 +1,14 @@
-package Admin_Screen.Bookmanagement;
+package Admin_Screen.Dashboard;
 
+
+import Main_system.MainFrame;
 import java.awt.Dimension;
 import javax.swing.*;
 
-import Main_system.MainFrame;
-
-
-public class BookMagement extends javax.swing.JPanel {
+public class AdminDashboard extends javax.swing.JPanel {
     private MainFrame frame;
 
-    public BookMagement(MainFrame frame){
+    public AdminDashboard(MainFrame frame){
         this.frame = frame;
         panel();
     }
@@ -19,7 +18,7 @@ public class BookMagement extends javax.swing.JPanel {
         
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images\\Admin_Book Management.png"));
+        background.setIcon(new ImageIcon(""));
         background.setLayout(null);
 
         this.add(background);
