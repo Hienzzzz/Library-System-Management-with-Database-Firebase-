@@ -6,16 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.Arrays;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-
-import java.util.Arrays;
-import java.util.regex.*;
 
 public class Register extends javax.swing.JPanel{
 
@@ -419,14 +415,23 @@ public void replace(FilterBypass fb, int offset, int length,
                     JOptionPane.ERROR_MESSAGE);
                     return;
             }else if (!firstname.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")) {
-                firstname.setForeground(errorRed);
-                JOptionPane.showMessageDialog(
+                    firstname.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
                     frame,
                     "Enter a valid first name",
                     "Invalid Name",
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
+            }else if (!firstname.getText().trim().matches("^[A-Za-z]{2,}$")) {
+                    firstname.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "Firstname must have 2 or more characters",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
             }else{
                 firstname.setForeground(normalColor);
             }
@@ -447,6 +452,15 @@ public void replace(FilterBypass fb, int offset, int length,
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
+            }else if (!lastname.getText().trim().matches("^[A-Za-z]{2,}$")) {
+                    lastname.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "Lastname must have 2 or more characters",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
             }else{
                 lastname.setForeground(normalColor);
             }
@@ -466,6 +480,15 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Invalid Input",
                     JOptionPane.ERROR_MESSAGE);
                 return;
+            }else if (!email.getText().trim().matches("^[A-Za-z0-9._%+-]{2,}+@gmail\\.com$")) {
+                    email.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "Email must have 2 or more characters",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
             }else{
                 email.setForeground(normalColor);
             }
@@ -499,6 +522,25 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Required Fields",
                     JOptionPane.ERROR_MESSAGE);
                 return;
+            }else if (!password.getText().trim().matches("^\\S+$")) {
+                password.setForeground(errorRed);
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Password must not contain whitespace",
+                    "Invalid iput",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+                
+            }else if (!password.getText().trim().matches("^.{8,}$")) {
+                    password.setForeground(errorRed);
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "Password must have 8 or more characters",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
             }else{
                 password.setForeground(normalColor);
             }

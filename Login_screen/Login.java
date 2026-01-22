@@ -169,21 +169,12 @@ public class Login extends javax.swing.JPanel{
                 }
                 if(username_empty){
                     username.setForeground(errorRed);
-
                     JOptionPane.showMessageDialog(
                         frame, 
                     "Please enter your username",
                     "Required Field",
                     JOptionPane.ERROR_MESSAGE);
                     return;
-                }else if(!username.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")){
-                        username.setForeground(errorRed);
-                        JOptionPane.showMessageDialog(
-                            frame, 
-                            "Enter a valid username",
-                            "Invalid Input",
-                            JOptionPane.ERROR_MESSAGE);
-                            return;
                 }else{
                     username.setForeground(normalColor);
                 }
