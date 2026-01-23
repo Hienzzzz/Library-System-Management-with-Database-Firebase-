@@ -32,7 +32,11 @@ public  class User{
     }
 
     public String getRole(){
-        return ID;
+        if (ID.matches("^AD\\d{7}$")) return "ADMIN";
+        if(ID.matches("^LB\\d{7}$")) return "LIBRARIAN";
+        if (ID.matches("^\\d{4} - \\d{7}$")) return "STUDENT";
+        return "UNKNOWN";
+
     }
 
 }

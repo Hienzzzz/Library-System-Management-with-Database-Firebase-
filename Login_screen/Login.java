@@ -151,8 +151,9 @@ public class Login extends javax.swing.JPanel{
                 Color errorRed = new Color(220, 80, 80);
                 Color normalColor = Color.BLACK;
                 
-                String loginInput = username.getText().trim();
+                String userNameInput = username.getText().trim();
                 String passInput = new String (password.getPassword());
+                
                 
 
                 boolean username_empty = 
@@ -198,7 +199,7 @@ public class Login extends javax.swing.JPanel{
                     password.setForeground(normalColor);
                 }
 
-                if(!Data.userExists(loginInput)){
+                if(!Data.userExists(userNameInput)){
                     username.setForeground(errorRed);
                     JOptionPane.showMessageDialog( 
                     frame,
@@ -211,14 +212,17 @@ public class Login extends javax.swing.JPanel{
                     username.setForeground(normalColor);
                 }
 
-                if(!Data.passwordCorrect(loginInput, passInput)){
+                if(!Data.passwordCorrect( passInput)){
+                    password.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                         frame,
-                        "Incoeecet password",
+                        "Incorrect password",
                         "Login failed",
                         JOptionPane.ERROR_MESSAGE
                     );
                     return;
+                }else{
+                    password.setForeground(normalColor);
                 }
 
                 
