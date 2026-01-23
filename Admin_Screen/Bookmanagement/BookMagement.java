@@ -18,7 +18,7 @@ public class BookMagement extends javax.swing.JPanel {
         
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images\\Admin_Book Management.png"));
+        background.setIcon(new ImageIcon("Images\\Admin_Book_management.png"));
         background.setLayout(null);
 
         this.add(background);
