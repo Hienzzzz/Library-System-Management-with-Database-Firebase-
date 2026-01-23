@@ -1,14 +1,15 @@
-package Admin_Screen.Dashboard;
+package Student_Screen.Student_dashboard;
 
-
-import Main_System.MainFrame;
 import java.awt.Dimension;
 import javax.swing.*;
 
-public class AdminDashboard extends javax.swing.JPanel {
+import Main_System.MainFrame;
+
+
+public class Student_dashboard extends javax.swing.JPanel {
     private MainFrame frame;
 
-    public AdminDashboard(MainFrame frame){
+    public Student_dashboard(MainFrame frame){
         this.frame = frame;
         panel();
     }
@@ -18,7 +19,7 @@ public class AdminDashboard extends javax.swing.JPanel {
         
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon(""));
+        background.setIcon(new ImageIcon("Images/Student_dasboard.png"));
         background.setLayout(null);
 
         this.add(background);

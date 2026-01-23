@@ -3,7 +3,7 @@ package Admin_Screen.Bookmanagement;
 import java.awt.Dimension;
 import javax.swing.*;
 
-import Main_system.MainFrame;
+import Main_System.MainFrame;
 
 
 public class BookMagement extends javax.swing.JPanel {

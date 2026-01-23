@@ -4,7 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import Main_system.MainFrame;
+import Admin_Screen.Dashboard.AdminDashboard;
+import Main_System.MainFrame;
+import Student_Screen.Student_dashboard.Student_dashboard;
  
 public class Login extends javax.swing.JPanel{
  
@@ -65,11 +67,11 @@ public class Login extends javax.swing.JPanel{
         password.setEchoChar((char) 0 );
  
         ImageIcon opeEye = new ImageIcon( //open eye icon for password filed
-            new ImageIcon("Images\\eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images/eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
  
         ImageIcon closedEye = new ImageIcon( // closed eye icon for password file
-            new ImageIcon("Images\\hidden.png").getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH)
+            new ImageIcon("Images/hidden.png").getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH)
         );
  
         JCheckBox showPassword = new JCheckBox();
@@ -197,6 +199,7 @@ public class Login extends javax.swing.JPanel{
                 }
 
                 if(!Data.userExists(loginInput)){
+                    username.setForeground(errorRed);
                     JOptionPane.showMessageDialog( 
                     frame,
                     "Username/Email does not exist",
@@ -204,6 +207,8 @@ public class Login extends javax.swing.JPanel{
                 JOptionPane.ERROR_MESSAGE
                 );
                 return;
+                }else{
+                    username.setForeground(normalColor);
                 }
 
                 if(!Data.passwordCorrect(loginInput, passInput)){
@@ -216,37 +221,14 @@ public class Login extends javax.swing.JPanel{
                     return;
                 }
 
-                User loggedInUser = Data.login(loginInput, passInput);
-                String role = loggedInUser.getRole();
-
-                JOptionPane.showMessageDialog( 
-                    frame,
-                    "Login Successful!\nRole: " + role
-                );
-
-                switch(role){
-                    case "ADMIN":
-                        //frame.setContentPane(new adminDashBoard(frame)); 
-                        break;
-
-                    case "LIBRARIAN":
-                        //frame.setContentPane(new LibrarianDashBoard(frame)); 
-                        break;
-                    case "STUDENT":
-                        //frame.setContentPane(new StudentDasgboard(frame)); 
-                        break;
-                }
-
-                frame.revalidate();
+                
+                       
 
 
                 
                 
             }
         });
- 
- 
- 
  
         //register button=================================================================
         JButton register = new JButton();
@@ -268,7 +250,6 @@ public class Login extends javax.swing.JPanel{
         background.add(showPassword);
         background.add(loginButton);
         background.add(clearButton);
-        background.add(showPassword);
         background.add(password);
         background.add(register);
         background.add(username);

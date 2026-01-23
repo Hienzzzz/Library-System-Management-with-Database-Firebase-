@@ -6,7 +6,7 @@ public class Data{
 
     private static ArrayList<User> users = new ArrayList<>();
 
-    public static boolean regsiterUser (String firstName, String surname, String email, String role,  String password){
+    public static boolean regsiterUser (String firstName, String surname, String email, String ID,  String password){
        
         String username = firstName + surname;
 
@@ -17,7 +17,7 @@ public class Data{
             }
         }
 
-        users.add(new User(firstName, surname, email, role, password));
+        users.add(new User(firstName, surname, email, ID, password));
         return true;
     }
 

@@ -12,7 +12,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import Main_system.MainFrame;
+import Main_System.MainFrame;
 
 public class Register extends javax.swing.JPanel{
 
@@ -415,7 +415,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Required Fields",
                     JOptionPane.ERROR_MESSAGE);
                     return;
-            }else if (!firstname.getText().trim().matches("^[A-Za-z]+( [A-Za-z]+)*$")) {
+            }else if (!firstname.getText().trim().matches("^[A-Za-z ]+$")) {
                     firstname.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                     frame,
@@ -424,7 +424,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
-            }else if (!firstname.getText().trim().matches("^[A-Za-z]{2,}$")) {
+            }else if (!firstname.getText().trim().matches("^(?=(?:.*[A-Za-z]){2,})[A-Za-z ]*$")) {
                     firstname.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                         frame, 
@@ -453,7 +453,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
-            }else if (!lastname.getText().trim().matches("^[A-Za-z]{2,}$")) {
+            }else if (!lastname.getText().trim().matches("^(?=(?:.*[A-Za-z]){2,})[A-Za-z ]*$")) {
                     lastname.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                         frame, 

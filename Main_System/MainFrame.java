@@ -1,7 +1,9 @@
-package Main_system;
+package Main_System;
 
 import Login_screen.*;
 import javax.swing.*;
+
+import Admin_Screen.SidebarScreen.Sidebar;
 
 public class MainFrame extends javax.swing.JFrame{
     
