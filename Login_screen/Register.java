@@ -574,7 +574,7 @@ public void replace(FilterBypass fb, int offset, int length,
             String id = Student_ID.getText();
             String Password = new String(password.getPassword());
 
-            boolean success = Data.regsiterUser(firstName, surname, Email, id, Password);
+            boolean success = Data.registerUser(firstName, surname, Email, id, Password);
 
             if(success){
                 JOptionPane.showMessageDialog(

@@ -150,11 +150,6 @@ public class Login extends javax.swing.JPanel{
  
                 Color errorRed = new Color(220, 80, 80);
                 Color normalColor = Color.BLACK;
-                
-                String userNameInput = username.getText().trim();
-                String passInput = new String (password.getPassword());
-                
-                
 
                 boolean username_empty = 
                 username.getText().trim().isEmpty() ||
@@ -199,37 +194,49 @@ public class Login extends javax.swing.JPanel{
                     password.setForeground(normalColor);
                 }
 
-                if(!Data.userExists(userNameInput)){
-                    username.setForeground(errorRed);
-                    JOptionPane.showMessageDialog( 
-                    frame,
-                    "Username/Email does not exist",
-                    "Login Failed",
-                JOptionPane.ERROR_MESSAGE
-                );
-                return;
-                }else{
-                    username.setForeground(normalColor);
-                }
+                String loginInput = username.getText().trim();
+                String passwordInput = new String (password.getPassword());
 
-                if(!Data.passwordCorrect( passInput)){
-                    password.setForeground(errorRed);
-                    JOptionPane.showMessageDialog(
-                        frame,
-                        "Incorrect password",
-                        "Login failed",
-                        JOptionPane.ERROR_MESSAGE
-                    );
+                //check if walang laman
+                if(loginInput.isEmpty() || passwordInput.isEmpty()){
+                    JOptionPane.showMessageDialog(frame, "Please fill in all fields");
                     return;
-                }else{
-                    password.setForeground(normalColor);
+                }
+                //check if user exists
+                if(!Data.userExists(loginInput)){
+                    JOptionPane.showMessageDialog(frame, "Username or emial does not exist");
+                    return;
                 }
 
-                
-                       
+                //login attemp
+
+                User loggedUser = Data.login(loginInput, passwordInput);
+
+                if(loggedUser == null){
+                    JOptionPane.showMessageDialog(frame, "Incorrect password");
+                    return;
+                }
+
+                JOptionPane.showMessageDialog(frame, "Login successful!\nRole: " + loggedUser.getRole()
+                );
+
+                switch (loggedUser.getRole()) {
+                    case "ADMIN":
+                        frame.setContentPane(new AdminDashboard(frame));
+                        break;
+                    case "LIBRARIAN":
+                        //frame.setContentPane(new LibrarianDashboard(frame));
+                        break;
+                    case "STUDENT":
+                        frame.setContentPane(new Student_dashboard(frame));
+                        break;
+                   
 
 
-                
+                }
+
+                frame.revalidate();
+
                 
             }
         });
