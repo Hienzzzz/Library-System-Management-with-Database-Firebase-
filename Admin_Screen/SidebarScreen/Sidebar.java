@@ -2,7 +2,6 @@ package Admin_Screen.SidebarScreen;
 
 import java.awt.*;
 import javax.swing.*;
-import Main_System.*;
 
 
 public class Sidebar extends javax.swing.JPanel{

@@ -1,7 +1,7 @@
 package Admin_Screen.Dashboard;
 
 
-import Main_System.MainFrame;
+import Main_system.MainFrame;
 import java.awt.Dimension;
 import javax.swing.*;
 
@@ -18,7 +18,7 @@ public class AdminDashboard extends javax.swing.JPanel {
         
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon(""));
+        background.setIcon(new ImageIcon("Images\\Admin_dashboard.png"));
         background.setLayout(null);
 
         this.add(background);

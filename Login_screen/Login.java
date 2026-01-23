@@ -1,12 +1,11 @@
 package Login_screen;
  
+import Admin_Screen.Dashboard.AdminDashboard;
+import Main_system.MainFrame;
+import Student_Screen.Student_dashboard.Student_dashboard;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
-import Admin_Screen.Dashboard.AdminDashboard;
-import Main_System.MainFrame;
-import Student_Screen.Student_dashboard.Student_dashboard;
  
 public class Login extends javax.swing.JPanel{
  
@@ -67,11 +66,11 @@ public class Login extends javax.swing.JPanel{
         password.setEchoChar((char) 0 );
  
         ImageIcon opeEye = new ImageIcon( //open eye icon for password filed
-            new ImageIcon("Images/eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images\\Login_show (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
  
         ImageIcon closedEye = new ImageIcon( // closed eye icon for password file
-            new ImageIcon("Images/hidden.png").getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH)
+            new ImageIcon("Images\\Login_hide.png").getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH)
         );
  
         JCheckBox showPassword = new JCheckBox();

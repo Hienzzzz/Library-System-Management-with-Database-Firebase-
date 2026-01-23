@@ -1,9 +1,8 @@
 package Student_Screen.Student_dashboard;
 
+import Main_system.MainFrame;
 import java.awt.Dimension;
 import javax.swing.*;
-
-import Main_System.MainFrame;
 
 
 public class Student_dashboard extends javax.swing.JPanel {
@@ -19,7 +18,7 @@ public class Student_dashboard extends javax.swing.JPanel {
         
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images/Student_dasboard.png"));
+        background.setIcon(new ImageIcon("Images\\Studnet_dashbaord.png"));
         background.setLayout(null);
 
         this.add(background);

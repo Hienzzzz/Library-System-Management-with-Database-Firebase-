@@ -1,5 +1,6 @@
 package Login_screen;
 
+import Main_system.MainFrame;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,8 +12,6 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-
-import Main_System.MainFrame;
 
 public class Register extends javax.swing.JPanel{
 
@@ -214,10 +213,10 @@ public void replace(FilterBypass fb, int offset, int length,
         password.setEchoChar((char) 0);
 
         ImageIcon show = new ImageIcon( // open eye icon
-            new ImageIcon("Images/eye (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images\\Login_show (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
         ImageIcon hide = new ImageIcon(
-            new ImageIcon("Images/hidden.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+            new ImageIcon("Images\\Login_hide.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
 
         JCheckBox showPassword = new JCheckBox();
