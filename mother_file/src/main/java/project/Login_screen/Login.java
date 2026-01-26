@@ -85,22 +85,27 @@ public class Login extends javax.swing.JPanel{
         password.setForeground(Color.GRAY);
         password.setEchoChar((char) 0 );
  
-        ImageIcon opeEye = new ImageIcon( //open eye icon for password filed
-            new ImageIcon("Images\\Login_show (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+        ImageIcon openEye = new ImageIcon(
+            new ImageIcon(
+                    getClass().getResource("/Images/Login_show (2).png")
+                ).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
+
  
-        ImageIcon closedEye = new ImageIcon( // closed eye icon for password file
-            new ImageIcon("Images\\Login_hide.png").getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH)
+        ImageIcon closedEye = new ImageIcon(
+            new ImageIcon(
+                    getClass().getResource("/Images/Login_hide.png")
+                ).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
  
         JCheckBox showPassword = new JCheckBox();
-        showPassword.setBounds(1285, 525, 35,30 );
+        showPassword.setBounds(1285, 512, 40,50 );
         showPassword.setBorder(null);
         showPassword.setContentAreaFilled(false);
         showPassword.setOpaque(false);
         showPassword.setFocusPainted(false);
         showPassword.setIcon(closedEye);
-        showPassword.setSelectedIcon(opeEye);
+        showPassword.setSelectedIcon(openEye);
  
         showPassword.addActionListener(e ->{
             String text = new String(password.getPassword());

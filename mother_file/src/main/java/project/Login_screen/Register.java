@@ -232,11 +232,17 @@ public void replace(FilterBypass fb, int offset, int length,
         password.setForeground(Color.gray);
         password.setEchoChar((char) 0);
 
-        ImageIcon show = new ImageIcon( // open eye icon
-            new ImageIcon("Images\\Login_show (2).png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+        ImageIcon openEye = new ImageIcon(
+            new ImageIcon(
+                    getClass().getResource("/Images/Login_show (2).png")
+                ).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
-        ImageIcon hide = new ImageIcon(
-            new ImageIcon("Images\\Login_hide.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
+
+ 
+        ImageIcon closedEye = new ImageIcon(
+            new ImageIcon(
+                    getClass().getResource("/Images/Login_hide.png")
+                ).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)
         );
 
         JCheckBox showPassword = new JCheckBox();
@@ -245,8 +251,8 @@ public void replace(FilterBypass fb, int offset, int length,
         showPassword.setContentAreaFilled(false);
         showPassword.setOpaque(false);
         showPassword.setFocusPainted(false);
-        showPassword.setSelectedIcon(show);
-        showPassword.setIcon(hide);
+        showPassword.setSelectedIcon(openEye);
+        showPassword.setIcon(closedEye);
 
         showPassword.addActionListener(e ->{
             String text = new String(password.getPassword());
@@ -303,8 +309,8 @@ public void replace(FilterBypass fb, int offset, int length,
         show_verifyPassword.setContentAreaFilled(false);
         show_verifyPassword.setOpaque(false);
         show_verifyPassword.setFocusPainted(false);
-        show_verifyPassword.setIcon(hide);
-        show_verifyPassword.setSelectedIcon(show);
+        show_verifyPassword.setIcon(closedEye);
+        show_verifyPassword.setSelectedIcon(openEye);
 
         show_verifyPassword.addActionListener(e ->{
             String text = new String (verify_password.getPassword());
