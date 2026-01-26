@@ -4,39 +4,52 @@ package project.Login_screen;
 public  class User{
     private String firstName;
     private String surname;
-    private String username;
-    private String emial;
-    private String ID;
+    private String fullname;
+    private String email;
+    private String id;
     private String password;
 
-    public User(String firstName, String surname, String email, String ID, String password){
+    public User(){}
+
+    public User(String firstName, String surname, String email, String id, String password){
         this.firstName = firstName;
         this.surname = surname;
-        this.username = firstName + " " + surname;
-        this.emial = email;
-        this.ID = ID;
+        this.fullname = firstName + " " + surname;
+        this.email = email;
+        this.id = id;
         this.password = password; 
     }
 
  
-    public String getUsername(){
-        return  username;
+    public String getFirstname(){
+        return  firstName;
+    }
+
+    public String getSurname(){
+        return  surname;
+    }
+    public String getFullname(){
+        return  fullname;
     }
 
     public String getEmail(){
-        return emial;
+        return email;
+    }
+    public String getId(){
+        return  id;
     }
 
     public String getPassword(){
         return  password;
     }
 
-    public String getRole(){
-        if (ID.matches("^AD\\d{7}$")) return "ADMIN";
-        if(ID.matches("^LB\\d{7}$")) return "LIBRARIAN";
-        if (ID.matches("^\\d{4} - \\d{7}$")) return "STUDENT";
+    public String getRole() {
+        if (id == null) return "UNKNOWN";
+        if (id.matches("^AD\\d{7}$")) return "ADMIN";
+        if (id.matches("^LB\\d{7}$")) return "LIBRARIAN";
+        if (id.matches("^\\d{4}-\\d{7}$")) return "STUDENT";
         return "UNKNOWN";
-
     }
+
 
 }

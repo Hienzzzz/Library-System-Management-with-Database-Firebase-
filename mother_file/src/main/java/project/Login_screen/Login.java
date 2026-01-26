@@ -19,6 +19,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import project.Admin_Screen.Dashboard.AdminDashboard;
+import project.Librarian_screen.Dashboard.Librarian_dashboard;
 import project.Main_System.MainFrame;
 import project.Student_Screen.Student_dashboard.Student_dashboard;
  
@@ -31,6 +32,7 @@ public class Login extends javax.swing.JPanel{
  
         
     }
+    
  
     public void panel(){
         this.setLayout(null);
@@ -226,42 +228,47 @@ public class Login extends javax.swing.JPanel{
                     JOptionPane.showMessageDialog(frame, "Please fill in all fields");
                     return;
                 }
-                //check if user exists
-                if(!Data.userExists(loginInput)){
-                    JOptionPane.showMessageDialog(frame, "Username or emial does not exist");
-                    return;
-                }
 
                 //login attemp
+                LoginResult result = FirebaseUserService.login(loginInput, passwordInput);
 
-                User loggedUser = Data.login(loginInput, passwordInput);
+                switch (result.getStatus()) {
+                    case SUCCESS:
+                        User loggedUser = result.getUser();
+                        JOptionPane.showMessageDialog(
+                            frame, 
+                            "Login successful! \nRole: " + loggedUser.getRole()
+                        );
 
-                if(loggedUser == null){
-                    JOptionPane.showMessageDialog(frame, "Incorrect password");
-                    return;
-                }
-
-                JOptionPane.showMessageDialog(frame, "Login successful!\nRole: " + loggedUser.getRole()
-                );
-
-                switch (loggedUser.getRole()) {
-                    case "ADMIN":
-                        frame.setContentPane(new AdminDashboard(frame));
+                        switch (loggedUser.getRole()) {
+                            case "ADMIN":
+                                frame.setContentPane(new AdminDashboard(frame));
+                                break;
+                            case "STUDENT":
+                                frame.setContentPane(new Student_dashboard(frame));
+                                break;
+                            case "LIBRARIAN":
+                                frame.setContentPane(new Librarian_dashboard(frame));
+                                break;
+                        }
+                        frame.revalidate();
+                        frame.repaint();
                         break;
-                    case "LIBRARIAN":
-                        //frame.setContentPane(new LibrarianDashboard(frame));
+                    case WRONG_PASSWORD :
+                        password.setForeground(errorRed);
+                        JOptionPane.showMessageDialog(
+                            frame,
+                            "Incorrect password");
                         break;
-                    case "STUDENT":
-                        frame.setContentPane(new Student_dashboard(frame));
-                        break;
-                   
+                    case USER_NOT_FOUND :
+                        username.setForeground(errorRed);
+                        password.setForeground(errorRed);
+                        JOptionPane.showMessageDialog(
+                            frame, 
+                            "Username or Email not Found");
+                            break;
+                } 
 
-
-                }
-
-                frame.revalidate();
-
-                
             }
         });
  

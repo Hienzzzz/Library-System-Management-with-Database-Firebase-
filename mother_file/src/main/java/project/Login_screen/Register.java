@@ -203,7 +203,7 @@ public void replace(FilterBypass fb, int offset, int length,
 
     String formatted;
     if (digits.length() > 4) {
-        formatted = digits.substring(0, 4) + " - " + digits.substring(4);
+        formatted = digits.substring(0, 4) + "-" + digits.substring(4);
     } else {
         formatted = digits;
     }
@@ -526,7 +526,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Required Fields",
                     JOptionPane.ERROR_MESSAGE);
                 return;
-            } else if(!Student_ID.getText().matches("^\\d{4} - \\d{7}$")){
+            } else if(!Student_ID.getText().matches("^\\d{4}-\\d{7}$")){
                     Student_ID.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                     frame,
@@ -593,28 +593,52 @@ public void replace(FilterBypass fb, int offset, int length,
                 verify_password.setForeground(normalColor);
             }
 
-            String firstName = firstname.getText();
-            String surname = lastname.getText();
-            String Email = email.getText();
-            String id = Student_ID.getText();
+            String firstName = firstname.getText().trim();
+            String surname = lastname.getText().trim();
+            String fullname = firstName + " " + surname;
+            String Email = email.getText().trim();
+            String id = Student_ID.getText().trim();
             String Password = new String(password.getPassword());
 
-            boolean success = Data.registerUser(firstName, surname, Email, id, Password);
+            User newUser = new User(
+                firstName,
+                surname,
+                Email,
+                id, 
+                Password
+            );
+            
 
-            if(success){
+            if(FirebaseUserService.userExists(Email) ||
+                FirebaseUserService.userExists(fullname)){
+                    JOptionPane.showMessageDialog(
+                        frame, 
+                        "User already Exists!",
+                        "Registration Fialed",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+            boolean registered = FirebaseUserService.registerUser(newUser);
+
+            if(registered){
                 JOptionPane.showMessageDialog(
-                frame,
-                "Registration successful!");
+                    frame, 
+                    "Registration successful!"
+                );
+
+                System.out.println("Switching to Login page");
+                frame.setContentPane(new Login (frame));
+                frame.revalidate();
+                frame.repaint();
             }else{
                 JOptionPane.showMessageDialog(
-                frame, 
-                "User already exists!"
-                );
+                    frame, 
+                    "Registration failed. Please try again.",
+                    "Error",
+                JOptionPane.ERROR_MESSAGE);
             }
-
-            System.out.println("Switching to Login page");
-            frame.setContentPane(new Login(frame));
-            frame.revalidate();
 
             Arrays.fill(password.getPassword(), '\0');
             Arrays.fill(verify_password.getPassword(), '\0');
