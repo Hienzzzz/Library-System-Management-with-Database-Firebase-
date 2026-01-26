@@ -1,4 +1,4 @@
-package Admin_Screen.SidebarScreen;
+package project.Admin_Screen.SidebarScreen;
 
 import java.awt.*;
 import javax.swing.*;

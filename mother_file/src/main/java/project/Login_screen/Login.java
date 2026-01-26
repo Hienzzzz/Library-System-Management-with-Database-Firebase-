@@ -1,11 +1,26 @@
-package Login_screen;
+package project.Login_screen;
  
-import Admin_Screen.Dashboard.AdminDashboard;
-import Main_system.MainFrame;
-import Student_Screen.Student_dashboard.Student_dashboard;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
+import project.Admin_Screen.Dashboard.AdminDashboard;
+import project.Main_System.MainFrame;
+import project.Student_Screen.Student_dashboard.Student_dashboard;
  
 public class Login extends javax.swing.JPanel{
  
@@ -21,11 +36,16 @@ public class Login extends javax.swing.JPanel{
         this.setLayout(null);
         this.setPreferredSize(new Dimension(1512, 982));
  
+       
+
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images/LoginScreen_Login.png"));
         background.setLayout(null);
- 
+
+        ImageIcon icon = new ImageIcon(
+                getClass().getResource("/Images/LoginScreen_Login.png")
+        );
+        
         //username========================================================================
         String nameText_placaeHolder = "Enter your Email / Username";
  
@@ -263,6 +283,7 @@ public class Login extends javax.swing.JPanel{
         background.add(password);
         background.add(register);
         background.add(username);
+        background.setIcon(icon);
         this.add(background);
     
        

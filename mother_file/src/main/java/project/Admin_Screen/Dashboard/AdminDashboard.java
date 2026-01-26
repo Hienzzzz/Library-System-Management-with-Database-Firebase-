@@ -1,9 +1,11 @@
-package Admin_Screen.Dashboard;
+package project.Admin_Screen.Dashboard;
 
 
-import Main_system.MainFrame;
+
 import java.awt.Dimension;
 import javax.swing.*;
+
+import project.Main_System.MainFrame;
 
 public class AdminDashboard extends javax.swing.JPanel {
     private MainFrame frame;

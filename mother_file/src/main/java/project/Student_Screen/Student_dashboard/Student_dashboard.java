@@ -1,8 +1,10 @@
-package Student_Screen.Student_dashboard;
+package project.Student_Screen.Student_dashboard;
 
-import Main_system.MainFrame;
+
 import java.awt.Dimension;
 import javax.swing.*;
+
+import project.Main_System.MainFrame;
 
 
 public class Student_dashboard extends javax.swing.JPanel {

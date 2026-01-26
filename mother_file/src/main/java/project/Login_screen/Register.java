@@ -1,17 +1,29 @@
-package Login_screen;
+package project.Login_screen;
 
-import Main_system.MainFrame;
-import java.awt.*;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.Arrays;
-import javax.swing.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+
+import project.Main_System.MainFrame;
 
 public class Register extends javax.swing.JPanel{
 
@@ -29,12 +41,20 @@ public class Register extends javax.swing.JPanel{
 
         JLabel background = new JLabel();
         background.setBounds(0,0,1512,982);
-        background.setIcon(new ImageIcon("Images/Login_REGISTER PAGE.png"));
         background.setLayout(null);
 
+        ImageIcon image = new ImageIcon(
+            getClass().getResource("/Images/Login_REGISTER PAGE.png")
+        );
+
+
         JLabel gif = new JLabel();
-        gif.setIcon(new ImageIcon("Images/Login_registration.gif"));
         gif.setBounds(865, 138, 624, 624);
+
+        ImageIcon gifIcon = new ImageIcon(
+            getClass().getResource("/Images/Login_registration.gif")
+        );
+        gif.setIcon(gifIcon);
 
 
         //Firstname===========================================================================================
@@ -615,7 +635,6 @@ public void replace(FilterBypass fb, int offset, int length,
 
 
         background.add(login);
-        background.add(gif);
         background.add(createButton);
         background.add(clearButton);
         background.add(show_verifyPassword);
@@ -626,6 +645,8 @@ public void replace(FilterBypass fb, int offset, int length,
         background.add(Student_ID);
         background.add(lastname);
         background.add(firstname);
+        background.add(gif);
+        background.setIcon(image);
         this.add(background);
     }
     
