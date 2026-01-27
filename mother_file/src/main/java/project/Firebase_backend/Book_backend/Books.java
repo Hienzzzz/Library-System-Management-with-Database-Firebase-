@@ -7,16 +7,20 @@ public class Books {
     private String author;
     private int quantity;
     private String genre;
+    private String description;
+    private String coverURL;
    
 
     public Books(){}
 
-    public Books(String title, String book_id, String author, int quantity, String genre){
+    public Books(String title, String book_id, String author, int quantity, String genre, String description, String CoverURL){
         this.title = title;
         this.author = author;
         this.book_id = book_id;
         this.quantity = quantity;
         this.genre = genre;
+        this.description = description;
+        this.coverURL = CoverURL;
     }
 
  
@@ -37,6 +41,22 @@ public class Books {
     public String getGenre(){
         return  genre;
     }
+    public String getDescription(){
+        return description;
+    }
+    public String getCoverURL(){
+        return coverURL;
+    }
+
+    
+    public void setBook_id(String book_id){
+        this.book_id = book_id;
+    }
+    public void setCoverURL(String coverURL){
+        this.coverURL = coverURL;
+    }
+
+    
 
     
 }

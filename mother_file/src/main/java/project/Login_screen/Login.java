@@ -55,7 +55,7 @@ public class Login extends javax.swing.JPanel{
         String nameText_placaeHolder = "Enter your Email / Username";
  
         JTextField username = new JTextField(nameText_placaeHolder);
-        username.setBounds(978, 420, 346, 51);;
+        username.setBounds(978, 420, 346, 51);
         username.setBackground(new Color(255, 255, 255));
         username.setBorder(null);
         username.setFont(new Font("Sanchez", Font.PLAIN, 20));
