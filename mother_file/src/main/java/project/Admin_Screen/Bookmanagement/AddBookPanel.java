@@ -46,7 +46,7 @@ public class AddBookPanel  extends JPanel{
         background.setLayout(null);
 
         Color fieldColor = new Color(241, 243, 246);
-        
+
         JTextField Title = new JTextField();
         Title.setBounds(216, 127, 500, 33);
         Title.setBackground(fieldColor);
@@ -66,7 +66,7 @@ public class AddBookPanel  extends JPanel{
         background.add(Genre);
 
         SpinnerNumberModel QuantityModel = 
-            new SpinnerNumberModel(1, 0, 20, 1);
+            new SpinnerNumberModel(1, 1, 20, 1);
 
         JSpinner Quantity_button = new JSpinner(QuantityModel);
         Quantity_button.setBounds(680, 295, 37, 31);
