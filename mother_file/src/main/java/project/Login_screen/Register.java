@@ -23,6 +23,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import project.Firebase_backend.User_backend.UserService;
+import project.Firebase_backend.User_backend.User;
 import project.Main_System.MainFrame;
 
 public class Register extends javax.swing.JPanel{
@@ -609,8 +611,8 @@ public void replace(FilterBypass fb, int offset, int length,
             );
             
 
-            if(FirebaseUserService.userExists(Email) ||
-                FirebaseUserService.userExists(fullname)){
+            if(UserService.userExists(Email) ||
+                UserService.userExists(fullname)){
                     JOptionPane.showMessageDialog(
                         frame, 
                         "User already Exists!",
@@ -620,7 +622,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     return;
                 }
 
-            boolean registered = FirebaseUserService.registerUser(newUser);
+            boolean registered = UserService.registerUser(newUser);
 
             if(registered){
                 JOptionPane.showMessageDialog(

@@ -19,6 +19,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import project.Admin_Screen.Dashboard.AdminDashboard;
+import project.Firebase_backend.User_backend.UserService;
+import project.Firebase_backend.User_backend.LoginResult;
+import project.Firebase_backend.User_backend.User;
 import project.Librarian_screen.Dashboard.Librarian_dashboard;
 import project.Main_System.MainFrame;
 import project.Student_Screen.Student_dashboard.Student_dashboard;
@@ -230,7 +233,7 @@ public class Login extends javax.swing.JPanel{
                 }
 
                 //login attemp
-                LoginResult result = FirebaseUserService.login(loginInput, passwordInput);
+                LoginResult result = UserService.login(loginInput, passwordInput);
 
                 switch (result.getStatus()) {
                     case SUCCESS:

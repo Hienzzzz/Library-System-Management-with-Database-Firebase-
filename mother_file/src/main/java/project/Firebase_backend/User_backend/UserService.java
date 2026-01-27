@@ -1,4 +1,4 @@
-package project.Login_screen;
+package project.Firebase_backend.User_backend;
 
 
 
@@ -14,7 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 
 
 
-public class FirebaseUserService{
+public class UserService{
 
     private static final String[] ROLE_PATH = {
         "students",
