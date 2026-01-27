@@ -2,33 +2,64 @@ package project.Firebase_backend.Storage_backend;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Locale;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 
-
 public class ImageService {
-    public static String uploadBookCover(File file, String bookId){
+
+    public static String uploadBookCover(File file, String bookId) {
+
         try {
             Bucket bucket = StorageClient.getInstance().bucket();
 
-            String filename = "book_covers/" + bookId + ".jpg";
+            if (bucket == null) {
+                throw new IllegalStateException(
+                    "Firebase Storage bucket not initialized."
+                );
+            }
+
+            // ✅ Safe ID
+            String safeId = (bookId != null)
+                    ? bookId
+                    : "temp_" + System.currentTimeMillis();
+
+            // ✅ Get file extension
+            String fileName = file.getName().toLowerCase(Locale.ROOT);
+            String extension = "jpg"; // default
+
+            if (fileName.endsWith(".png")) extension = "png";
+            else if (fileName.endsWith(".jpeg")) extension = "jpeg";
+            else if (fileName.endsWith(".jpg")) extension = "jpg";
+
+            // ✅ Detect content type
+            String contentType = Files.probeContentType(file.toPath());
+            if (contentType == null) {
+                contentType = "image/" + extension;
+            }
+
+            String filename = "book_covers/" + safeId + "." + extension;
 
             Blob blob = bucket.create(
                 filename,
-                Files.readAllBytes(file.toPath()), 
-                "image/jpeg"
+                Files.readAllBytes(file.toPath()),
+                contentType
             );
 
+            System.out.println("Image uploaded: " + filename);
+
             return String.format(
-                "https://storage.googleapis,com/%s/%s", 
-            bucket.getName(), filename
-        );
+                "https://storage.googleapis.com/%s/%s",
+                bucket.getName(),
+                filename
+            );
+
         } catch (Exception e) {
-            e.printStackTrace();
+           System.err.println("Image upload failed: " + e.getMessage());
             return null;
+
         }
     }
-    
 }

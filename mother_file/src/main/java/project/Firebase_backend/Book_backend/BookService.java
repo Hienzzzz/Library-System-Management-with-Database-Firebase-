@@ -8,56 +8,57 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
 public class BookService {
 
-    private static final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("books");
+    private static final DatabaseReference ref =
+            FirebaseDatabase.getInstance().getReference("books");
 
-    public static DatabaseReference getRef(){
+    private static final Random RAND = new Random();
+
+    public static DatabaseReference getRef() {
         return ref;
     }
 
-    // to generate book id
-    public static String generatedBookId(){
-        Random rand = new Random();
-        int number = 100000 + rand.nextInt(900000); // 6 digit to
+    // Generate book ID
+    public static String generatedBookId() {
+        int number = 100000 + RAND.nextInt(900000);
         return "BK-" + number;
-        }
-
-
-
-    public static void addBookWithUniqueId(Books book){
-        checkAndAdd(book,0);
     }
-    private static void checkAndAdd(Books book, int attempts){
-        if(attempts > 5 ){
-            System.out.println("Failed to generate unique Book Id");
+
+    public static void addBookWithUniqueId(Books book) {
+        checkAndAdd(book, 0);
+    }
+
+    private static void checkAndAdd(Books book, int attempts) {
+
+        if (attempts > 5) {
+            System.out.println("Failed to generate unique Book ID");
             return;
         }
 
         String newId = generatedBookId();
-        book.setBook_id(newId);
+        book.setBookId(newId);
 
-        ref.orderByChild("book_id").equalTo(newId).addListenerForSingleValueEvent(new ValueEventListener() {
-        
-        @Override
-        public void onDataChange(DataSnapshot Id_number){
-            if(Id_number.exists()){
-                checkAndAdd(book, attempts + 1);
-            }else{
-                ref.push().setValueAsync(book);
-                System.out.println("Book added with ID: " + newId);
+        ref.orderByChild("bookId")
+           .equalTo(newId)
+           .addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+
+                if (snapshot.exists()) {
+                    checkAndAdd(book, attempts + 1);
+                } else {
+                    // ✅ Better: use Book ID as key
+                    ref.child(newId).setValueAsync(book);
+                    System.out.println("Book added with ID: " + newId);
+                }
             }
-        }
-        @Override
-        public void onCancelled(DatabaseError error){
-            System.out.println(error.getMessage());
-        }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.out.println(error.getMessage());
+            }
         });
     }
-
-   
-
-    
 }
-

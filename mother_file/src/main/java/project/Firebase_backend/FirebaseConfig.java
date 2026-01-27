@@ -14,9 +14,14 @@ public class FirebaseConfig{
                     .getClassLoader()
                     .getResourceAsStream("firebase-key.json");
 
+                    if (serviceAccount == null) {
+                        throw new RuntimeException("firebase-key.json not found in resources folder");
+                        }
+
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .setDatabaseUrl("https://nationalian-library-system-default-rtdb.firebaseio.com/")
+                    .setStorageBucket("nationalian-library-system.firebasestorage.app")
                     .build();
 
                     FirebaseApp.initializeApp(options); // without this hindi mag s-start si firebase natin

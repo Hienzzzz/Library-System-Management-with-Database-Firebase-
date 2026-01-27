@@ -32,7 +32,7 @@ public class AddBookPanel  extends JPanel{
         this.parent = parent;
 
         setLayout(null);
-        setBounds(439, 308, 765, 587);
+        setBounds(439, 308, 762, 587);
         setOpaque(false);
 
         ImageIcon image = new ImageIcon(
@@ -42,7 +42,7 @@ public class AddBookPanel  extends JPanel{
    
 
         JLabel background = new JLabel(image);
-        background.setBounds(0,0,765, 587);
+        background.setBounds(0,0,762, 587);
         background.setLayout(null);
 
         Color fieldColor = new Color(241, 243, 246);
@@ -156,13 +156,25 @@ public class AddBookPanel  extends JPanel{
                     return;
             }
 
-            String CoverURL = null;
-            if(selectedFile[0] != null){
-                CoverURL = ImageService.uploadBookCover(
-                    selectedFile[0],
-                    null
-                );
-            }
+            String coverURL = null;
+            if (selectedFile[0] != null) {
+            coverURL = ImageService.uploadBookCover(selectedFile[0], null);
+
+                if (selectedFile[0] != null && coverURL == null) {
+                    JOptionPane.showMessageDialog(
+                    this,
+                    "Image upload failed.\n\n" +
+                    "Please make sure Firebase Storage is enabled\n" +
+                    "and try again.",
+                    "Upload Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+            
+        }
+
 
             Books book = new Books(
                 Title.getText(),
@@ -171,7 +183,7 @@ public class AddBookPanel  extends JPanel{
                 (int) Quantity_button.getValue(),
                 Genre.getText(),
                 Description.getText(),
-                CoverURL
+                coverURL
 
             );
             

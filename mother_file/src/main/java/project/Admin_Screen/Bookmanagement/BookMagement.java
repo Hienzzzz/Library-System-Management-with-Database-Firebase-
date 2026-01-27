@@ -133,31 +133,33 @@ public class BookMagement extends JPanel {
     // ================= FIREBASE LISTENER =================
     private void loadBooks() {
 
-        BookService.getRef().addValueEventListener(new ValueEventListener() {
+    BookService.getRef().addValueEventListener(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
 
-                SwingUtilities.invokeLater(() -> {
-                    model.setRowCount(0);
+            SwingUtilities.invokeLater(() -> {
+                model.setRowCount(0);
 
-                    for (DataSnapshot data : snapshot.getChildren()) {
-                        Books book = data.getValue(Books.class);
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    Books book = data.getValue(Books.class);
+                    if (book == null) continue;
 
-                        model.addRow(new Object[]{
-                                book.getTitle(),
-                                book.getBook_id(),
-                                book.getAuthor(),
-                                book.getQuantity()
-                        });
-                    }
-                });
-            }
+                    model.addRow(new Object[]{
+                            book.getTitle(),
+                            book.getBookId(),
+                            book.getAuthor(),
+                            book.getQuantity()
+                    });
+                }
+            });
+        }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.out.println("Firebase error: " + error.getMessage());
-            }
-        });
-    }
+        @Override
+        public void onCancelled(DatabaseError error) {
+            System.out.println("Firebase error: " + error.getMessage());
+        }
+    });
+}
+
 }
