@@ -3,12 +3,14 @@ package project.Admin_Screen.Bookmanagement;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.File;
+import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,6 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.NumberFormatter;
 
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
@@ -65,17 +68,35 @@ public class AddBookPanel  extends JPanel{
         Genre.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         background.add(Genre);
 
-        SpinnerNumberModel QuantityModel = 
-            new SpinnerNumberModel(1, 1, 20, 1);
 
-        JSpinner Quantity_button = new JSpinner(QuantityModel);
-        Quantity_button.setBounds(680, 295, 37, 31);
-        JComponent editor = Quantity_button.getEditor();
-        JTextField spinnerText = ((JSpinner.DefaultEditor) editor).getTextField();
+        final int MAX_QUANTITY = 20;
 
-        spinnerText.setBackground(fieldColor);
-        spinnerText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        background.add(Quantity_button);
+        SpinnerNumberModel quantityModel =
+        new SpinnerNumberModel(1, 1, MAX_QUANTITY, 1);
+
+        JSpinner quantityButton = new JSpinner(quantityModel);
+        quantityButton.setBounds(680, 295, 45, 31);
+
+
+        JSpinner.NumberEditor editor =
+        new JSpinner.NumberEditor(quantityButton, "#");
+        quantityButton.setEditor(editor);
+
+
+        JFormattedTextField textField = editor.getTextField();
+
+        NumberFormatter formatter = (NumberFormatter) textField.getFormatter();
+        formatter.setAllowsInvalid(false); 
+        formatter.setMinimum(1);          
+        formatter.setMaximum(MAX_QUANTITY);
+
+
+        textField.setBackground(fieldColor);
+        textField.setBorder(BorderFactory.createEmptyBorder(5, 2, 5, 5));
+
+        background.add(quantityButton);
+
+// =======================================================
 
         JTextArea Description = new JTextArea();
         Description.setLineWrap(true);
@@ -180,7 +201,7 @@ public class AddBookPanel  extends JPanel{
                 Title.getText(),
                 null,
                 Author.getText(),
-                (int) Quantity_button.getValue(),
+                (int) quantityButton.getValue(),
                 Genre.getText(),
                 Description.getText(),
                 coverURL
