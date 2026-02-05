@@ -124,6 +124,14 @@ public class AddBookPanel  extends JPanel{
         cancel_button.setOpaque(false);
         background.add(cancel_button);
 
+        JButton close_button = new JButton();
+        close_button.setBounds(726, 13, 25, 25);
+        close_button.setContentAreaFilled(false);
+        close_button.setBorder(null);
+        close_button.setFocusPainted(false);
+        close_button.setOpaque(false);
+        background.add(close_button);
+
         JButton UploadImage = new JButton();
         UploadImage.setBounds(17, 324, 175, 42);
         UploadImage.setBorder(null);
@@ -160,7 +168,20 @@ public class AddBookPanel  extends JPanel{
         
 
 
-        cancel_button.addActionListener(e -> parent.closeAddBook());
+        cancel_button.addActionListener(e -> {
+        int result = JOptionPane.showConfirmDialog(
+            this,
+            "Cancel adding this book?\nAll entered data will be lost.",
+            "Confirm Cancel",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+    if (result == JOptionPane.YES_OPTION) {
+        parent.closeAddBook();
+    }
+});
+
 
         addBook_button.addActionListener(e -> {
 
@@ -190,6 +211,7 @@ public class AddBookPanel  extends JPanel{
                     return;
                 }
 
+               
             
         }
 
@@ -209,6 +231,22 @@ public class AddBookPanel  extends JPanel{
             BookService.checkDuplicateAndAdd(book);
             parent.closeAddBook();
         });
+
+         close_button.addActionListener(e -> {
+                    int result = JOptionPane.showConfirmDialog(
+                        this, 
+                        "Are you sure you want to close this Panel?\nAll entered data will be lost.",
+                        "Confirm close",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                    );
+                    
+                    if (result == JOptionPane.YES_OPTION){
+                        parent.closeAddBook();
+                    }
+
+                });
+        
 
         this.add(background);
     }

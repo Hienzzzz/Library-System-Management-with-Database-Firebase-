@@ -13,9 +13,10 @@ import project.Firebase_backend.Book_backend.Books;
 
 public class BookDetailsPanel extends JPanel {
 
-   
+   private BookMagement parent;
 
     public BookDetailsPanel(Books book, Runnable onClose){
+        this.parent = parent;
        
 
         setLayout(null);
@@ -107,12 +108,23 @@ public class BookDetailsPanel extends JPanel {
                 }
         });
 
+        JButton close_button = new JButton();
+        close_button.setBounds(726, 13, 25, 25);
+        close_button.setContentAreaFilled(false);
+        close_button.setBorder(null);
+        close_button.setFocusPainted(false);
+        close_button.setOpaque(false);
+
+        close_button.addActionListener(e -> onClose.run());
+
+      
 
       
 
 
 
 
+        background.add(close_button);
         background.add(description);
         background.add(quantity);
         background.add(genre);
