@@ -1,5 +1,6 @@
 package project.Admin_Screen.Bookmanagement;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -40,6 +41,7 @@ public class BookMagement extends JPanel {
 
     private JLayeredPane layeredPane;
     private AddBookPanel addBook;
+    private JPanel dimOverlay;
 
     public BookMagement(MainFrame frame) {
         this.frame = frame;
@@ -64,6 +66,28 @@ public class BookMagement extends JPanel {
         JLabel background = new JLabel(icon);
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
+
+        // ================= LIGHT OVERLAY (DISABLED BACKGROUND) =================
+      // ================= TRANSPARENT DIM OVERLAY =================
+dimOverlay = new JPanel() {
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setComposite(AlphaComposite.SrcOver.derive(0.12f)); // 15% dim
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        g2.dispose();
+    }
+};
+
+dimOverlay.setBounds(0, 0, 1512, 982);
+dimOverlay.setOpaque(false);      // 🔑 CRITICAL
+dimOverlay.setVisible(false);
+
+// block interaction behind modal
+dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
 
         // ================= TABLE =================
         String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action"};
@@ -145,7 +169,6 @@ public class BookMagement extends JPanel {
         // ================= CELL RENDERER =================
         table.setDefaultRenderer(Object.class, new CustomCellRenderer());
 
-        // Lock column widths
         for (int i = 0; i < table.getColumnCount(); i++) {
             int w = table.getColumnModel().getColumn(i).getPreferredWidth();
             table.getColumnModel().getColumn(i).setMinWidth(w);
@@ -179,10 +202,14 @@ public class BookMagement extends JPanel {
         addBookButton.setBorder(null);
         addBookButton.setContentAreaFilled(false);
 
-        addBookButton.addActionListener(e -> addBook.setVisible(true));
+        addBookButton.addActionListener(e -> {
+            dimOverlay.setVisible(true);
+            addBook.setVisible(true);
+        });
 
         // ================= LAYERS =================
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
         layeredPane.add(addBook, JLayeredPane.POPUP_LAYER);
         layeredPane.add(addBookButton, JLayeredPane.PALETTE_LAYER);
 
@@ -192,6 +219,7 @@ public class BookMagement extends JPanel {
     // ================= CLOSE ADD BOOK =================
     public void closeAddBook() {
         addBook.setVisible(false);
+        dimOverlay.setVisible(false);
     }
 
     // ================= FIREBASE LISTENER =================
