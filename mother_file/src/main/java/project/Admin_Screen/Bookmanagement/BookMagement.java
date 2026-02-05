@@ -67,11 +67,10 @@ public class BookMagement extends JPanel {
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
 
-        // ================= LIGHT OVERLAY (DISABLED BACKGROUND) =================
-      // ================= TRANSPARENT DIM OVERLAY =================
-dimOverlay = new JPanel() {
-    @Override
-    protected void paintComponent(Graphics g) {
+      
+        dimOverlay = new JPanel() {
+            @Override
+        protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g.create();
@@ -82,12 +81,12 @@ dimOverlay = new JPanel() {
     }
 };
 
-dimOverlay.setBounds(0, 0, 1512, 982);
-dimOverlay.setOpaque(false);      // 🔑 CRITICAL
-dimOverlay.setVisible(false);
+        dimOverlay.setBounds(0, 0, 1512, 982);
+        dimOverlay.setOpaque(false);      
+        dimOverlay.setVisible(false);
 
-// block interaction behind modal
-dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
+
+        dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
 
         // ================= TABLE =================
         String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action"};
@@ -108,7 +107,7 @@ dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
 
-        // ================= MODERN SCROLLBAR =================
+      
         JScrollBar vBar = scrollPane.getVerticalScrollBar();
         vBar.setUI(new BasicScrollBarUI() {
 
