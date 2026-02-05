@@ -49,7 +49,7 @@ public class BookService {
                 if (snapshot.exists()) {
                     checkAndAdd(book, attempts + 1);
                 } else {
-                    // ✅ Better: use Book ID as key
+                    
                     ref.child(newId).setValueAsync(book);
                     System.out.println("Book added with ID: " + newId);
                 }

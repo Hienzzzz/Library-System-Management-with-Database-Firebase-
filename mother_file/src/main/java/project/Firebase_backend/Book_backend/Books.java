@@ -10,7 +10,6 @@ public class Books {
     private String description;
     private String coverURL;
 
-    // 🔥 REQUIRED by Firebase
     public Books() {}
 
     public Books(String title,

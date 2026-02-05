@@ -21,12 +21,12 @@ public class ImageService {
                 );
             }
 
-            // ✅ Safe ID
+           
             String safeId = (bookId != null)
                     ? bookId
                     : "temp_" + System.currentTimeMillis();
 
-            // ✅ Get file extension
+           
             String fileName = file.getName().toLowerCase(Locale.ROOT);
             String extension = "jpg"; // default
 
@@ -34,7 +34,6 @@ public class ImageService {
             else if (fileName.endsWith(".jpeg")) extension = "jpeg";
             else if (fileName.endsWith(".jpg")) extension = "jpg";
 
-            // ✅ Detect content type
             String contentType = Files.probeContentType(file.toPath());
             if (contentType == null) {
                 contentType = "image/" + extension;
