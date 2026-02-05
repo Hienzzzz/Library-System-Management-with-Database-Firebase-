@@ -9,6 +9,9 @@ public class Books {
     private String genre;
     private String description;
     private String coverURL;
+    private int borrowedCount;
+
+    
 
     public Books() {}
 
@@ -18,7 +21,7 @@ public class Books {
                  int quantity,
                  String genre,
                  String description,
-                 String coverURL) {
+                 String coverURL ) {
 
         this.title = title;
         this.bookId = bookId;
@@ -27,6 +30,7 @@ public class Books {
         this.genre = genre;
         this.description = description;
         this.coverURL = coverURL;
+        this.borrowedCount = borrowedCount;
     }
 
     // ================= GETTERS =================
@@ -59,6 +63,10 @@ public class Books {
         return coverURL;
     }
 
+    public int getBorrowedCount(){
+        return borrowedCount;
+    }
+
     // ================= SETTERS =================
 
     public void setTitle(String title) {
@@ -87,5 +95,9 @@ public class Books {
 
     public void setCoverURL(String coverURL) {
         this.coverURL = coverURL;
+    }
+
+    public void setBorrowedCount(int borrowedCount){
+        this.borrowedCount = borrowedCount;
     }
 }

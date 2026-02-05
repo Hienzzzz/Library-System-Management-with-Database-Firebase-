@@ -2,6 +2,7 @@ package project.Admin_Screen.Bookmanagement;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -19,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -90,7 +92,12 @@ public class BookMagement extends JPanel {
 
         // ================= TABLE =================
         String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action"};
-        model = new DefaultTableModel(columns, 0);
+        model = new DefaultTableModel(columns, 0) {
+        @Override
+            public boolean isCellEditable(int row, int column) {
+            return column == 4; // disable editing for all cells
+            }
+        };
 
         table = new JTable(model);
         table.setRowHeight(28);
@@ -165,6 +172,9 @@ public class BookMagement extends JPanel {
         table.getColumnModel().getColumn(3).setPreferredWidth(115);
         table.getColumnModel().getColumn(4).setPreferredWidth(100);
 
+        table.getColumnModel().getColumn(4).setCellRenderer(new ActionButtonRenderer());
+        table.getColumnModel().getColumn(4).setCellEditor(new ActionButtonEditor(this));
+
         // ================= CELL RENDERER =================
         table.setDefaultRenderer(Object.class, new CustomCellRenderer());
 
@@ -192,7 +202,7 @@ public class BookMagement extends JPanel {
 
         // ================= ADD BOOK PANEL =================
         addBook = new AddBookPanel(this);
-        addBook.setBounds(375, 200, 762, 587);
+        addBook.setBounds(439, 270, 762, 587); // [wede ma edit for add book panel location]
         addBook.setVisible(false);
 
         // ================= ADD BOOK BUTTON =================
@@ -213,6 +223,8 @@ public class BookMagement extends JPanel {
         layeredPane.add(addBookButton, JLayeredPane.PALETTE_LAYER);
 
         add(layeredPane);
+
+       
     }
 
     // ================= CLOSE ADD BOOK =================
@@ -240,7 +252,8 @@ public class BookMagement extends JPanel {
                                 book.getTitle(),
                                 book.getBookId(),
                                 book.getAuthor(),
-                                book.getQuantity()
+                                book.getQuantity(),
+                                "..."
                         });
                     }
                 });
@@ -252,4 +265,157 @@ public class BookMagement extends JPanel {
             }
         });
     }
+
+    //=========================Custom Cell renderer =======================================
+    
+    class CustomCellRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+
+            super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column
+            );
+
+            // RESET defaults (important)
+            setFont(table.getFont());
+            setForeground(Color.BLACK);
+            setBackground(Color.WHITE);
+            setHorizontalAlignment(SwingConstants.LEFT);
+            setVerticalAlignment(SwingConstants.CENTER);
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+            if (column == 0) {
+                setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 10));
+            }
+
+            if (column == 1){
+                setBorder(BorderFactory.createEmptyBorder(0, 15, 0,0));
+            }
+
+            if (column == 2){
+                setBorder(BorderFactory.createEmptyBorder(0, 60, 0,0));
+            }
+        
+            if (column == 3) {
+                setHorizontalAlignment(SwingConstants.LEFT);
+            }
+
+           
+            if (column == 4) {
+                setHorizontalAlignment(SwingConstants.RIGHT);
+                setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
+            }
+
+           
+            if (row % 2 == 0) {
+                setBackground(new Color(245, 245, 245));
+            }
+
+            
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                setForeground(table.getSelectionForeground());
+            }
+
+            return this;
+        }
+    }
+    
+    // ====================================Action Button Renderer =============================================
+
+    class ActionButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+
+    public ActionButtonRenderer() {
+            setText("...");
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(false);
+            setFont(new Font("Poppins", Font.BOLD, 18));
+        }
+
+        @Override
+        public java.awt.Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+            return this;
+        }
+    }
+
+
+
+    //=============================button editor ======================================================
+    class ActionButtonEditor extends javax.swing.DefaultCellEditor {
+
+    private JButton button;
+    private int selectedRow;
+    private BookMagement parent;
+
+    public ActionButtonEditor(BookMagement parent) {
+            super(new javax.swing.JTextField());
+            this.parent = parent;
+
+            button = new JButton("...");
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setContentAreaFilled(false);
+            button.setFont(new Font("Poppins", Font.BOLD, 18));
+
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                parent.showBookDetails(selectedRow);
+            });
+        }
+
+        @Override
+        public java.awt.Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int row, int column) {
+
+            selectedRow = row;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "...";
+        }
+    }
+
+        public void showBookDetails(int row){
+        String bookId = model.getValueAt(row, 1).toString();
+
+        BookService.getRef().child(bookId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot){
+                Books book = snapshot.getValue(Books.class);
+                if (book == null) return;
+
+                SwingUtilities.invokeLater(() -> {
+
+                    dimOverlay.setVisible(true);
+
+                    final BookDetailsPanel[] detailsHolder = new BookDetailsPanel[1];
+
+                     detailsHolder[0] = new BookDetailsPanel(book, () -> {
+                            layeredPane.remove(detailsHolder[0]);
+                            dimOverlay.setVisible(false);
+                            layeredPane.repaint();
+                        });
+
+                    layeredPane.add(detailsHolder[0], JLayeredPane.POPUP_LAYER);
+                    layeredPane.repaint();
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error){}
+        });
+    }
+
+
+
+    
 }

@@ -3,12 +3,10 @@ package project.Admin_Screen.Bookmanagement;
 import java.awt.Color;
 import java.awt.Image;
 import java.io.File;
-import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -41,8 +39,6 @@ public class AddBookPanel  extends JPanel{
         ImageIcon image = new ImageIcon(
             getClass().getResource("/Images/Admin_addBook.png")
         );
-
-   
 
         JLabel background = new JLabel(image);
         background.setBounds(0,0,762, 587);
@@ -172,7 +168,7 @@ public class AddBookPanel  extends JPanel{
                 JOptionPane.showMessageDialog(
                     this, 
                     "Please fill in required fields",
-                    "Inavlid",
+                    "Invalid",
                     JOptionPane.ERROR_MESSAGE);
                     return;
             }
@@ -190,6 +186,7 @@ public class AddBookPanel  extends JPanel{
                     "Upload Error",
                         JOptionPane.ERROR_MESSAGE
                     );
+                    
                     return;
                 }
 
@@ -198,17 +195,18 @@ public class AddBookPanel  extends JPanel{
 
 
             Books book = new Books(
-                Title.getText(),
+                Title.getText().trim(),
                 null,
-                Author.getText(),
+                Author.getText().trim(),
                 (int) quantityButton.getValue(),
-                Genre.getText(),
-                Description.getText(),
+                Genre.getText().trim(),
+                Description.getText().trim(),
                 coverURL
 
             );
             
-            BookService.addBookWithUniqueId(book);
+            
+            BookService.checkDuplicateAndAdd(book);
             parent.closeAddBook();
         });
 

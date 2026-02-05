@@ -2,6 +2,8 @@ package project.Firebase_backend.Book_backend;
 
 import java.util.Random;
 
+import javax.swing.JOptionPane;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,5 +62,48 @@ public class BookService {
                 System.out.println(error.getMessage());
             }
         });
+    }
+    public static void checkDuplicateAndAdd(Books book) {
+
+    String title = book.getTitle().trim().toLowerCase();
+    String author = book.getAuthor().trim().toLowerCase();
+
+    ref.orderByChild("title")
+       .equalTo(title)
+       .addListenerForSingleValueEvent(new ValueEventListener() {
+
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
+
+            for (DataSnapshot snap : snapshot.getChildren()) {
+                Books existingBook = snap.getValue(Books.class);
+
+                if (existingBook != null &&
+                    existingBook.getAuthor().trim().toLowerCase().equals(author)) {
+
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Book already exists!"
+                    );
+                    return; 
+                }
+            }
+
+          
+            addBookWithUniqueId(book);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError error) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Error checking book: " + error.getMessage()
+            );
+        }
+    });
+    }
+
+    public static void deleteBook(String bookId){
+        ref.child(bookId).removeValueAsync();
     }
 }
