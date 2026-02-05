@@ -3,16 +3,23 @@ package project.Admin_Screen.Bookmanagement;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -32,7 +39,6 @@ public class BookMagement extends JPanel {
     private DefaultTableModel model;
 
     private JLayeredPane layeredPane;
-
     private AddBookPanel addBook;
 
     public BookMagement(MainFrame frame) {
@@ -60,30 +66,93 @@ public class BookMagement extends JPanel {
         background.setLayout(null);
 
         // ================= TABLE =================
-        String[] columns = {"Title", "Book ID", "Author", "Quantity"};
+        String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action"};
         model = new DefaultTableModel(columns, 0);
 
         table = new JTable(model);
         table.setRowHeight(28);
         table.setBackground(Color.WHITE);
         table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
 
+        // ================= SCROLL PANE =================
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(371, 510, 1030, 412);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(412);
-        table.getColumnModel().getColumn(1).setPreferredWidth(195);
-        table.getColumnModel().getColumn(2).setPreferredWidth(244);
-        table.getColumnModel().getColumn(3).setPreferredWidth(107);
+        // ================= MODERN SCROLLBAR =================
+        JScrollBar vBar = scrollPane.getVerticalScrollBar();
+        vBar.setUI(new BasicScrollBarUI() {
 
+            @Override
+            protected void configureScrollBarColors() {
+                thumbColor = new Color(180, 180, 180);
+                trackColor = new Color(245, 245, 245);
+            }
+
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            private JButton createZeroButton() {
+                JButton b = new JButton();
+                b.setPreferredSize(new Dimension(0, 0));
+                b.setMinimumSize(new Dimension(0, 0));
+                b.setMaximumSize(new Dimension(0, 0));
+                return b;
+            }
+
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                    RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(thumbColor);
+                g2.fillRoundRect(
+                        r.x + 2, r.y + 2,
+                        r.width - 4, r.height - 4,
+                        10, 10
+                );
+                g2.dispose();
+            }
+
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
+                g.setColor(trackColor);
+                g.fillRect(r.x, r.y, r.width, r.height);
+            }
+        });
+
+        vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+
+        // ================= COLUMN WIDTHS =================
+        table.getColumnModel().getColumn(0).setPreferredWidth(410);
+        table.getColumnModel().getColumn(1).setPreferredWidth(150);
+        table.getColumnModel().getColumn(2).setPreferredWidth(240);
+        table.getColumnModel().getColumn(3).setPreferredWidth(115);
+        table.getColumnModel().getColumn(4).setPreferredWidth(100);
+
+        // ================= CELL RENDERER =================
+        table.setDefaultRenderer(Object.class, new CustomCellRenderer());
+
+        // Lock column widths
         for (int i = 0; i < table.getColumnCount(); i++) {
             int w = table.getColumnModel().getColumn(i).getPreferredWidth();
             table.getColumnModel().getColumn(i).setMinWidth(w);
             table.getColumnModel().getColumn(i).setMaxWidth(w);
         }
 
+        // ================= HEADER (HIDDEN) =================
         JTableHeader header = table.getTableHeader();
         header.setFont(new Font("Poppins", Font.PLAIN, 18));
         header.setBackground(new Color(241, 243, 246));
@@ -99,10 +168,9 @@ public class BookMagement extends JPanel {
 
         background.add(scrollPane);
 
-
         // ================= ADD BOOK PANEL =================
         addBook = new AddBookPanel(this);
-        addBook.setBounds(375, 200, 762, 587); // EXACT image size
+        addBook.setBounds(375, 200, 762, 587);
         addBook.setVisible(false);
 
         // ================= ADD BOOK BUTTON =================
@@ -111,12 +179,9 @@ public class BookMagement extends JPanel {
         addBookButton.setBorder(null);
         addBookButton.setContentAreaFilled(false);
 
-        addBookButton.addActionListener(e -> {
-           
-            addBook.setVisible(true);
-        });
+        addBookButton.addActionListener(e -> addBook.setVisible(true));
 
-        // ================= ADD TO LAYERS =================
+        // ================= LAYERS =================
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(addBook, JLayeredPane.POPUP_LAYER);
         layeredPane.add(addBookButton, JLayeredPane.PALETTE_LAYER);
@@ -127,39 +192,37 @@ public class BookMagement extends JPanel {
     // ================= CLOSE ADD BOOK =================
     public void closeAddBook() {
         addBook.setVisible(false);
-     
     }
 
     // ================= FIREBASE LISTENER =================
     private void loadBooks() {
 
-    BookService.getRef().addValueEventListener(new ValueEventListener() {
+        BookService.getRef().addValueEventListener(new ValueEventListener() {
 
-        @Override
-        public void onDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
 
-            SwingUtilities.invokeLater(() -> {
-                model.setRowCount(0);
+                SwingUtilities.invokeLater(() -> {
+                    model.setRowCount(0);
 
-                for (DataSnapshot data : snapshot.getChildren()) {
-                    Books book = data.getValue(Books.class);
-                    if (book == null) continue;
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        Books book = data.getValue(Books.class);
+                        if (book == null) continue;
 
-                    model.addRow(new Object[]{
-                            book.getTitle(),
-                            book.getBookId(),
-                            book.getAuthor(),
-                            book.getQuantity()
-                    });
-                }
-            });
-        }
+                        model.addRow(new Object[]{
+                                book.getTitle(),
+                                book.getBookId(),
+                                book.getAuthor(),
+                                book.getQuantity()
+                        });
+                    }
+                });
+            }
 
-        @Override
-        public void onCancelled(DatabaseError error) {
-            System.out.println("Firebase error: " + error.getMessage());
-        }
-    });
-}
-
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.out.println("Firebase error: " + error.getMessage());
+            }
+        });
+    }
 }
