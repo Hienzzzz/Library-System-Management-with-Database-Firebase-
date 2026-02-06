@@ -397,6 +397,8 @@ public class BookMagement extends JPanel {
             addBook.setVisible(true);
         });
 
+        
+
         // ================= LAYERS =================
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
@@ -479,46 +481,50 @@ public class BookMagement extends JPanel {
     // ================= SHOW BOOK DETAILS =================
     public void showBookDetails(int row) {
 
-        String bookId = model.getValueAt(row, 1).toString();
+    String bookId = model.getValueAt(row, 1).toString();
 
-        BookService.getRef()
-            .child(bookId)
-            .addListenerForSingleValueEvent(new ValueEventListener() {
+    BookService.getRef()
+        .child(bookId)
+        .addListenerForSingleValueEvent(new ValueEventListener() {
 
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
 
-                    Books book = snapshot.getValue(Books.class);
-                    if (book == null) return;
+                Books book = snapshot.getValue(Books.class);
+                if (book == null) return;
 
-                    SwingUtilities.invokeLater(() -> {
+                SwingUtilities.invokeLater(() -> {
 
-                        dimOverlay.setVisible(true);
+                    dimOverlay.setVisible(true);
 
-                        final BookDetailsPanel[] holder =
-                                new BookDetailsPanel[1];
+                    final BookDetailsPanel[] holder =
+                            new BookDetailsPanel[1];
 
-                        holder[0] = new BookDetailsPanel(book, () -> {
+                    holder[0] = new BookDetailsPanel(
+                        BookMagement.this,   
+                        book,
+                        () -> {
                             layeredPane.remove(holder[0]);
-                            dimOverlay.setVisible(false);
+                            hideDimOverlay();
                             layeredPane.repaint();
-                        });
-
-                        layeredPane.add(holder[0],
-                                JLayeredPane.POPUP_LAYER);
-                        layeredPane.repaint();
-                    });
-                }
-
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    System.out.println(
-                        "Failed to load book details: " +
-                        error.getMessage()
+                        }
                     );
-                }
-            });
-    }
+
+                    layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
+                    layeredPane.repaint();
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.out.println(
+                    "Failed to load book details: " +
+                    error.getMessage()
+                );
+            }
+        });
+}
+
     // ============================for Filters =========================================
 
    private void applyFilters() {
@@ -691,55 +697,70 @@ public class BookMagement extends JPanel {
     //=============================button editor ======================================================
    class ActionButtonEditor extends javax.swing.DefaultCellEditor {
 
-    private JButton button;
-    private int selectedRow;
-    private BookMagement parent;
+        private JButton button;
+        private int selectedRow;
+        private BookMagement parent;
 
-    public ActionButtonEditor(BookMagement parent) {
-        super(new javax.swing.JTextField());
-        this.parent = parent;
+        public ActionButtonEditor(BookMagement parent) {
+            super(new javax.swing.JTextField());
+            this.parent = parent;
 
-        button = new JButton("•••");
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(true); 
-        button.setOpaque(true);            
-        button.setFont(new Font("Poppins", Font.BOLD, 18));
+            button = new JButton("•••");
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setContentAreaFilled(true); 
+            button.setOpaque(true);            
+            button.setFont(new Font("Poppins", Font.BOLD, 18));
 
-        button.addActionListener(e -> {
-            fireEditingStopped();
-            parent.showBookDetails(selectedRow);
-        });
-    }
-
-    @Override
-    public Component getTableCellEditorComponent(
-            JTable table, Object value, boolean isSelected, int row, int column) {
-
-        selectedRow = row;
-
-        if (isSelected) {
-            button.setBackground(table.getSelectionBackground());
-            button.setForeground(table.getSelectionForeground());
-        } else {
-            button.setBackground(row % 2 == 0
-                    ? new Color(245, 245, 245)
-                    : Color.WHITE);
-            button.setForeground(Color.BLACK);
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                parent.showBookDetails(selectedRow);
+            });
         }
 
-        return button;
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int row, int column) {
+
+            selectedRow = row;
+
+            if (isSelected) {
+                button.setBackground(table.getSelectionBackground());
+                button.setForeground(table.getSelectionForeground());
+            } else {
+                button.setBackground(row % 2 == 0
+                        ? new Color(245, 245, 245)
+                        : Color.WHITE);
+                button.setForeground(Color.BLACK);
+            }
+
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "•••";
+        }
     }
 
-    @Override
-    public Object getCellEditorValue() {
-        return "•••";
+    // ================= Overlay helpers =================
+
+    public JLayeredPane getLayeredPaneRef() {
+        return layeredPane;
     }
-}
+
+    public void showDimOverlay() {
+        dimOverlay.setVisible(true);
+    }
+
+    public void hideDimOverlay() {
+        dimOverlay.setVisible(false);
+    }
+
+  
 
 
 
 
     
 }
-

@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,10 +30,16 @@ import project.Firebase_backend.Book_backend.Books;
 
 public class BookDetailsPanel extends JPanel {
 
-   private BookMagement parent;
+    private BookMagement parent;
+    private Books book;
+    private Runnable onClose;
 
-    public BookDetailsPanel(Books book, Runnable onClose){
+
+
+    public BookDetailsPanel(BookMagement parent, Books book, Runnable onClose){
         this.parent = parent;
+        this.book = book;
+        this.onClose = onClose;
        
 
         setLayout(null);
@@ -177,51 +184,47 @@ scrollPane.setBorder(null);
 
 scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
 
-    @Override
-    protected void configureScrollBarColors() {
-        thumbColor = SCROLL_THUMB;
-        trackColor = SCROLL_TRACK;
-    }
+        @Override
+        protected void configureScrollBarColors() {
+            thumbColor = SCROLL_THUMB;
+            trackColor = SCROLL_TRACK;
+        }
 
-    @Override
-    protected JButton createDecreaseButton(int orientation) {
-        return createZeroButton();
-    }
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
 
-    @Override
-    protected JButton createIncreaseButton(int orientation) {
-        return createZeroButton();
-    }
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
 
-    private JButton createZeroButton() {
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(0, 0));
-        button.setMinimumSize(new Dimension(0, 0));
-        button.setMaximumSize(new Dimension(0, 0));
-        return button;
-    }
+        private JButton createZeroButton() {
+            JButton button = new JButton();
+            button.setPreferredSize(new Dimension(0, 0));
+            button.setMinimumSize(new Dimension(0, 0));
+            button.setMaximumSize(new Dimension(0, 0));
+            return button;
+        }
 
-    @Override
-    protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                            RenderingHints.VALUE_ANTIALIAS_ON);
+        @Override
+        protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setColor(isThumbRollover() ? SCROLL_THUMB_HOVER : SCROLL_THUMB);
-        g2.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
-        g2.dispose();
-    }
+            g2.setColor(isThumbRollover() ? SCROLL_THUMB_HOVER : SCROLL_THUMB);
+            g2.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+            g2.dispose();
+        }
 
-    @Override
-    protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
-        g.setColor(SCROLL_TRACK);
-        g.fillRect(r.x, r.y, r.width, r.height);
-    }
-});
-
-
-
-
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
+            g.setColor(SCROLL_TRACK);
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+    });
 
 
         JButton edit_button = new JButton();
@@ -231,36 +234,61 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         edit_button.setFocusPainted(false);
         edit_button.setOpaque(false);
 
-        edit_button.addActionListener(e ->{
-            int result = JOptionPane.showConfirmDialog(this, 
-                        "Do you want to edit his book?",
-                        "confirm edit",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE
-                        
+        edit_button.addActionListener(e -> {
+
+            int result = JOptionPane.showConfirmDialog(
+                this,
+                "Do you want to edit this book?",
+                "Confirm Edit",
+                JOptionPane.YES_NO_OPTION
             );
 
-            if(result == JOptionPane.YES_OPTION){
-                
-            }else{
+            if (result != JOptionPane.YES_OPTION) return;
 
-            }
+            
+            onClose.run();
+
+            final EditBookPanel[] editPanelHolder = new EditBookPanel[1];
+
+            editPanelHolder[0] = new EditBookPanel(
+                parent,
+                book,   
+                () -> {
+                    parent.getLayeredPaneRef().remove(editPanelHolder[0]);
+                    parent.hideDimOverlay();
+                    parent.getLayeredPaneRef().revalidate();
+                    parent.getLayeredPaneRef().repaint();
+                }
+            );
+
+            parent.showDimOverlay();
+
+            parent.getLayeredPaneRef().add(
+                editPanelHolder[0],
+                JLayeredPane.POPUP_LAYER
+            );
+
+            parent.getLayeredPaneRef().revalidate();
+            parent.getLayeredPaneRef().repaint();
         });
+
+
+
        
 
 
-        JButton delete_button = new JButton();
-        delete_button.setBounds(600, 531, 137, 38);
+        JButton cancel_button = new JButton();
+        cancel_button.setBounds(600, 531, 137, 38);
         //delete_button.setBorder(null);
-        delete_button.setContentAreaFilled(false);
-        delete_button.setFocusPainted(false);
-        delete_button.setOpaque(false);
+        cancel_button.setContentAreaFilled(false);
+        cancel_button.setFocusPainted(false);
+        cancel_button.setOpaque(false);
 
-        delete_button.addActionListener(e -> {
+        cancel_button.addActionListener(e -> {
 
             if(book.getBorrowedCount() > 0){
-                delete_button.setEnabled(false);
-                delete_button.setToolTipText("Book us currenltu borrowed");
+                cancel_button.setEnabled(false);
+                cancel_button.setToolTipText("Book us currenltu borrowed");
 
             }
 
@@ -276,14 +304,7 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
                 }
         });
 
-        JButton close_button = new JButton();
-        close_button.setBounds(726, 13, 25, 25);
-        close_button.setContentAreaFilled(false);
-        close_button.setBorder(null);
-        close_button.setFocusPainted(false);
-        close_button.setOpaque(false);
-
-        close_button.addActionListener(e -> onClose.run());
+       
 
 
         background.add(status_textHolder);
@@ -291,14 +312,13 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         background.add(author_textHolder);
         background.add(bookId_textHolder);
         background.add(status);
-        background.add(close_button);
         background.add(scrollPane);
         background.add(quantity);
         background.add(genre);
         background.add(author);
         background.add(bookId);
         background.add(title);
-        background.add(delete_button);
+        background.add(cancel_button);
         background.add(edit_button);
         this.add(background);
 

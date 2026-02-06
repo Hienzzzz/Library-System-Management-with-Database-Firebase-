@@ -1,5 +1,6 @@
 package project.Firebase_backend.Book_backend;
 
+import java.util.Map;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
@@ -126,4 +127,33 @@ public class BookService {
             return "AVAILABLE";
         }
     }
+
+    public static void updateBook(Books book) {
+
+        if (book == null || book.getBookId() == null) {
+            System.err.println("Cannot update book: invalid data");
+            return;
+        }
+
+        // Recalculate status (important!)
+        book.setStatus(calculateStatus(book.getQuantity()));
+
+        ref.child(book.getBookId()).setValueAsync(book);
+
+        System.out.println("Book updated: " + book.getBookId());
+    }
+
+    public static void updateBookFields(String bookId, Map<String, Object> updates) {
+
+        if (updates.containsKey("quantity")) {
+            int qty = (int) updates.get("quantity");
+            updates.put("status", calculateStatus(qty));
+        }
+
+        ref.child(bookId).updateChildrenAsync(updates);
+    }
+
+    
+
+
 }
