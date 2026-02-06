@@ -28,7 +28,6 @@ public class AddBookPanel  extends JPanel{
 
     private BookMagement parent;
 
-
     public AddBookPanel(BookMagement parent){
         this.parent = parent;
 
@@ -64,7 +63,6 @@ public class AddBookPanel  extends JPanel{
         Genre.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         background.add(Genre);
 
-
         final int MAX_QUANTITY = 20;
 
         SpinnerNumberModel quantityModel =
@@ -73,11 +71,9 @@ public class AddBookPanel  extends JPanel{
         JSpinner quantityButton = new JSpinner(quantityModel);
         quantityButton.setBounds(680, 295, 45, 31);
 
-
         JSpinner.NumberEditor editor =
         new JSpinner.NumberEditor(quantityButton, "#");
         quantityButton.setEditor(editor);
-
 
         JFormattedTextField textField = editor.getTextField();
 
@@ -85,7 +81,6 @@ public class AddBookPanel  extends JPanel{
         formatter.setAllowsInvalid(false); 
         formatter.setMinimum(1);          
         formatter.setMaximum(MAX_QUANTITY);
-
 
         textField.setBackground(fieldColor);
         textField.setBorder(BorderFactory.createEmptyBorder(5, 2, 5, 5));
@@ -106,7 +101,6 @@ public class AddBookPanel  extends JPanel{
         Description_scroll.getViewport().setBackground(fieldColor);
         background.add(Description_scroll);
 
-
         JButton addBook_button = new JButton();
         addBook_button.setBounds(555, 539, 183, 38);
         addBook_button.setBorder(null);
@@ -114,7 +108,6 @@ public class AddBookPanel  extends JPanel{
         addBook_button.setFocusPainted(false);
         addBook_button.setOpaque(false);
         background.add(addBook_button);
-
 
         JButton cancel_button = new JButton();
         cancel_button.setBounds(27, 538, 130, 38);
@@ -166,8 +159,6 @@ public class AddBookPanel  extends JPanel{
             }
         });
         
-
-
         cancel_button.addActionListener(e -> {
         int result = JOptionPane.showConfirmDialog(
             this,
@@ -181,8 +172,6 @@ public class AddBookPanel  extends JPanel{
         parent.closeAddBook();
     }
 });
-
-
         addBook_button.addActionListener(e -> {
 
             if(Title.getText().isEmpty() || Author.getText().isEmpty() || Genre.getText().isEmpty() || Description.getText().isEmpty()){
@@ -211,10 +200,7 @@ public class AddBookPanel  extends JPanel{
                     return;
                 }
 
-               
-            
         }
-
 
             Books book = new Books(
                 Title.getText().trim(),
@@ -226,7 +212,6 @@ public class AddBookPanel  extends JPanel{
                 coverURL
 
             );
-            
             
             BookService.checkDuplicateAndAdd(book);
             parent.closeAddBook();

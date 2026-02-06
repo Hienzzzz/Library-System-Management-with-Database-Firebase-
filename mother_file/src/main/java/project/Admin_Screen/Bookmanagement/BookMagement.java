@@ -7,26 +7,32 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableRowSorter;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,21 +47,27 @@ public class BookMagement extends JPanel {
     private MainFrame frame;
     private JTable table;
     private DefaultTableModel model;
-
     private JLayeredPane layeredPane;
     private AddBookPanel addBook;
     private JPanel dimOverlay;
+    private TableRowSorter<DefaultTableModel> sorter;
+    private JTextField searchField;
+    private JComboBox<String> categoryBox;
+    private JComboBox<String> sortBox;
 
     public BookMagement(MainFrame frame) {
         this.frame = frame;
         initUI();
         loadBooks();
+        
     }
+    
 
     private void initUI() {
 
         setLayout(null);
         setPreferredSize(new Dimension(1512, 982));
+
 
         // ================= LAYERED PANE =================
         layeredPane = new JLayeredPane();
@@ -77,7 +89,7 @@ public class BookMagement extends JPanel {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setComposite(AlphaComposite.SrcOver.derive(0.12f)); // 15% dim
+        g2.setComposite(AlphaComposite.SrcOver.derive(0.12f)); // 
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, getWidth(), getHeight());
         g2.dispose();
@@ -105,6 +117,131 @@ public class BookMagement extends JPanel {
         table.setBackground(Color.WHITE);
         table.setShowGrid(false);
         table.setIntercellSpacing(new Dimension(0, 0));
+
+
+        //========================search bar field 'to ==========================
+        searchField = new JTextField();
+        searchField.setBounds(409, 415, 255, 27);
+        searchField.setForeground(Color.BLACK);
+        searchField.setFont(new Font("Poppins", Font.PLAIN, 13));
+        searchField.setBackground(Color.WHITE);
+        searchField.setBorder(null);
+        background.add(searchField);
+
+        // ===================== categories filter ====================================
+        String[] genres ={
+            " All Categories",
+            " Fiction",
+            " Non-Fiction",
+            " Science",
+            " History",
+            " Technology",
+            " Education"
+        };
+
+        categoryBox = new JComboBox<>(genres);
+        categoryBox.setBounds(684, 414, 145, 26);
+        categoryBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
+        categoryBox.setBackground(Color.WHITE);
+        categoryBox.setForeground(new Color(60, 60, 60));
+        categoryBox.setFocusable(false);
+
+        categoryBox.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(220, 220, 220), 0),
+        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        categoryBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI(){
+            @Override
+            protected  JButton createArrowButton(){
+                JButton CaButton = new JButton();
+                CaButton.setContentAreaFilled(false);
+                CaButton.setBorder(null);
+                CaButton.setFocusPainted(false);
+                CaButton.setOpaque(false);
+
+                ImageIcon icon = new ImageIcon(
+                getClass().getResource("/Images/down-chevron.png")
+                );
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                CaButton.setIcon(new ImageIcon(img));
+                
+                return CaButton;
+            }
+        });
+        background.add(categoryBox);
+
+        //======================== sort bar ==============================
+        String[] sortOption = {
+            "Newest",
+            "Oldest",
+            "A to Z",
+            "Title",
+            "Author",
+            "Book ID"
+        };
+
+        sortBox = new JComboBox<>(sortOption);
+        sortBox.setBounds(854, 416, 145, 24);
+        sortBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
+        sortBox.setBackground(Color.WHITE);
+        sortBox.setForeground(new Color(60, 60, 60));
+        sortBox.setFocusable(false);
+        sortBox.setOpaque(false);
+
+        sortBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 0),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        sortBox.setSelectedItem(null); 
+
+        sortBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                if (index == -1 && value == null) {
+                    // This is the combo box display (not dropdown) when nothing is selected
+                    setText("Sort by:");
+                    setForeground(new Color(150, 150, 150));
+                } else if (index == -1) {
+                    // Combo box display when an option is selected
+                    setText("Sort by: " + value.toString());
+                    setForeground(new Color(60, 60, 60));
+                } else {
+                    // Dropdown items
+                    setText(value.toString());
+                    setForeground(new Color(60, 60, 60));
+                }
+
+                return this;
+            }
+        });
+
+
+        sortBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI(){
+            @Override
+            protected  JButton createArrowButton(){
+                JButton sortButton = new JButton();
+                sortButton.setContentAreaFilled(false);
+                sortButton.setBorder(null);
+                sortButton.setFocusPainted(false);
+                sortButton.setOpaque(false);
+
+                ImageIcon icon = new ImageIcon(
+                getClass().getResource("/Images/down-chevron.png")
+                );
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                sortButton.setIcon(new ImageIcon(img));
+                
+                return sortButton;
+            }
+        });
+        background.add(sortBox);
 
         // ================= SCROLL PANE =================
         JScrollPane scrollPane = new JScrollPane(table);
@@ -169,9 +306,9 @@ public class BookMagement extends JPanel {
         // ================= COLUMN WIDTHS =================
         table.getColumnModel().getColumn(0).setPreferredWidth(410);
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
-        table.getColumnModel().getColumn(2).setPreferredWidth(240);
-        table.getColumnModel().getColumn(3).setPreferredWidth(115);
-        table.getColumnModel().getColumn(4).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(217);
+        table.getColumnModel().getColumn(3).setPreferredWidth(80);
+        table.getColumnModel().getColumn(4).setPreferredWidth(170);
 
         table.getColumnModel().getColumn(4).setCellRenderer(new ActionButtonRenderer());
         table.getColumnModel().getColumn(4).setCellEditor(new ActionButtonEditor(this));
@@ -187,7 +324,7 @@ public class BookMagement extends JPanel {
 
         // ================= HEADER (HIDDEN) =================
         JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Poppins", Font.PLAIN, 18));
+        header.setFont(new Font("Poppins", Font.PLAIN, 19));
         header.setBackground(new Color(241, 243, 246));
         header.setForeground(Color.GRAY);
         header.setBorder(BorderFactory.createEmptyBorder());
@@ -200,6 +337,10 @@ public class BookMagement extends JPanel {
         scrollPane.setColumnHeaderView(null);
 
         background.add(scrollPane);
+
+         //====================== for sorter table =======================
+        sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
 
         // ================= ADD BOOK PANEL =================
         addBook = new AddBookPanel(this);
@@ -233,6 +374,8 @@ public class BookMagement extends JPanel {
         addBook.setVisible(false);
         dimOverlay.setVisible(false);
     }
+
+   
 
     // ================= FIREBASE LISTENER =================
     private void loadBooks() {
@@ -311,7 +454,6 @@ public class BookMagement extends JPanel {
             });
     }
 
-
     //=========================Custom Cell renderer =======================================
     
     class CustomCellRenderer extends DefaultTableCellRenderer {
@@ -346,7 +488,7 @@ public class BookMagement extends JPanel {
             }
         
             if (column == 3) {
-                setHorizontalAlignment(SwingConstants.LEFT);
+                setHorizontalAlignment(SwingConstants.CENTER);
             }
 
            
@@ -462,3 +604,13 @@ public class BookMagement extends JPanel {
 
     
 }
+
+/*   categoryBox.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        categoryBox.setBorder(BorderFactory.createLineBorder(new Color(180, 200, 255), 1));
+    }
+
+    public void mouseExited(java.awt.event.MouseEvent evt) {
+        categoryBox.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
+    }
+}); */
