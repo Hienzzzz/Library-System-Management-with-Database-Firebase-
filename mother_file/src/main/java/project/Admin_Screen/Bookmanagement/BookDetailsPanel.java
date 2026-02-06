@@ -49,25 +49,53 @@ public class BookDetailsPanel extends JPanel {
 
        
         
-        JLabel title = new JLabel(book.getTitle());
+        JTextArea title = new JTextArea(book.getTitle());
+        title.setWrapStyleWord(true);
+        title.setLineWrap(true);
+        title.setEditable(false);
+        title.setFocusable(false);
+        title.setOpaque(false);
         title.setFont(new Font("Poppins", Font.BOLD, 30));
-        title.setBounds(216, 127, 500, 33);
+        title.setBounds(200, 90, 500, 80);
 
-        JLabel bookId = new JLabel("Book ID: " + book.getBookId());
-        bookId.setBounds(216, 190, 300, 22);
+        JLabel bookId_textHolder = new JLabel("Book ID: " );
+        bookId_textHolder.setBounds(200, 190, 300, 22);
+        bookId_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
 
-        JLabel author = new JLabel("Author: " + book.getAuthor());
-        author.setBounds(216, 160, 300, 25);
+        JLabel bookId = new JLabel(book.getBookId());
+        bookId.setBounds(200, 215, 300, 22);
+        bookId.setFont(new Font("Poppins", Font.PLAIN, 20));
 
-        JLabel genre = new JLabel("Genre: " + book.getGenre());
-        genre.setBounds(216, 220, 300, 25);
+        JLabel author_textHolder = new JLabel("Author: ");
+        author_textHolder.setBounds(200, 250, 300, 25);
+        author_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
 
-        JLabel status = new JLabel("Status: " + book.getStatus());
-        status.setBounds(520, 284, 300, 25);
-        status.setFont(new Font("Poppins", Font.BOLD, 15));
+        JLabel author = new JLabel(book.getAuthor());
+        author.setBounds(200, 270, 300, 25);
+        author.setFont(new Font("Poppins", Font.PLAIN, 17));
 
-       JLabel book_cover = new JLabel();
-        book_cover.setBounds(26, 85, 153, 223);
+        JLabel genre_textHolder = new JLabel("Genre: " );
+        genre_textHolder.setBounds(500, 190, 300, 25);
+        genre_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
+
+        JLabel genre = new JLabel(book.getGenre());
+        genre.setBounds(500, 210, 300, 25);
+        genre.setFont(new Font("Poppins", Font.PLAIN, 17));
+
+        JLabel status_textHolder = new JLabel("Status: " );
+        status_textHolder.setBounds(500, 240, 300, 25);
+        status_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
+
+        JLabel status = new JLabel(book.getStatus());
+        status.setBounds(500, 260, 300, 25);
+        status.setFont(new Font("Poppins", Font.PLAIN, 17));
+
+        JLabel quantity = new JLabel("Quantity: " + book.getQuantity());
+        quantity.setBounds(500, 290, 300, 25);
+        quantity.setFont(new Font("Poppins", Font.PLAIN, 15));
+
+        JLabel book_cover = new JLabel();
+        book_cover.setBounds(29, 90, 158, 238);
         book_cover.setOpaque(false);
         book_cover.setBackground(Color.GRAY);
         
@@ -105,9 +133,7 @@ public class BookDetailsPanel extends JPanel {
             }
         }).start();
 
-        JLabel quantity = new JLabel("Quantity: " + book.getQuantity());
-        quantity.setBounds(520, 300, 300, 25);
-        quantity.setFont(new Font("Poppins", Font.BOLD, 15));
+        
 
 JTextArea description = new JTextArea(book.getDescription());
 description.setWrapStyleWord(true);
@@ -260,6 +286,10 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         close_button.addActionListener(e -> onClose.run());
 
 
+        background.add(status_textHolder);
+        background.add(genre_textHolder);
+        background.add(author_textHolder);
+        background.add(bookId_textHolder);
         background.add(status);
         background.add(close_button);
         background.add(scrollPane);
