@@ -1,12 +1,18 @@
 package project.Admin_Screen.Bookmanagement;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -18,6 +24,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.text.NumberFormatter;
 
 import project.Firebase_backend.Book_backend.BookService;
@@ -89,17 +96,78 @@ public class AddBookPanel  extends JPanel{
 
 // =======================================================
 
-        JTextArea Description = new JTextArea();
-        Description.setLineWrap(true);
-        Description.setWrapStyleWord(true);
-        Description.setBackground(fieldColor);
-        Description.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        JTextArea description = new JTextArea();
+        description.setLineWrap(true);
+        description.setWrapStyleWord(true);
+        description.setBackground(fieldColor);
+        description.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        JScrollPane Description_scroll = new JScrollPane(Description);
-        Description_scroll.setBounds(214, 386, 505, 117);
-        Description_scroll.setBorder(BorderFactory.createEmptyBorder());
-        Description_scroll.getViewport().setBackground(fieldColor);
-        background.add(Description_scroll);
+        JScrollPane scrollPane = new JScrollPane(description);
+scrollPane.setBounds(214, 386, 505, 117);
+//scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADDE2)));
+scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+scrollPane.setBackground(Color.WHITE);
+scrollPane.getViewport().setBackground(new Color(0xF1F3F6));
+scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+scrollPane.setCorner(JScrollPane.LOWER_RIGHT_CORNER, new JPanel());
+scrollPane.setBorder(null);
+scrollPane.setOpaque(false);
+scrollPane.getViewport().setOpaque(false);
+
+
+
+Color SCROLL_TRACK = new Color(0xF1F3F6);
+Color SCROLL_THUMB = new Color(0xB0B8C4); // soft gray-blue
+Color SCROLL_THUMB_HOVER = new Color(0x8FA1B5);
+
+scrollPane.setBorder(null);
+
+scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+
+    @Override
+    protected void configureScrollBarColors() {
+        thumbColor = SCROLL_THUMB;
+        trackColor = SCROLL_TRACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    private JButton createZeroButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+
+    @Override
+    protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setColor(isThumbRollover() ? SCROLL_THUMB_HOVER : SCROLL_THUMB);
+        g2.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        g2.dispose();
+    }
+
+    @Override
+    protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
+        g.setColor(SCROLL_TRACK);
+        g.fillRect(r.x, r.y, r.width, r.height);
+    }
+});
+background.add(scrollPane);
 
         JButton addBook_button = new JButton();
         addBook_button.setBounds(555, 539, 183, 38);
@@ -168,7 +236,7 @@ public class AddBookPanel  extends JPanel{
 });
         addBook_button.addActionListener(e -> {
 
-            if(Title.getText().isEmpty() || Author.getText().isEmpty() || Genre.getText().isEmpty() || Description.getText().isEmpty()){
+            if(Title.getText().isEmpty() || Author.getText().isEmpty() || Genre.getText().isEmpty() || description.getText().isEmpty()){
                 JOptionPane.showMessageDialog(
                     this, 
                     "Please fill in required fields",
@@ -210,7 +278,7 @@ public class AddBookPanel  extends JPanel{
                 Author.getText().trim(),
                 (int) quantityButton.getValue(),
                 Genre.getText().trim(),
-                Description.getText().trim(),
+                description.getText().trim(),
                 coverURL
 
             );

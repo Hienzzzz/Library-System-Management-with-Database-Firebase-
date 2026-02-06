@@ -13,6 +13,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -239,15 +240,15 @@ public class BookMagement extends JPanel {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
                 if (index == -1 && value == null) {
-                    // This is the combo box display (not dropdown) when nothing is selected
+                    
                     setText("Sort by:");
                     setForeground(new Color(150, 150, 150));
                 } else if (index == -1) {
-                    // Combo box display when an option is selected
+                 
                     setText("Sort by: " + value.toString());
                     setForeground(new Color(60, 60, 60));
                 } else {
-                    // Dropdown items
+                  
                     setText(value.toString());
                     setForeground(new Color(60, 60, 60));
                 }
@@ -520,13 +521,12 @@ public class BookMagement extends JPanel {
     }
     // ============================for Filters =========================================
 
-    private void applyFilters() {
+   private void applyFilters() {
 
     List<RowFilter<Object, Object>> filters = new ArrayList<>();
 
+    // 🔍 SEARCH FILTER
     String text = searchField.getText().trim();
-
-    // 🚫 Ignore placeholder text
     if (!text.isEmpty() && !text.equalsIgnoreCase("Search Book...")) {
         filters.add(RowFilter.regexFilter(
             "(?i)" + text,
@@ -536,13 +536,19 @@ public class BookMagement extends JPanel {
         ));
     }
 
+    // 🏷 CATEGORY FILTER (MULTI-GENRE SUPPORT)
     String genre = categoryBox.getSelectedItem().toString().trim();
     if (!genre.equalsIgnoreCase("All Categories")) {
-        filters.add(RowFilter.regexFilter("^" + genre + "$", 5));
+        filters.add(RowFilter.regexFilter(
+            "(?i).*" + Pattern.quote(genre) + ".*",
+            5 // Genre column (hidden)
+        ));
     }
 
     sorter.setRowFilter(
-        filters.isEmpty() ? null : RowFilter.andFilter(filters)
+        filters.isEmpty()
+            ? null
+            : RowFilter.andFilter(filters)
     );
 }
 
@@ -696,8 +702,8 @@ public class BookMagement extends JPanel {
         button = new JButton("•••");
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setContentAreaFilled(true); // ✅ IMPORTANT
-        button.setOpaque(true);            // ✅ IMPORTANT
+        button.setContentAreaFilled(true); 
+        button.setOpaque(true);            
         button.setFont(new Font("Poppins", Font.BOLD, 18));
 
         button.addActionListener(e -> {
@@ -737,12 +743,3 @@ public class BookMagement extends JPanel {
     
 }
 
-/*   categoryBox.addMouseListener(new java.awt.event.MouseAdapter() {
-    public void mouseEntered(java.awt.event.MouseEvent evt) {
-        categoryBox.setBorder(BorderFactory.createLineBorder(new Color(180, 200, 255), 1));
-    }
-
-    public void mouseExited(java.awt.event.MouseEvent evt) {
-        categoryBox.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
-    }
-}); */
