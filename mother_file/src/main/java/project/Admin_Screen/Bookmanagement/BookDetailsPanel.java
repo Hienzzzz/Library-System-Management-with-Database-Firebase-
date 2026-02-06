@@ -1,18 +1,28 @@
 package project.Admin_Screen.Bookmanagement;
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
@@ -99,13 +109,93 @@ public class BookDetailsPanel extends JPanel {
         quantity.setBounds(520, 300, 300, 25);
         quantity.setFont(new Font("Poppins", Font.BOLD, 15));
 
-        JTextArea description = new JTextArea(book.getDescription());
-        description.setBounds(33, 355, 700, 150);
-        description.setWrapStyleWord(true);
-        description.setLineWrap(true);
-        description.setEditable(false);
-        description.setFont(new Font("Poppins", Font.PLAIN, 13));
-        //description.setBackground(new Color(0xF1F3F6));
+JTextArea description = new JTextArea(book.getDescription());
+description.setWrapStyleWord(true);
+description.setLineWrap(true);
+description.setEditable(false);
+description.setFont(new Font("Poppins", Font.PLAIN, 13));
+description.setForeground(new Color(0x333333));
+description.setBackground(new Color(0xF1F3F6));
+description.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+description.setCaretPosition(0);
+description.setFocusable(false);
+description.setBorder(null);
+description.setFocusable(false);
+description.setFocusable(false);
+description.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+
+
+JScrollPane scrollPane = new JScrollPane(description);
+scrollPane.setBounds(33, 355, 700, 150);
+//scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADDE2)));
+scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+scrollPane.setBackground(Color.WHITE);
+scrollPane.getViewport().setBackground(new Color(0xF1F3F6));
+scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+scrollPane.setCorner(JScrollPane.LOWER_RIGHT_CORNER, new JPanel());
+scrollPane.setBorder(null);
+scrollPane.setOpaque(false);
+scrollPane.getViewport().setOpaque(false);
+
+
+
+
+Color SCROLL_TRACK = new Color(0xF1F3F6);
+Color SCROLL_THUMB = new Color(0xB0B8C4); // soft gray-blue
+Color SCROLL_THUMB_HOVER = new Color(0x8FA1B5);
+
+scrollPane.setBorder(null);
+
+scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+
+    @Override
+    protected void configureScrollBarColors() {
+        thumbColor = SCROLL_THUMB;
+        trackColor = SCROLL_TRACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createZeroButton();
+    }
+
+    private JButton createZeroButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+
+    @Override
+    protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setColor(isThumbRollover() ? SCROLL_THUMB_HOVER : SCROLL_THUMB);
+        g2.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        g2.dispose();
+    }
+
+    @Override
+    protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
+        g.setColor(SCROLL_TRACK);
+        g.fillRect(r.x, r.y, r.width, r.height);
+    }
+});
+
+
+
+
 
 
         JButton edit_button = new JButton();
@@ -172,7 +262,7 @@ public class BookDetailsPanel extends JPanel {
 
         background.add(status);
         background.add(close_button);
-        background.add(description);
+        background.add(scrollPane);
         background.add(quantity);
         background.add(genre);
         background.add(author);
