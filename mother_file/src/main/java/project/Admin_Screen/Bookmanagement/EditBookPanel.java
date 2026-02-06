@@ -282,6 +282,13 @@ public class EditBookPanel  extends  JPanel{
                 book.setDescription(description.getText().trim());;
 
             if (selectedFile[0] != null) {
+
+       
+                if (book.getCoverURL() != null && !book.getCoverURL().isEmpty()) {
+                    ImageService.deleteBookCoverByUrl(book.getCoverURL());
+                }
+
+       
                 String newCover = ImageService.uploadBookCover(
                     selectedFile[0],
                     book.getBookId()
@@ -291,6 +298,7 @@ public class EditBookPanel  extends  JPanel{
                     book.setCoverURL(newCover);
                 }
             }
+
 
             
             int confirm = JOptionPane.showConfirmDialog(
@@ -308,6 +316,7 @@ public class EditBookPanel  extends  JPanel{
                 updates.put("genre", Genre.getText().trim());
                 updates.put("description", description.getText().trim());
                 updates.put("quantity", (int) quantityButton.getValue());
+                updates.put("coverURL", book.getCoverURL());
 
                 
                 BookService.updateBookFields(book.getBookId(), updates);
