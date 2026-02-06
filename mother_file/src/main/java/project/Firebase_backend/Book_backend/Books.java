@@ -10,6 +10,7 @@ public class Books {
     private String description;
     private String coverURL;
     private int borrowedCount;
+    private String status;
 
     
 
@@ -30,7 +31,8 @@ public class Books {
         this.genre = genre;
         this.description = description;
         this.coverURL = coverURL;
-        this.borrowedCount = borrowedCount;
+        this.borrowedCount = 0;
+        this.status = null;
     }
 
     // ================= GETTERS =================
@@ -67,6 +69,10 @@ public class Books {
         return borrowedCount;
     }
 
+    public String getStatus(){
+        return status;
+    }
+
     // ================= SETTERS =================
 
     public void setTitle(String title) {
@@ -99,5 +105,9 @@ public class Books {
 
     public void setBorrowedCount(int borrowedCount){
         this.borrowedCount = borrowedCount;
+    }
+
+    public void setStatus(String status){
+        this.status = status;
     }
 }

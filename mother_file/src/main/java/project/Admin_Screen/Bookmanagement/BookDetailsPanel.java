@@ -1,12 +1,18 @@
 package project.Admin_Screen.Bookmanagement;
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
@@ -34,7 +40,7 @@ public class BookDetailsPanel extends JPanel {
        
         
         JLabel title = new JLabel(book.getTitle());
-        title.setFont(new Font("Poppins", Font.PLAIN, 30));
+        title.setFont(new Font("Poppins", Font.BOLD, 30));
         title.setBounds(216, 127, 500, 33);
 
         JLabel bookId = new JLabel("Book ID: " + book.getBookId());
@@ -46,14 +52,60 @@ public class BookDetailsPanel extends JPanel {
         JLabel genre = new JLabel("Genre: " + book.getGenre());
         genre.setBounds(216, 220, 300, 25);
 
+        JLabel status = new JLabel("Status: " + book.getStatus());
+        status.setBounds(520, 284, 300, 25);
+        status.setFont(new Font("Poppins", Font.BOLD, 15));
+
+       JLabel book_cover = new JLabel();
+        book_cover.setBounds(26, 85, 153, 223);
+        book_cover.setOpaque(false);
+        book_cover.setBackground(Color.GRAY);
+        
+        background.add(book_cover);
+
+        new Thread(() -> {
+            try {
+                if (book.getCoverURL() == null || book.getCoverURL().isEmpty()) {
+                    System.out.println("Cover URL is null or empty");
+                    return;
+                }
+
+                URL url = new URL(book.getCoverURL());
+
+                // FORCE full load
+                BufferedImage bufferedImage = ImageIO.read(url);
+                if (bufferedImage == null) {
+                    System.out.println("Failed to load image from URL");
+                    return;
+                }
+
+                Image scaled = bufferedImage.getScaledInstance(
+                        153, 223,
+                        Image.SCALE_SMOOTH
+                );
+
+                SwingUtilities.invokeLater(() -> {
+                    book_cover.setIcon(new ImageIcon(scaled));
+                    book_cover.revalidate();
+                    book_cover.repaint();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
         JLabel quantity = new JLabel("Quantity: " + book.getQuantity());
-        quantity.setBounds(216, 260, 300, 25);
+        quantity.setBounds(520, 300, 300, 25);
+        quantity.setFont(new Font("Poppins", Font.BOLD, 15));
 
         JTextArea description = new JTextArea(book.getDescription());
+        description.setBounds(33, 355, 700, 150);
         description.setWrapStyleWord(true);
         description.setLineWrap(true);
         description.setEditable(false);
-        description.setBounds(30, 220, 590, 200);
+        description.setFont(new Font("Poppins", Font.PLAIN, 13));
+        //description.setBackground(new Color(0xF1F3F6));
 
 
         JButton edit_button = new JButton();
@@ -117,13 +169,8 @@ public class BookDetailsPanel extends JPanel {
 
         close_button.addActionListener(e -> onClose.run());
 
-      
 
-      
-
-
-
-
+        background.add(status);
         background.add(close_button);
         background.add(description);
         background.add(quantity);

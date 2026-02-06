@@ -117,13 +117,7 @@ public class AddBookPanel  extends JPanel{
         cancel_button.setOpaque(false);
         background.add(cancel_button);
 
-        JButton close_button = new JButton();
-        close_button.setBounds(726, 13, 25, 25);
-        close_button.setContentAreaFilled(false);
-        close_button.setBorder(null);
-        close_button.setFocusPainted(false);
-        close_button.setOpaque(false);
-        background.add(close_button);
+        
 
         JButton UploadImage = new JButton();
         UploadImage.setBounds(17, 324, 175, 42);
@@ -184,23 +178,31 @@ public class AddBookPanel  extends JPanel{
             }
 
             String coverURL = null;
-            if (selectedFile[0] != null) {
-            coverURL = ImageService.uploadBookCover(selectedFile[0], null);
 
-                if (selectedFile[0] != null && coverURL == null) {
-                    JOptionPane.showMessageDialog(
+            if (selectedFile[0] == null) {
+                JOptionPane.showMessageDialog(
                     this,
-                    "Image upload failed.\n\n" +
-                    "Please make sure Firebase Storage is enabled\n" +
-                    "and try again.",
-                    "Upload Error",
+                    "Please upload a book cover image.",
+                    "Missing Image",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+           if (selectedFile[0] != null) {
+                coverURL = ImageService.uploadBookCover(selectedFile[0], null);
+
+                if (coverURL == null) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Image upload failed.\n\nPlease try again.",
+                        "Upload Error",
                         JOptionPane.ERROR_MESSAGE
                     );
-                    
                     return;
                 }
+            }
 
-        }
 
             Books book = new Books(
                 Title.getText().trim(),
@@ -217,20 +219,7 @@ public class AddBookPanel  extends JPanel{
             parent.closeAddBook();
         });
 
-         close_button.addActionListener(e -> {
-                    int result = JOptionPane.showConfirmDialog(
-                        this, 
-                        "Are you sure you want to close this Panel?\nAll entered data will be lost.",
-                        "Confirm close",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE
-                    );
-                    
-                    if (result == JOptionPane.YES_OPTION){
-                        parent.closeAddBook();
-                    }
-
-                });
+       
         
 
         this.add(background);

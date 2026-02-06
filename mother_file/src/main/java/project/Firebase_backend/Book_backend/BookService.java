@@ -52,8 +52,18 @@ public class BookService {
                     checkAndAdd(book, attempts + 1);
                 } else {
                     
+                    book.setStatus(calculateStatus(book.getQuantity()));
+
                     ref.child(newId).setValueAsync(book);
                     System.out.println("Book added with ID: " + newId);
+                    System.out.println("STATUS BEFORE SAVE: " + book.getStatus());
+
+                    // for testing only
+                    System.out.println(
+                        "Q=" + book.getQuantity() +
+                        " STATUS=" + book.getStatus()
+                    );
+
                 }
             }
 
@@ -105,5 +115,15 @@ public class BookService {
 
     public static void deleteBook(String bookId){
         ref.child(bookId).removeValueAsync();
+    }
+
+    private static String calculateStatus(int quantity){
+        if(quantity == 0){
+            return "OUT OF STOCK";
+        }else if(quantity <= 2){
+            return  "LOW_QUANTITY";
+        }else{
+            return "AVAILABLE";
+        }
     }
 }

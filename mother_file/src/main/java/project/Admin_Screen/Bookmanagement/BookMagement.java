@@ -11,6 +11,8 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -26,8 +28,13 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -82,19 +89,20 @@ public class BookMagement extends JPanel {
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
 
-      
         dimOverlay = new JPanel() {
             @Override
-        protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setComposite(AlphaComposite.SrcOver.derive(0.12f)); // 
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, getWidth(), getHeight());
-        g2.dispose();
-    }
-};
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setComposite(AlphaComposite.SrcOver.derive(0.12f)); // 
+                g2.setColor(Color.BLACK);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+
+
+            }
+        };
 
         dimOverlay.setBounds(0, 0, 1512, 982);
         dimOverlay.setOpaque(false);      
@@ -104,7 +112,7 @@ public class BookMagement extends JPanel {
         dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
 
         // ================= TABLE =================
-        String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action"};
+        String[] columns = {"Title", "Book ID", "Author", "Quantity", "Action", "Genre"};
         model = new DefaultTableModel(columns, 0) {
         @Override
             public boolean isCellEditable(int row, int column) {
@@ -120,23 +128,49 @@ public class BookMagement extends JPanel {
 
 
         //========================search bar field 'to ==========================
+       String search_placeHolder = "Search Book...";
+
         searchField = new JTextField();
-        searchField.setBounds(409, 415, 255, 27);
-        searchField.setForeground(Color.BLACK);
-        searchField.setFont(new Font("Poppins", Font.PLAIN, 13));
+        searchField.setBounds(436, 415, 228, 27);
+        searchField.setForeground(Color.GRAY);
+        searchField.setFont(new Font("Poppins", Font.PLAIN, 15));
         searchField.setBackground(Color.WHITE);
         searchField.setBorder(null);
+        
+
+        searchField.setText("Search Book...");
+        searchField.setForeground(Color.GRAY);
+
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (searchField.getText().equals("Search Book...")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search Book...");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
         background.add(searchField);
 
-        // ===================== categories filter ====================================
+                // ===================== categories filter ====================================
         String[] genres ={
-            " All Categories",
-            " Fiction",
-            " Non-Fiction",
-            " Science",
-            " History",
-            " Technology",
-            " Education"
+            "All Categories",
+            "Fiction",
+            "Non-Fiction",
+            "Science",
+            "History",
+            "Technology",
+            "Education"
         };
 
         categoryBox = new JComboBox<>(genres);
@@ -309,6 +343,10 @@ public class BookMagement extends JPanel {
         table.getColumnModel().getColumn(2).setPreferredWidth(217);
         table.getColumnModel().getColumn(3).setPreferredWidth(80);
         table.getColumnModel().getColumn(4).setPreferredWidth(170);
+        table.getColumnModel().getColumn(5).setMinWidth(0);
+        table.getColumnModel().getColumn(5).setMaxWidth(0);
+        table.getColumnModel().getColumn(5).setWidth(0);
+
 
         table.getColumnModel().getColumn(4).setCellRenderer(new ActionButtonRenderer());
         table.getColumnModel().getColumn(4).setCellEditor(new ActionButtonEditor(this));
@@ -364,9 +402,34 @@ public class BookMagement extends JPanel {
         layeredPane.add(addBook, JLayeredPane.POPUP_LAYER);
         layeredPane.add(addBookButton, JLayeredPane.PALETTE_LAYER);
 
-        add(layeredPane);
 
-       
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+
+            private void filter() {
+                applyFilters();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filter();
+            }
+        });
+        
+        categoryBox.addActionListener(e -> applyFilters());
+        sortBox.addActionListener(e -> applySorting());
+
+
+        this.add(layeredPane);
     }
 
     // ================= CLOSE ADD BOOK =================
@@ -374,6 +437,7 @@ public class BookMagement extends JPanel {
         addBook.setVisible(false);
         dimOverlay.setVisible(false);
     }
+
 
    
 
@@ -397,7 +461,8 @@ public class BookMagement extends JPanel {
                                 book.getBookId(),
                                 book.getAuthor(),
                                 book.getQuantity(),
-                                "..."
+                                "...",
+                                book.getGenre()
                         });
                     }
                 });
@@ -453,6 +518,73 @@ public class BookMagement extends JPanel {
                 }
             });
     }
+    // ============================for Filters =========================================
+
+    private void applyFilters() {
+
+    List<RowFilter<Object, Object>> filters = new ArrayList<>();
+
+    String text = searchField.getText().trim();
+
+    // 🚫 Ignore placeholder text
+    if (!text.isEmpty() && !text.equalsIgnoreCase("Search Book...")) {
+        filters.add(RowFilter.regexFilter(
+            "(?i)" + text,
+            0, // Title
+            1, // Book ID
+            2  // Author
+        ));
+    }
+
+    String genre = categoryBox.getSelectedItem().toString().trim();
+    if (!genre.equalsIgnoreCase("All Categories")) {
+        filters.add(RowFilter.regexFilter("^" + genre + "$", 5));
+    }
+
+    sorter.setRowFilter(
+        filters.isEmpty() ? null : RowFilter.andFilter(filters)
+    );
+}
+
+    //========================sorting ========================================
+
+    private void applySorting() {
+
+        Object selected = sortBox.getSelectedItem();
+        if (selected == null) {
+            sorter.setSortKeys(null);
+            return;
+        }
+
+        String option = selected.toString();
+        List<RowSorter.SortKey> keys = new ArrayList<>();
+
+        switch (option) {
+            case "Newest":
+                keys.add(new RowSorter.SortKey(1, SortOrder.DESCENDING));
+                break;
+
+            case "Oldest":
+                keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+                break;
+
+            case "A to Z":
+            case "Title":
+                keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+                break;
+
+            case "Author":
+                keys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+                break;
+
+            default:
+                sorter.setSortKeys(null);
+                return;
+        }
+
+        sorter.setSortKeys(keys);
+    }
+
 
     //=========================Custom Cell renderer =======================================
     
