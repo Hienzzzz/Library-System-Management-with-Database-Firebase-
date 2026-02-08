@@ -42,7 +42,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableModel; //
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableRowSorter;
 
@@ -146,14 +146,14 @@ public class BookMagement extends JPanel {
         searchField.setBorder(null);
         
 
-        searchField.setText("Search Book...");
+        searchField.setText(search_placeHolder);
         searchField.setForeground(Color.GRAY);
 
         searchField.addFocusListener(new java.awt.event.FocusAdapter() {
 
             @Override
             public void focusGained(java.awt.event.FocusEvent e) {
-                if (searchField.getText().equals("Search Book...")) {
+                if (searchField.getText().equals(search_placeHolder)) {
                     searchField.setText("");
                     searchField.setForeground(Color.BLACK);
                 }
@@ -162,7 +162,7 @@ public class BookMagement extends JPanel {
             @Override
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
-                    searchField.setText("Search Book...");
+                    searchField.setText(search_placeHolder);
                     searchField.setForeground(Color.GRAY);
                 }
             }
@@ -365,46 +365,46 @@ public class BookMagement extends JPanel {
 
 
         table.addMouseMotionListener(new MouseMotionAdapter() {
-    public void mouseMoved(MouseEvent e) {
-        int row = table.rowAtPoint(e.getPoint());
-        if (row != hoveredRow) {
-            hoveredRow = row;
-            table.repaint();
-        }
-    }
-});
+            public void mouseMoved(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row != hoveredRow) {
+                    hoveredRow = row;
+                    table.repaint();
+                }
+            }
+        });
 
-table.addMouseListener(new MouseAdapter() {
-    
-    public void mouseExited(MouseEvent e) {
-        hoveredRow = -1;
-        table.repaint();
-    }
-});
+        table.addMouseListener(new MouseAdapter() {
+            
+            public void mouseExited(MouseEvent e) {
+                hoveredRow = -1;
+                table.repaint();
+            }
+        });
 
-table.addFocusListener(new java.awt.event.FocusAdapter() {
-    @Override
-    public void focusGained(java.awt.event.FocusEvent e) {
-        tableHasFocus = true;
-        table.repaint();
-    }
+        table.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                tableHasFocus = true;
+                table.repaint();
+            }
 
-    @Override
-    public void focusLost(java.awt.event.FocusEvent e) {
-        tableHasFocus = false;
-        hoveredRow = -1; // clear hover when focus is lost
-        table.clearSelection();
-        table.repaint();
-    }
-});
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                tableHasFocus = false;
+                hoveredRow = -1; // clear hover when focus is lost
+                table.clearSelection();
+                table.repaint();
+            }
+        });
 
-background.setFocusable(true);
-background.addMouseListener(new MouseAdapter() {
-    @Override
-    public void mousePressed(MouseEvent e) {
-        background.requestFocusInWindow();
-    }
-});
+        background.setFocusable(true);
+        background.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                background.requestFocusInWindow();
+            }
+        });
 
 
 
@@ -538,82 +538,82 @@ background.addMouseListener(new MouseAdapter() {
     // ================= SHOW BOOK DETAILS =================
     public void showBookDetails(int row) {
 
-    String bookId = model.getValueAt(row, 1).toString();
+        String bookId = model.getValueAt(row, 1).toString();
 
-    BookService.getRef()
-        .child(bookId)
-        .addListenerForSingleValueEvent(new ValueEventListener() {
+        BookService.getRef()
+            .child(bookId)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
 
-                Books book = snapshot.getValue(Books.class);
-                if (book == null) return;
+                    Books book = snapshot.getValue(Books.class);
+                    if (book == null) return;
 
-                SwingUtilities.invokeLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
 
-                    dimOverlay.setVisible(true);
+                        dimOverlay.setVisible(true);
 
-                    final BookDetailsPanel[] holder =
-                            new BookDetailsPanel[1];
+                        final BookDetailsPanel[] holder =
+                                new BookDetailsPanel[1];
 
-                    holder[0] = new BookDetailsPanel(
-                        BookMagement.this,   
-                        book,
-                        () -> {
-                            layeredPane.remove(holder[0]);
-                            hideDimOverlay();
-                            layeredPane.repaint();
-                        }
+                        holder[0] = new BookDetailsPanel(
+                            BookMagement.this,   
+                            book,
+                            () -> {
+                                layeredPane.remove(holder[0]);
+                                hideDimOverlay();
+                                layeredPane.repaint();
+                            }
+                        );
+
+                        layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
+                        layeredPane.repaint();
+                    });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    System.out.println(
+                        "Failed to load book details: " +
+                        error.getMessage()
                     );
-
-                    layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
-                    layeredPane.repaint();
-                });
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.out.println(
-                    "Failed to load book details: " +
-                    error.getMessage()
-                );
-            }
-        });
-}
+                }
+            });
+    }
 
     // ============================for Filters =========================================
 
    private void applyFilters() {
 
-    List<RowFilter<Object, Object>> filters = new ArrayList<>();
+        List<RowFilter<Object, Object>> filters = new ArrayList<>();
 
-    // 🔍 SEARCH FILTER
-    String text = searchField.getText().trim();
-    if (!text.isEmpty() && !text.equalsIgnoreCase("Search Book...")) {
-        filters.add(RowFilter.regexFilter(
-            "(?i)" + text,
-            0, // Title
-            1, // Book ID
-            2  // Author
-        ));
+        // 🔍 SEARCH FILTER
+        String text = searchField.getText().trim();
+        if (!text.isEmpty() && !text.equalsIgnoreCase("Search Book...")) {
+            filters.add(RowFilter.regexFilter(
+                "(?i)" + text,
+                0, // Title
+                1, // Book ID
+                2  // Author
+            ));
+        }
+
+        // 🏷 CATEGORY FILTER (MULTI-GENRE SUPPORT)
+        String genre = categoryBox.getSelectedItem().toString().trim();
+        if (!genre.equalsIgnoreCase("All Categories")) {
+            filters.add(RowFilter.regexFilter(
+                "(?i).*" + Pattern.quote(genre) + ".*",
+                5 // Genre column (hidden)
+            ));
+        }
+
+        sorter.setRowFilter(
+            filters.isEmpty()
+                ? null
+                : RowFilter.andFilter(filters)
+        );
     }
-
-    // 🏷 CATEGORY FILTER (MULTI-GENRE SUPPORT)
-    String genre = categoryBox.getSelectedItem().toString().trim();
-    if (!genre.equalsIgnoreCase("All Categories")) {
-        filters.add(RowFilter.regexFilter(
-            "(?i).*" + Pattern.quote(genre) + ".*",
-            5 // Genre column (hidden)
-        ));
-    }
-
-    sorter.setRowFilter(
-        filters.isEmpty()
-            ? null
-            : RowFilter.andFilter(filters)
-    );
-}
 
     //========================sorting ========================================
 
@@ -662,15 +662,15 @@ background.addMouseListener(new MouseAdapter() {
     
     class CustomCellRenderer extends DefaultTableCellRenderer {
 
-    private final Color HOVER_COLOR = new Color(230, 240, 255);
-    private final Color SELECT_COLOR = new Color(200, 220, 255);
-    private final Color EVEN_ROW = new Color(245, 245, 245);
-    private final Color ODD_ROW = Color.WHITE;
+        private final Color HOVER_COLOR = new Color(230, 240, 255);
+        private final Color SELECT_COLOR = new Color(200, 220, 255);
+        private final Color EVEN_ROW = new Color(245, 245, 245);
+        private final Color ODD_ROW = Color.WHITE;
 
-    @Override
-    public Component getTableCellRendererComponent(
-            JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
 
         super.getTableCellRendererComponent(
                 table, value, false, false, row, column
@@ -678,86 +678,81 @@ background.addMouseListener(new MouseAdapter() {
 
         int modelRow = table.convertRowIndexToModel(row);
 
-        // Default background
+
         setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
         setForeground(Color.BLACK);
 
-        // Hover highlight
-       if (row == hoveredRow && tableHasFocus)
 
- {
-            setBackground(HOVER_COLOR);
+        if (row == hoveredRow && tableHasFocus){
+                setBackground(HOVER_COLOR);
+            }
+
+            // Click selection highlight
+            if (table.getSelectedRow() == row && tableHasFocus) {
+                setBackground(SELECT_COLOR);
+            }
+            if (column == 4) {
+                return this; // skip hover highlight for action button column
+            }
+
+
+            // Alignment tweaks (keep your layout)
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+            setVerticalAlignment(SwingConstants.CENTER);
+
+            return this;
+
+            
         }
 
-        // Click selection highlight
-        if (table.getSelectedRow() == row && tableHasFocus) {
-            setBackground(SELECT_COLOR);
-        }
-        if (column == 4) {
-            return this; // skip hover highlight for action button column
-        }
-
-
-        // Alignment tweaks (keep your layout)
-        setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-        setVerticalAlignment(SwingConstants.CENTER);
-
-        return this;
-
-        
     }
-    
-}
 
     
     // ====================================Action Button Renderer =============================================
 
-class ActionButtonRenderer extends JButton
-        implements javax.swing.table.TableCellRenderer {
+    class ActionButtonRenderer extends JButton
+            implements javax.swing.table.TableCellRenderer {
 
-    public ActionButtonRenderer() {
-        setText("•••");
-        setFocusPainted(false);
-        setBorderPainted(false);
-        setContentAreaFilled(true);
-        setOpaque(true);
-        setFont(new Font("Poppins", Font.BOLD, 18));
-        setMargin(new Insets(0, 0, 0, 0));
-        setBorder(BorderFactory.createEmptyBorder());
-    }
-
-    @Override
-    public Component getTableCellRendererComponent(
-            JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-
-        int modelRow = table.convertRowIndexToModel(row);
-
-        Color EVEN_ROW = new Color(245, 245, 245);
-        Color ODD_ROW = Color.WHITE;
-        Color HOVER_COLOR = new Color(230, 240, 255);
-        Color SELECT_COLOR = new Color(200, 220, 255);
-
-        // default zebra striping
-        setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
-        setForeground(Color.BLACK);
-
-        // hover
-        if (row == hoveredRow && tableHasFocus) {
-            setBackground(HOVER_COLOR);
+        public ActionButtonRenderer() {
+            setText("•••");
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(true);
+            setOpaque(true);
+            setFont(new Font("Poppins", Font.BOLD, 18));
+            setMargin(new Insets(0, 0, 0, 0));
+            setBorder(BorderFactory.createEmptyBorder());
         }
 
-        // selection
-        if (table.getSelectedRow() == row && tableHasFocus) {
-            setBackground(SELECT_COLOR);
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+
+            int modelRow = table.convertRowIndexToModel(row);
+
+            Color EVEN_ROW = new Color(245, 245, 245);
+            Color ODD_ROW = Color.WHITE;
+            Color HOVER_COLOR = new Color(230, 240, 255);
+            Color SELECT_COLOR = new Color(200, 220, 255);
+
+            // default zebra striping
+            setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
+            setForeground(Color.BLACK);
+
+            // hover
+            if (row == hoveredRow && tableHasFocus) {
+                setBackground(HOVER_COLOR);
+            }
+
+            // selection
+            if (table.getSelectedRow() == row && tableHasFocus) {
+                setBackground(SELECT_COLOR);
+            }
+
+            return this;
         }
-
-        return this;
     }
-}
-
-
-
 
     //=============================button editor ======================================================
    class ActionButtonEditor extends javax.swing.DefaultCellEditor {
