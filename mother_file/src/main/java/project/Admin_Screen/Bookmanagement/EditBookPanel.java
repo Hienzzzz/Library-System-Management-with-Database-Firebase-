@@ -288,7 +288,6 @@ public class EditBookPanel  extends  JPanel{
                     ImageService.deleteBookCoverByUrl(book.getCoverURL());
                 }
 
-       
                 String newCover = ImageService.uploadBookCover(
                     selectedFile[0],
                     book.getBookId()
@@ -297,6 +296,7 @@ public class EditBookPanel  extends  JPanel{
                 if (newCover != null) {
                     book.setCoverURL(newCover);
                 }
+
             }
 
 

@@ -720,15 +720,16 @@ public class BookMagement extends JPanel {
 
         @Override
         public Component getTableCellEditorComponent(
-                JTable table, Object value, boolean isSelected, int row, int column) {
+                JTable table, Object value, boolean isSelected, int viewRow, int column) {
 
-            selectedRow = row;
+            // ✅ CONVERT VIEW ROW → MODEL ROW
+            selectedRow = table.convertRowIndexToModel(viewRow);
 
             if (isSelected) {
                 button.setBackground(table.getSelectionBackground());
                 button.setForeground(table.getSelectionForeground());
             } else {
-                button.setBackground(row % 2 == 0
+                button.setBackground(viewRow % 2 == 0
                         ? new Color(245, 245, 245)
                         : Color.WHITE);
                 button.setForeground(Color.BLACK);
@@ -736,6 +737,7 @@ public class BookMagement extends JPanel {
 
             return button;
         }
+
 
         @Override
         public Object getCellEditorValue() {

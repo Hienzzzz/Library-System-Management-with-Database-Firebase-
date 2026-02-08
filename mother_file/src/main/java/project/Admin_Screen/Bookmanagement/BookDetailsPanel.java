@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -81,13 +82,83 @@ public class BookDetailsPanel extends JPanel {
         author.setBounds(200, 270, 300, 25);
         author.setFont(new Font("Poppins", Font.PLAIN, 17));
 
-        JLabel genre_textHolder = new JLabel("Genre: " );
-        genre_textHolder.setBounds(500, 190, 300, 25);
+       // ---- Genre label title ----
+        JLabel genre_textHolder = new JLabel("Genre:");
+        genre_textHolder.setBounds(500, 190, 80, 25);
         genre_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
+        genre_textHolder.setForeground(new Color(0x333333));
 
-        JLabel genre = new JLabel(book.getGenre());
-        genre.setBounds(500, 210, 300, 25);
-        genre.setFont(new Font("Poppins", Font.PLAIN, 17));
+
+        // ---- Genre value label ----
+        JLabel genreLabel = new JLabel(book.getGenre());
+        genreLabel.setFont(new Font("Poppins", Font.PLAIN, 17));
+        genreLabel.setForeground(new Color(0x333333));
+        genreLabel.setOpaque(false);
+
+        // ---- Scroll container ----
+        JScrollPane genreScroll = new JScrollPane(
+                genreLabel,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+
+        genreScroll.setBounds(500, 210, 200, 25);
+        genreScroll.setBorder(null);
+        genreScroll.setOpaque(false);
+        genreScroll.getViewport().setOpaque(false);
+
+        // Hide scrollbar by default
+        JScrollBar hBar = genreScroll.getHorizontalScrollBar();
+        hBar.setPreferredSize(new Dimension(0, 0));
+        hBar.setOpaque(false);
+        hBar.setVisible(false);
+
+        // Show scrollbar only when hovering or scrolling
+        genreScroll.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                hBar.setPreferredSize(new Dimension(0, 3));
+                hBar.setVisible(true);
+                genreScroll.revalidate();
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                hBar.setPreferredSize(new Dimension(0, 0));
+                hBar.setVisible(false);
+                genreScroll.revalidate();
+            }
+        });
+        hBar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                thumbColor = new Color(0xB0B8C4);
+                trackColor = new Color(0xF1F3F6);
+            }
+
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            private JButton createZeroButton() {
+                JButton b = new JButton();
+                b.setPreferredSize(new Dimension(0, 0));
+                b.setMinimumSize(new Dimension(0, 0));
+                b.setMaximumSize(new Dimension(0, 0));
+                return b;
+            }
+        });
+        genreLabel.addMouseWheelListener(e -> {
+            JScrollBar bar = genreScroll.getHorizontalScrollBar();
+            bar.setValue(bar.getValue() + e.getWheelRotation() * 15);
+        });
+
 
         JLabel status_textHolder = new JLabel("Status: " );
         status_textHolder.setBounds(500, 240, 300, 25);
@@ -337,7 +408,7 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         background.add(status);
         background.add(scrollPane);
         background.add(quantity);
-        background.add(genre);
+        background.add(genreScroll);
         background.add(author);
         background.add(bookId);
         background.add(title);

@@ -67,4 +67,33 @@ public class ImageService {
             return null;
         }
     }
+
+    public static void deleteBookCoverByUrl(String coverUrl) {
+    try {
+        if (coverUrl == null || coverUrl.isEmpty()) return;
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+
+        // Extract object path from URL
+        // Example URL:
+        // https://storage.googleapis.com/BUCKET_NAME/book_covers/xxx.jpg
+        int index = coverUrl.indexOf(bucket.getName());
+        if (index == -1) return;
+
+        String objectPath = coverUrl.substring(
+            index + bucket.getName().length() + 1
+        );
+
+        Blob blob = bucket.get(objectPath);
+
+        if (blob != null) {
+            blob.delete();
+            System.out.println("Deleted old cover image: " + objectPath);
+        }
+
+    } catch (Exception e) {
+        System.err.println("Failed to delete old cover image: " + e.getMessage());
+    }
+}
+
 }
