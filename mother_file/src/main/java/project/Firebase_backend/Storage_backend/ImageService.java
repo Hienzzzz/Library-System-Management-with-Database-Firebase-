@@ -45,7 +45,7 @@ public class ImageService {
                 contentType
             );
 
-            // ✅ MAKE IMAGE PUBLIC (THIS IS THE KEY)
+       
             blob.createAcl(
                 com.google.cloud.storage.Acl.of(
                     com.google.cloud.storage.Acl.User.ofAllUsers(),
@@ -55,7 +55,7 @@ public class ImageService {
 
             System.out.println("Image uploaded: " + filename);
 
-            // ✅ RETURN PUBLIC URL (NO SIGNATURE, NO EXPIRY)
+         
             return String.format(
                 "https://storage.googleapis.com/%s/%s",
                 bucket.getName(),
@@ -65,6 +65,32 @@ public class ImageService {
         } catch (Exception e) {
             System.err.println("Image upload failed: " + e.getMessage());
             return null;
+        }
+    }
+
+    public static void deleteBookCoverByUrl(String coverUrl) {
+        try {
+            if (coverUrl == null || coverUrl.isEmpty()) return;
+
+            Bucket bucket = StorageClient.getInstance().bucket();
+            String bucketName = bucket.getName();
+            String prefix = "https://storage.googleapis.com/" + bucketName + "/";
+
+            if (!coverUrl.startsWith(prefix)) return;
+
+            String objectPath = coverUrl.substring(prefix.length());
+            if (objectPath.contains("?")) {
+                objectPath = objectPath.substring(0, objectPath.indexOf("?"));
+            }
+
+            Blob blob = bucket.get(objectPath);
+            if (blob != null) {
+                blob.delete();
+                System.out.println("Deleted old cover: " + objectPath);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Delete failed: " + e.getMessage());
         }
     }
 }
