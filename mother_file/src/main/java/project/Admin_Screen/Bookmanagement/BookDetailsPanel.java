@@ -154,12 +154,7 @@ public class BookDetailsPanel extends JPanel {
                 return b;
             }
         });
-        genreLabel.addMouseWheelListener(e -> {
-            JScrollBar bar = genreScroll.getHorizontalScrollBar();
-            bar.setValue(bar.getValue() + e.getWheelRotation() * 15);
-        });
-
-
+       
         JLabel status_textHolder = new JLabel("Status: " );
         status_textHolder.setBounds(500, 240, 300, 25);
         status_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));

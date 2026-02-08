@@ -11,6 +11,9 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -29,6 +32,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
@@ -62,6 +66,9 @@ public class BookMagement extends JPanel {
     private JTextField searchField;
     private JComboBox<String> categoryBox;
     private JComboBox<String> sortBox;
+    private int hoveredRow = -1;
+    private boolean tableHasFocus = false;
+
 
     public BookMagement(MainFrame frame) {
         this.frame = frame;
@@ -208,6 +215,7 @@ public class BookMagement extends JPanel {
 
         //======================== sort bar ==============================
         String[] sortOption = {
+            "Default",
             "Newest",
             "Oldest",
             "A to Z",
@@ -351,6 +359,55 @@ public class BookMagement extends JPanel {
 
         table.getColumnModel().getColumn(4).setCellRenderer(new ActionButtonRenderer());
         table.getColumnModel().getColumn(4).setCellEditor(new ActionButtonEditor(this));
+        table.setRowSelectionAllowed(true);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setFocusable(true);
+
+
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+    public void mouseMoved(MouseEvent e) {
+        int row = table.rowAtPoint(e.getPoint());
+        if (row != hoveredRow) {
+            hoveredRow = row;
+            table.repaint();
+        }
+    }
+});
+
+table.addMouseListener(new MouseAdapter() {
+    
+    public void mouseExited(MouseEvent e) {
+        hoveredRow = -1;
+        table.repaint();
+    }
+});
+
+table.addFocusListener(new java.awt.event.FocusAdapter() {
+    @Override
+    public void focusGained(java.awt.event.FocusEvent e) {
+        tableHasFocus = true;
+        table.repaint();
+    }
+
+    @Override
+    public void focusLost(java.awt.event.FocusEvent e) {
+        tableHasFocus = false;
+        hoveredRow = -1; // clear hover when focus is lost
+        table.clearSelection();
+        table.repaint();
+    }
+});
+
+background.setFocusable(true);
+background.addMouseListener(new MouseAdapter() {
+    @Override
+    public void mousePressed(MouseEvent e) {
+        background.requestFocusInWindow();
+    }
+});
+
+
+
 
         // ================= CELL RENDERER =================
         table.setDefaultRenderer(Object.class, new CustomCellRenderer());
@@ -572,6 +629,9 @@ public class BookMagement extends JPanel {
         List<RowSorter.SortKey> keys = new ArrayList<>();
 
         switch (option) {
+            case "Default" :
+                sorter.setSortKeys(null);
+                return;
             case "Newest":
                 keys.add(new RowSorter.SortKey(1, SortOrder.DESCENDING));
                 break;
@@ -602,95 +662,100 @@ public class BookMagement extends JPanel {
     
     class CustomCellRenderer extends DefaultTableCellRenderer {
 
-        @Override
-        public Component getTableCellRendererComponent(
-                JTable table, Object value, boolean isSelected,
-                boolean hasFocus, int row, int column) {
+    private final Color HOVER_COLOR = new Color(230, 240, 255);
+    private final Color SELECT_COLOR = new Color(200, 220, 255);
+    private final Color EVEN_ROW = new Color(245, 245, 245);
+    private final Color ODD_ROW = Color.WHITE;
 
-            super.getTableCellRendererComponent(
-                    table, value, isSelected, hasFocus, row, column
-            );
+    @Override
+    public Component getTableCellRendererComponent(
+            JTable table, Object value, boolean isSelected,
+            boolean hasFocus, int row, int column) {
 
-            // RESET defaults (important)
-            setFont(table.getFont());
-            setForeground(Color.BLACK);
-            setBackground(Color.WHITE);
-            setHorizontalAlignment(SwingConstants.LEFT);
-            setVerticalAlignment(SwingConstants.CENTER);
-            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        super.getTableCellRendererComponent(
+                table, value, false, false, row, column
+        );
 
-            if (column == 0) {
-                setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 10));
-            }
+        int modelRow = table.convertRowIndexToModel(row);
 
-            if (column == 1){
-                setBorder(BorderFactory.createEmptyBorder(0, 15, 0,0));
-            }
+        // Default background
+        setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
+        setForeground(Color.BLACK);
 
-            if (column == 2){
-                setBorder(BorderFactory.createEmptyBorder(0, 60, 0,0));
-            }
-        
-            if (column == 3) {
-                setHorizontalAlignment(SwingConstants.CENTER);
-            }
+        // Hover highlight
+       if (row == hoveredRow && tableHasFocus)
 
-           
-            if (column == 4) {
-                setHorizontalAlignment(SwingConstants.RIGHT);
-                setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 20));
-            }
-
-           
-            if (row % 2 == 0) {
-                setBackground(new Color(245, 245, 245));
-            }
-
-            
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-                setForeground(table.getSelectionForeground());
-            }
-
-            return this;
+ {
+            setBackground(HOVER_COLOR);
         }
+
+        // Click selection highlight
+        if (table.getSelectedRow() == row && tableHasFocus) {
+            setBackground(SELECT_COLOR);
+        }
+        if (column == 4) {
+            return this; // skip hover highlight for action button column
+        }
+
+
+        // Alignment tweaks (keep your layout)
+        setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        setVerticalAlignment(SwingConstants.CENTER);
+
+        return this;
+
+        
     }
+    
+}
+
     
     // ====================================Action Button Renderer =============================================
 
-    class ActionButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+class ActionButtonRenderer extends JButton
+        implements javax.swing.table.TableCellRenderer {
 
     public ActionButtonRenderer() {
-            setText("•••");
-            setFocusPainted(false);
-            setBorderPainted(false);
-            setContentAreaFilled(false);
-            setOpaque(true);
-            setFont(new Font("Poppins", Font.BOLD, 18));
+        setText("•••");
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setContentAreaFilled(true);
+        setOpaque(true);
+        setFont(new Font("Poppins", Font.BOLD, 18));
+        setMargin(new Insets(0, 0, 0, 0));
+        setBorder(BorderFactory.createEmptyBorder());
+    }
 
-            setMargin(new Insets(0, 0, 0, 0));
-            setBorder(BorderFactory.createEmptyBorder());
+    @Override
+    public Component getTableCellRendererComponent(
+            JTable table, Object value, boolean isSelected,
+            boolean hasFocus, int row, int column) {
 
+        int modelRow = table.convertRowIndexToModel(row);
+
+        Color EVEN_ROW = new Color(245, 245, 245);
+        Color ODD_ROW = Color.WHITE;
+        Color HOVER_COLOR = new Color(230, 240, 255);
+        Color SELECT_COLOR = new Color(200, 220, 255);
+
+        // default zebra striping
+        setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
+        setForeground(Color.BLACK);
+
+        // hover
+        if (row == hoveredRow && tableHasFocus) {
+            setBackground(HOVER_COLOR);
         }
-        @Override
-        public Component getTableCellRendererComponent(
-                JTable table, Object value, boolean isSelected,
-                boolean hasFocus, int row, int column) {
 
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-                setForeground(table.getSelectionForeground());
-            } else {
-                // Zebra striping
-                setBackground(row % 2 == 0
-                        ? new Color(245, 245, 245)
-                        : Color.WHITE);
-                setForeground(Color.BLACK);
-            }
+        // selection
+        if (table.getSelectedRow() == row && tableHasFocus) {
+            setBackground(SELECT_COLOR);
+        }
 
-            return this;
+        return this;
     }
-    }
+}
+
 
 
 
