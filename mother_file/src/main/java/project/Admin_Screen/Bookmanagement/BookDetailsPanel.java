@@ -226,10 +226,33 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         }
     });
 
+        JButton close_Button = new JButton();
+        close_Button.setBounds(724, 13, 25, 25);
+        close_Button.setBorder(null);
+        close_Button.setContentAreaFilled(false);
+        close_Button.setFocusPainted(false);
+        close_Button.setOpaque(false);
+
+        close_Button.addActionListener(e -> {
+
+            
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to Close this Panel?",
+                "Confirm Close Panel",
+                JOptionPane.YES_NO_OPTION
+            );
+                if (confirm == JOptionPane.YES_OPTION){
+                    onClose.run();
+                }
+        });
+
+
+        
 
         JButton edit_button = new JButton();
         edit_button.setBounds(452, 531, 117, 38);
-       // edit_button.setBorder(null);
+        edit_button.setBorder(null);
         edit_button.setContentAreaFilled(false);
         edit_button.setFocusPainted(false);
         edit_button.setOpaque(false);
@@ -274,21 +297,20 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
 
 
 
-       
 
 
-        JButton cancel_button = new JButton();
-        cancel_button.setBounds(600, 531, 137, 38);
-        //delete_button.setBorder(null);
-        cancel_button.setContentAreaFilled(false);
-        cancel_button.setFocusPainted(false);
-        cancel_button.setOpaque(false);
+        JButton delete_button = new JButton();
+        delete_button.setBounds(600, 531, 137, 38);
+        delete_button.setBorder(null);
+        delete_button.setContentAreaFilled(false);
+        delete_button.setFocusPainted(false);
+        delete_button.setOpaque(false);
 
-        cancel_button.addActionListener(e -> {
+        delete_button.addActionListener(e -> {
 
             if(book.getBorrowedCount() > 0){
-                cancel_button.setEnabled(false);
-                cancel_button.setToolTipText("Book us currenltu borrowed");
+                delete_button.setEnabled(false);
+                delete_button.setToolTipText("Book us currenltu borrowed");
 
             }
 
@@ -307,6 +329,7 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
        
 
 
+        background.add(close_Button);
         background.add(status_textHolder);
         background.add(genre_textHolder);
         background.add(author_textHolder);
@@ -318,7 +341,7 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         background.add(author);
         background.add(bookId);
         background.add(title);
-        background.add(cancel_button);
+        background.add(delete_button);
         background.add(edit_button);
         this.add(background);
 
