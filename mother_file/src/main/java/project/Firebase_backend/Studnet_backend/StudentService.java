@@ -1,8 +1,8 @@
 package project.Firebase_backend.Studnet_backend;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -192,6 +192,13 @@ public class StudentService{
             }
 
         }
+
+        public static boolean isRestricted(Student student) {
+            return student != null &&
+                !student.isBlocked() &&
+                System.currentTimeMillis() < student.getRestrictionUntil();
+        }
+
 
 
 

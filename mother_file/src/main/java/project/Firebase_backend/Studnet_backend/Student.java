@@ -34,7 +34,7 @@ public class Student extends User {
         this.offenseCount = 0;
         this.restrictionUntil = 0;
         this.blocked = false;
-        this.status = "ACTIVE";
+        this.status = STATUS_ACTIVE;
     }
 
     // ===== GETTERS =====
