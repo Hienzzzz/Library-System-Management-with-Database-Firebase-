@@ -1,43 +1,92 @@
 package project.Firebase_backend.Studnet_backend;
 
-public class Student {
+import project.Firebase_backend.User_backend.User;
 
-    private String studentId;
-    private String fullName;
-    private String email;
-    private String course;
-    private int yearLevel;
+
+public class Student extends User {
+
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_RESTRICTED = "RESTRICTED";
+    public static final String STATUS_BLOCKED = "BLOCKED";
+    public static final String STATUS_OVERDUE = "OVERDUE";
+
     private int borrowedCount;
-    private String status; // ACTIVE / BLOCKED
+    private double penaltyAmount;
+    private String status; // ACTIVE, RESTRICTED, BLOCKED
+    private int offenseCount;
+    private long restrictionUntil;
+    private boolean blocked;
 
-    public Student() {}
+    public Student() {
+        super();
+    }
 
-    public Student(String studentId, String fullName, String email,
-                   String course, int yearLevel) {
-
-        this.studentId = studentId;
-        this.fullName = fullName;
-        this.email = email;
-        this.course = course;
-        this.yearLevel = yearLevel;
+    public Student(
+        String firstName,
+        String surname,
+        String email,
+        String id,
+        String password
+    ) {
+        super(firstName, surname, email, id, password);
         this.borrowedCount = 0;
+        this.penaltyAmount = 0.0;
+        this.offenseCount = 0;
+        this.restrictionUntil = 0;
+        this.blocked = false;
         this.status = "ACTIVE";
     }
 
     // ===== GETTERS =====
-    public String getStudentId() { return studentId; }
-    public String getFullName() { return fullName; }
-    public String getEmail() { return email; }
-    public String getCourse() { return course; }
-    public int getYearLevel() { return yearLevel; }
-    public int getBorrowedCount() { return borrowedCount; }
-    public String getStatus() { return status; }
+    public int getBorrowedCount() {
+        return borrowedCount;
+    }
+
+    public double getPenaltyAmount() {
+        return penaltyAmount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+    
+    public int getOffenseCount() {
+        return offenseCount;
+    }
+
+    public long getRestrictionUntil() {
+        return restrictionUntil;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+    public boolean isRestricted() {
+        return !blocked && System.currentTimeMillis() < restrictionUntil;
+    }
+
 
     // ===== SETTERS =====
-    public void setFullName(String fullName) { this.fullName = fullName; }
-    public void setEmail(String email) { this.email = email; }
-    public void setCourse(String course) { this.course = course; }
-    public void setYearLevel(int yearLevel) { this.yearLevel = yearLevel; }
-    public void setBorrowedCount(int borrowedCount) { this.borrowedCount = borrowedCount; }
-    public void setStatus(String status) { this.status = status; }
+    public void setBorrowedCount(int borrowedCount) {
+        this.borrowedCount = borrowedCount;
+    }
+
+    public void setPenaltyAmount(double penaltyAmount) {
+        this.penaltyAmount = penaltyAmount;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+     public void setOffenseCount(int offenseCount) {
+        this.offenseCount = offenseCount;
+    }
+
+    public void setRestrictionUntil(long restrictionUntil) {
+        this.restrictionUntil = restrictionUntil;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
 }
