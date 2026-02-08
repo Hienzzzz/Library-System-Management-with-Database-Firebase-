@@ -248,7 +248,7 @@ public void replace(FilterBypass fb, int offset, int length,
         );
 
         JCheckBox showPassword = new JCheckBox();
-        showPassword.setBounds(537, 581, 30 , 20);
+        showPassword.setBounds(537, 578, 40 , 30);
         showPassword.setBorder(null);
         showPassword.setContentAreaFilled(false);
         showPassword.setOpaque(false);

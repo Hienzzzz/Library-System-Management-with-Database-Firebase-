@@ -67,4 +67,9 @@ public class ImageService {
             return null;
         }
     }
+
+    public static void deleteBookCoverByUrl(String coverURL) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteBookCoverByUrl'");
+    }
 }
