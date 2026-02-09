@@ -23,8 +23,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import project.Firebase_backend.User_backend.UserService;
 import project.Firebase_backend.User_backend.User;
+import project.Firebase_backend.User_backend.UserService;
 import project.Main_System.MainFrame;
 
 public class Register extends javax.swing.JPanel{
@@ -500,7 +500,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if(!email.getText().trim().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")){
+            if(!email.getText().trim().matches("^[A-Za-z0-9._%+-]+@students\\.nu-moa\\.edu\\.ph$")){
                 email.setForeground(errorRed);
                 JOptionPane.showMessageDialog(
                     frame,
@@ -508,7 +508,7 @@ public void replace(FilterBypass fb, int offset, int length,
                     "Invalid Input",
                     JOptionPane.ERROR_MESSAGE);
                 return;
-            }else if (!email.getText().trim().matches("^[A-Za-z0-9._%+-]{2,}+@gmail\\.com$")) {
+            }else if (!email.getText().trim().matches("^[A-Za-z0-9._%+-]+@students\\.nu-moa\\.edu\\.ph$")) {
                     email.setForeground(errorRed);
                     JOptionPane.showMessageDialog(
                         frame, 
@@ -627,7 +627,10 @@ public void replace(FilterBypass fb, int offset, int length,
             if(registered){
                 JOptionPane.showMessageDialog(
                     frame, 
-                    "Registration successful!"
+                    "Student account has been successfully added!\n\n" +
+                    "Role: STUDENT",
+                    "Account Created",
+                    JOptionPane.INFORMATION_MESSAGE
                 );
 
                 System.out.println("Switching to Login page");
