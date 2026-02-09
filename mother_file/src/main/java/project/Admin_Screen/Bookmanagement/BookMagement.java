@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -124,7 +125,7 @@ public class BookMagement extends JPanel {
         model = new DefaultTableModel(columns, 0) {
         @Override
             public boolean isCellEditable(int row, int column) {
-            return column == 4; // disable editing for all cells
+            return column == 4; 
             }
         };
 
@@ -216,6 +217,9 @@ public class BookMagement extends JPanel {
         //======================== sort bar ==============================
         String[] sortOption = {
             "Default",
+            "Available Books",
+            "Low Quantity",
+            "Out of Stock",
             "Newest",
             "Oldest",
             "A to Z",
@@ -392,7 +396,7 @@ public class BookMagement extends JPanel {
             @Override
             public void focusLost(java.awt.event.FocusEvent e) {
                 tableHasFocus = false;
-                hoveredRow = -1; // clear hover when focus is lost
+                hoveredRow = -1; 
                 table.clearSelection();
                 table.repaint();
             }
@@ -488,9 +492,83 @@ public class BookMagement extends JPanel {
         categoryBox.addActionListener(e -> applyFilters());
         sortBox.addActionListener(e -> applySorting());
 
+        sortBox.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    JComboBox<?> box = (JComboBox<?>) e.getSource();
+                    JPopupMenu popup = (JPopupMenu) box.getAccessibleContext().getAccessibleChild(0);
 
+                    if (popup != null && popup.getComponentCount() > 0) {
+                        JScrollPane scrollPane = (JScrollPane) popup.getComponent(0);
+                        JScrollBar vBar = scrollPane.getVerticalScrollBar();
+                        vBar.setUI(new ModernScrollBarUI());
+                        vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+                    }
+                });
+            }
+
+            @Override public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            @Override public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+        });
+
+
+
+        
         this.add(layeredPane);
     }
+
+    private static class ModernScrollBarUI extends BasicScrollBarUI {
+
+        @Override
+        protected void configureScrollBarColors() {
+            thumbColor = new Color(180, 180, 180);
+            trackColor = new Color(245, 245, 245);
+        }
+
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        private JButton createZeroButton() {
+            JButton b = new JButton();
+            b.setPreferredSize(new Dimension(0, 0));
+            b.setMinimumSize(new Dimension(0, 0));
+            b.setMaximumSize(new Dimension(0, 0));
+            return b;
+        }
+
+        @Override
+        protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(new Color(160, 160, 160));
+
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2.setColor(thumbColor);
+            g2.fillRoundRect(
+                    r.x + 2, r.y + 2,
+                    r.width - 4, r.height - 4,
+                    10, 10
+            );
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
+            g.setColor(trackColor);
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+    }
+
+
 
     // ================= CLOSE ADD BOOK =================
     public void closeAddBook() {
@@ -500,13 +578,22 @@ public class BookMagement extends JPanel {
 
 
    
+    
+
 
     // ================= FIREBASE LISTENER =================
+ 
+    protected boolean includeBook(Books book) {
+
+        return true;
+    }
     private void loadBooks() {
+        
 
         BookService.getRef().addValueEventListener(new ValueEventListener() {
 
             @Override
+          
             public void onDataChange(DataSnapshot snapshot) {
 
                 SwingUtilities.invokeLater(() -> {
@@ -515,6 +602,9 @@ public class BookMagement extends JPanel {
                     for (DataSnapshot data : snapshot.getChildren()) {
                         Books book = data.getValue(Books.class);
                         if (book == null) continue;
+
+                        // NEW: only add rows when includeBook returns true
+                        if (!includeBook(book)) continue;
 
                         model.addRow(new Object[]{
                                 book.getTitle(),
@@ -528,12 +618,16 @@ public class BookMagement extends JPanel {
                 });
             }
 
+
             @Override
             public void onCancelled(DatabaseError error) {
                 System.out.println("Firebase error: " + error.getMessage());
             }
         });
     }
+
+
+
 
     // ================= SHOW BOOK DETAILS =================
     public void showBookDetails(int row) {
@@ -584,28 +678,39 @@ public class BookMagement extends JPanel {
 
     // ============================for Filters =========================================
 
-   private void applyFilters() {
+    private void applyFilters() {
 
         List<RowFilter<Object, Object>> filters = new ArrayList<>();
 
-        // 🔍 SEARCH FILTER
+        // 🔍 Search filter
         String text = searchField.getText().trim();
         if (!text.isEmpty() && !text.equalsIgnoreCase("Search Book...")) {
             filters.add(RowFilter.regexFilter(
-                "(?i)" + text,
-                0, // Title
-                1, // Book ID
-                2  // Author
+                "(?i)" + Pattern.quote(text),
+                0, 1, 2
             ));
         }
 
-        // 🏷 CATEGORY FILTER (MULTI-GENRE SUPPORT)
+        // 📚 Category filter
         String genre = categoryBox.getSelectedItem().toString().trim();
         if (!genre.equalsIgnoreCase("All Categories")) {
             filters.add(RowFilter.regexFilter(
                 "(?i).*" + Pattern.quote(genre) + ".*",
-                5 // Genre column (hidden)
+                5
             ));
+        }
+
+        // 📦 Stock filter (NEW)
+        Object selectedSort = sortBox.getSelectedItem();
+        if (selectedSort != null) {
+            String option = selectedSort.toString();
+
+            if (option.equals("Available Books")
+                    || option.equals("Low Quantity")
+                    || option.equals("Out of Stock")) {
+
+                filters.add(getStockFilter(option));
+            }
         }
 
         sorter.setRowFilter(
@@ -613,7 +718,35 @@ public class BookMagement extends JPanel {
                 ? null
                 : RowFilter.andFilter(filters)
         );
+
+
     }
+
+    private RowFilter<Object, Object> getStockFilter(String option) {
+
+            return new RowFilter<>() {
+                @Override
+                public boolean include(Entry<?, ?> entry) {
+
+                    int quantity = Integer.parseInt(entry.getStringValue(3));
+
+                    switch (option) {
+                        case "Available Books":
+                            return quantity >= 1;
+
+                        case "Low Quantity":
+                            return quantity > 0 && quantity <= 5;
+
+                        case "Out of Stock":
+                            return quantity == 0;
+
+                        default:
+                            return true;
+                    }
+                }
+            };
+    }
+    
 
     //========================sorting ========================================
 
@@ -622,10 +755,22 @@ public class BookMagement extends JPanel {
         Object selected = sortBox.getSelectedItem();
         if (selected == null) {
             sorter.setSortKeys(null);
+            applyFilters();
             return;
         }
 
         String option = selected.toString();
+
+        // Stock-based options = filtering, not sorting
+        if (option.equals("Available Books")
+                || option.equals("Low Quantity")
+                || option.equals("Out of Stock")) {
+
+            sorter.setSortKeys(null);
+            applyFilters();
+            return;
+        }
+
         List<RowSorter.SortKey> keys = new ArrayList<>();
 
         switch (option) {
@@ -682,21 +827,33 @@ public class BookMagement extends JPanel {
         setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
         setForeground(Color.BLACK);
 
+      
+        if (column == 3 && value != null) { 
+            int qty = Integer.parseInt(value.toString());
+
+            if (qty == 0) {
+                setForeground(Color.RED);
+            } else if (qty <= 5) {
+                setForeground(new Color(255, 140, 0)); 
+            }else{
+                setForeground(new Color(0, 128, 0));
+            }
+        }
+
 
         if (row == hoveredRow && tableHasFocus){
                 setBackground(HOVER_COLOR);
             }
 
-            // Click selection highlight
             if (table.getSelectedRow() == row && tableHasFocus) {
                 setBackground(SELECT_COLOR);
             }
             if (column == 4) {
-                return this; // skip hover highlight for action button column
+                return this; 
             }
 
 
-            // Alignment tweaks (keep your layout)
+            
             setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
             setVerticalAlignment(SwingConstants.CENTER);
 
@@ -736,11 +893,9 @@ public class BookMagement extends JPanel {
             Color HOVER_COLOR = new Color(230, 240, 255);
             Color SELECT_COLOR = new Color(200, 220, 255);
 
-            // default zebra striping
             setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
             setForeground(Color.BLACK);
 
-            // hover
             if (row == hoveredRow && tableHasFocus) {
                 setBackground(HOVER_COLOR);
             }
@@ -782,7 +937,7 @@ public class BookMagement extends JPanel {
         public Component getTableCellEditorComponent(
                 JTable table, Object value, boolean isSelected, int viewRow, int column) {
 
-            // ✅ CONVERT VIEW ROW → MODEL ROW
+          
             selectedRow = table.convertRowIndexToModel(viewRow);
 
             if (isSelected) {
@@ -818,6 +973,8 @@ public class BookMagement extends JPanel {
     public void hideDimOverlay() {
         dimOverlay.setVisible(false);
     }
+
+
 
   
 

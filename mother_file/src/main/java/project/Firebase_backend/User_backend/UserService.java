@@ -125,7 +125,6 @@ public class UserService{
 }
 
 
-    // check if user exists (username or email)
     public static boolean userExists(String input){
         for(String role: ROLE_PATH){
             if (existsInRole(role, input)) return true;

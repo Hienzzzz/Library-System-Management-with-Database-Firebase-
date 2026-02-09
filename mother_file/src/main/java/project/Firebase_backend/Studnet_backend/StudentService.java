@@ -10,84 +10,78 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class StudentService{
+public class StudentService {
 
-    private static final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("students");
+    private static final DatabaseReference ref =
+            FirebaseDatabase.getInstance().getReference("students");
 
+    // ===================== BASIC =====================
 
-    
-    public static DatabaseReference getRef(){
-        return  ref;
+    public static DatabaseReference getRef() {
+        return ref;
     }
 
-    //==========================add==================================
-    public static void addStudnet(Student student ){
+    public static void addStudent(Student student) {
         if (student == null || student.getId() == null) return;
-
         ref.child(student.getId()).setValueAsync(student);
     }
 
-    //========================update============================
-    public static void updateStudnetField(
-        String studentId,
-        Map<String, Object> updates 
-    ){
-        if(studentId == null || updates == null) return;
-
+    public static void updateStudentFields(
+            String studentId,
+            Map<String, Object> updates
+    ) {
+        if (studentId == null || updates == null || updates.isEmpty()) return;
         ref.child(studentId).updateChildrenAsync(updates);
     }
 
-    //==========================delete ====================================
-    public static void deleteStudent(String studentId){
-        if(studentId == null) return;
+    public static void deleteStudentCompletely(String studentId) {
+        if (studentId == null) return;
 
-        ref.child(studentId).removeValueAsync();
+        FirebaseDatabase.getInstance()
+            .getReference("students")
+            .child(studentId)
+            .removeValueAsync();
+
+        FirebaseDatabase.getInstance()
+            .getReference("users")
+            .child("students")
+            .child(studentId)
+            .removeValueAsync();
     }
 
-    //==================penalty ============================================================
-    public static void addPenalty(String studentId, double amount){
+
+    // ===================== PENALTY =====================
+
+    public static void addPenalty(String studentId, double amount) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("penaltyAmount", amount);
-
-        ref.child(studentId).updateChildrenAsync(updates);
+        updateStudentFields(studentId, updates);
     }
 
-    public static void clearPenalty(String studentId){
+    public static void clearPenalty(String studentId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("penaltyAmount", 0.0);
-
-        ref.child(studentId).updateChildrenAsync(updates);
+        updateStudentFields(studentId, updates);
     }
 
-    //===========================borrow ==============================================
+    // ===================== BORROW =====================
+
     public static boolean canBorrow(Student student) {
-
-        if (student == null) return false;
-
-        if (student.isBlocked()) return false;
-
-        if (student.getPenaltyAmount() > 0) return false;
-
-        if (System.currentTimeMillis() < student.getRestrictionUntil())
-            return false;
-
-        return true;
+        return student != null && student.canBorrow();
     }
-    
-    public static void incrementBorrowed(String studentId) {
 
+    public static void incrementBorrowed(String studentId) {
         ref.child(studentId)
-        .child("borrowedCount")
-        .addListenerForSingleValueEvent(new ValueEventListener() {
+           .child("borrowedCount")
+           .addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 Integer count = snapshot.getValue(Integer.class);
                 if (count == null) count = 0;
-
                 ref.child(studentId)
-                .child("borrowedCount")
-                .setValueAsync(count + 1);
+                   .child("borrowedCount")
+                   .setValueAsync(count + 1);
             }
 
             @Override
@@ -98,19 +92,17 @@ public class StudentService{
     }
 
     public static void decrementBorrowed(String studentId) {
-
         ref.child(studentId)
-        .child("borrowedCount")
-        .addListenerForSingleValueEvent(new ValueEventListener() {
+           .child("borrowedCount")
+           .addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 Integer count = snapshot.getValue(Integer.class);
                 if (count == null || count <= 0) return;
-
                 ref.child(studentId)
-                .child("borrowedCount")
-                .setValueAsync(count - 1);
+                   .child("borrowedCount")
+                   .setValueAsync(count - 1);
             }
 
             @Override
@@ -119,13 +111,15 @@ public class StudentService{
             }
         });
     }
-    //borrow message
-   public static String getBorrowRestrictionMessage(Student student) {
+
+    // ===================== RESTRICTIONS =====================
+
+    public static String getBorrowRestrictionMessage(Student student) {
 
         if (student == null)
             return "Student record not found.";
 
-        if (student.isBlocked())
+        if (Student.STATUS_BLOCKED.equals(student.getStatus()))
             return "Your account has been permanently blocked.";
 
         if (student.getPenaltyAmount() > 0)
@@ -140,8 +134,8 @@ public class StudentService{
         return null;
     }
 
+    // ===================== VIOLATIONS =====================
 
-    //=================violation====================================
     public static void applyViolation(Student student) {
 
         if (student == null || student.getId() == null) return;
@@ -153,56 +147,18 @@ public class StudentService{
         updates.put("offenseCount", offense);
 
         if (offense == 1) {
-
-            updates.put(
-                "restrictionUntil",
-                now + TimeUnit.DAYS.toMillis(7)
-            );
+            updates.put("restrictionUntil", now + TimeUnit.DAYS.toMillis(7));
             updates.put("status", Student.STATUS_RESTRICTED);
 
         } else if (offense == 2) {
-
-            updates.put(
-                "restrictionUntil",
-                now + TimeUnit.DAYS.toMillis(30)
-            );
+            updates.put("restrictionUntil", now + TimeUnit.DAYS.toMillis(30));
             updates.put("status", Student.STATUS_RESTRICTED);
 
         } else {
-
-            updates.put("blocked", true);
             updates.put("status", Student.STATUS_BLOCKED);
             updates.put("restrictionUntil", 0L);
         }
 
-        ref.child(student.getId()).updateChildrenAsync(updates);
-
-            student.setOffenseCount(offense);
-
-            if (offense == 1) {
-                student.setRestrictionUntil(now + TimeUnit.DAYS.toMillis(7));
-                student.setStatus(Student.STATUS_RESTRICTED);
-
-            } else if (offense == 2) {
-                student.setRestrictionUntil(now + TimeUnit.DAYS.toMillis(30));
-                student.setStatus(Student.STATUS_RESTRICTED);
-
-            } else {
-                student.setBlocked(true);
-                student.setStatus(Student.STATUS_BLOCKED);
-                student.setRestrictionUntil(0L);
-            }
-
-        }
-
-        public static boolean isRestricted(Student student) {
-            return student != null &&
-                !student.isBlocked() &&
-                System.currentTimeMillis() < student.getRestrictionUntil();
-        }
-
-
-
-
-
+        updateStudentFields(student.getId(), updates);
+    }
 }

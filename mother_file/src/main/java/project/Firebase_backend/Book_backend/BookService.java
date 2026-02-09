@@ -22,7 +22,7 @@ public class BookService {
         return ref;
     }
 
-    // Generate book ID
+  
     public static String generatedBookId() {
         int number = 100000 + RAND.nextInt(900000);
         return "BK-" + number;
@@ -118,15 +118,21 @@ public class BookService {
         ref.child(bookId).removeValueAsync();
     }
 
+ 
+    
+
     private static String calculateStatus(int quantity){
         if(quantity == 0){
             return "OUT OF STOCK";
         }else if(quantity <= 2){
-            return  "LOW_QUANTITY";
+            return  "LOW QUANTITY";
         }else{
             return "AVAILABLE";
         }
     }
+
+    
+    
 
     public static void updateBook(Books book) {
 
@@ -135,7 +141,7 @@ public class BookService {
             return;
         }
 
-        // Recalculate status (important!)
+     
         book.setStatus(calculateStatus(book.getQuantity()));
 
         ref.child(book.getBookId()).setValueAsync(book);

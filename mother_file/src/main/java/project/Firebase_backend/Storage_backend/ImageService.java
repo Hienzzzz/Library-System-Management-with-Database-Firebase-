@@ -74,9 +74,7 @@ public class ImageService {
 
         Bucket bucket = StorageClient.getInstance().bucket();
 
-        // Extract object path from URL
-        // Example URL:
-        // https://storage.googleapis.com/BUCKET_NAME/book_covers/xxx.jpg
+       
         int index = coverUrl.indexOf(bucket.getName());
         if (index == -1) return;
 

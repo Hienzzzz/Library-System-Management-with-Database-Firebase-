@@ -24,7 +24,7 @@ public class FirebaseConfig{
                     .setStorageBucket("nationalian-library-system.firebasestorage.app")
                     .build();
 
-                    FirebaseApp.initializeApp(options); // without this hindi mag s-start si firebase natin
+                    FirebaseApp.initializeApp(options); 
                     System.out.println("\nFirebase connected successfully!\n");
 
         } catch (Exception e) {

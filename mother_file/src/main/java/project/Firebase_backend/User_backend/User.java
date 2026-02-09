@@ -21,7 +21,7 @@ public  class User{
     }
 
  
-    public String getFirstname(){
+    public String getFirstName(){
         return  firstName;
     }
 

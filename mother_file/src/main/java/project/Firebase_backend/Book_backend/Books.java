@@ -35,7 +35,6 @@ public class Books {
         this.status = null;
     }
 
-    // ================= GETTERS =================
 
     public String getTitle() {
         return title;
@@ -73,7 +72,6 @@ public class Books {
         return status;
     }
 
-    // ================= SETTERS =================
 
     public void setTitle(String title) {
         this.title = title;

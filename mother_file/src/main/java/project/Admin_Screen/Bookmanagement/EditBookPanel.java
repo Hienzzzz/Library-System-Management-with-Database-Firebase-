@@ -88,7 +88,7 @@ public class EditBookPanel  extends  JPanel{
         final int MAX_QUANTITY = 20;
 
         SpinnerNumberModel quantityModel =
-        new SpinnerNumberModel(1, 1, MAX_QUANTITY, 1);
+        new SpinnerNumberModel(0, 0, MAX_QUANTITY, 1);
 
         JSpinner quantityButton = new JSpinner(quantityModel);
         quantityButton.setBounds(680, 295, 45, 31);
@@ -101,7 +101,7 @@ public class EditBookPanel  extends  JPanel{
 
         NumberFormatter formatter = (NumberFormatter) textField.getFormatter();
         formatter.setAllowsInvalid(false); 
-        formatter.setMinimum(1);          
+        formatter.setMinimum(0);          
         formatter.setMaximum(MAX_QUANTITY);
 
         textField.setBackground(fieldColor);

@@ -119,7 +119,7 @@ scrollPane.getViewport().setOpaque(false);
 
 
 Color SCROLL_TRACK = new Color(0xF1F3F6);
-Color SCROLL_THUMB = new Color(0xB0B8C4); // soft gray-blue
+Color SCROLL_THUMB = new Color(0xB0B8C4);
 Color SCROLL_THUMB_HOVER = new Color(0x8FA1B5);
 
 scrollPane.setBorder(null);

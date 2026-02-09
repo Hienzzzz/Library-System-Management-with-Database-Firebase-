@@ -2,6 +2,7 @@ package project.Admin_Screen.Studentmanagement;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -22,65 +23,118 @@ import project.Firebase_backend.User_backend.UserService;
 
 public class AddStudentPanel extends JPanel {
 
-    private final StudentManagement parent;
+    private final StudentAccountPanel parent;
 
-    public AddStudentPanel(StudentManagement parent) {
+    public AddStudentPanel(StudentAccountPanel parent) {
         this.parent = parent;
 
         setLayout(null);
-        setBounds(439, 308, 762, 587);
+
         setOpaque(false);
 
-        JLabel background = new JLabel(
-            new ImageIcon(getClass().getResource("/Images/Admin_addStudent.png"))
+        // Load image
+        ImageIcon icon = new ImageIcon(
+            getClass().getResource("/Images/Admin_Student managemenr_addAccount.png")
         );
-        background.setBounds(0, 0, 762, 587);
+
+        // Scale image to EXACT panel size
+        Image scaledImage = icon.getImage().getScaledInstance(
+            862, 678, Image.SCALE_SMOOTH
+        );
+
+        // Background label
+        JLabel background = new JLabel(new ImageIcon(scaledImage));
+        background.setBounds(0, 0, 862, 678);
         background.setLayout(null);
 
         Color fieldColor = new Color(241, 243, 246);
         Font fieldFont = new Font("Poppins", Font.PLAIN, 18);
 
 
+        //================== display studnet name ==============
+
+        
         // ================= FIRST NAME =================
-        JTextField firstName = createField(230, 123, fieldColor, fieldFont);
-        firstName.setSize(400, 35);
+        JTextField firstName = createField(243, 270, fieldColor, fieldFont);
+        firstName.setSize(275, 33);
         
         background.add(firstName);
 
         // ================= LAST NAME =================
-        JTextField lastName = createField(232, 207, fieldColor, fieldFont);
-        lastName.setSize(400, 35);
+        JTextField lastName = createField(545, 270, fieldColor, fieldFont);
+        lastName.setSize(273, 33);
         background.add(lastName);
 
         // ================= EMAIL =================
-        JTextField email = createField(232, 291, fieldColor, fieldFont);
-        email.setSize(400, 35);
+        JTextField email = createField(243, 351, fieldColor, fieldFont);
+        email.setSize(512, 33);
         background.add(email);
 
         // ================= STUDENT ID =================
-        JTextField studentId = createField(232, 380, fieldColor, fieldFont);
-        studentId.setSize(400, 33);
+        JTextField studentId = createField(243, 436, fieldColor, fieldFont);
+        studentId.setSize(280, 33);
         background.add(studentId);
 
         applyStudentIdFormatter(studentId);
 
         // ================= PASSWORD =================
         JPasswordField password = new JPasswordField();
-        password.setBounds(232, 461, 400, 33);
+        password.setBounds(243, 520, 225, 33);
         password.setBackground(fieldColor);
         password.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         password.setFont(fieldFont);
         background.add(password);
+        
+        // ================= confirm PASSWORD  =================
+        JPasswordField C_password = new JPasswordField();
+        C_password.setBounds(525, 520, 225, 33);
+        C_password.setBackground(fieldColor);
+        C_password.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        C_password.setFont(fieldFont);
+        background.add(C_password);
+
+        //================== display studnet name ==============
+
+        JLabel studentFullName = new JLabel("Gabriel Murilla");
+        studentFullName.setBounds(241, 90, 429, 40);
+        studentFullName.setFont(new Font("Sanchez", Font.BOLD, 35));
+        studentFullName.setBorder(null);
+        studentFullName.setBackground(Color.WHITE);
+        background.add(studentFullName);
+
+        //student ID
+
+        JLabel student_ID = new JLabel("student Id here");
+        student_ID.setBounds(240, 170, 429, 30);
+        student_ID.setFont(new Font("Sanchez", Font.PLAIN, 24));
+        student_ID.setBorder(null);
+        student_ID.setBackground(Color.WHITE);
+        background.add(student_ID);
+ 
+        //upload Image
+        JButton uploadImg = new JButton();
+        uploadImg.setBounds(31, 279, 177, 32);
+        uploadImg.setContentAreaFilled(false);
+        uploadImg.setBorder(null);
+        background.add(uploadImg);
 
         // ================= ADD BUTTON =================
         JButton addBtn = new JButton();
-        addBtn.setBounds(555, 539, 183, 38);
-        styleButton(addBtn);
+        addBtn.setBounds(685, 625, 151, 32);
+        addBtn.setBorder(null);
+        addBtn.setContentAreaFilled(false);
+        addBtn.setFocusPainted(false);
+        addBtn.setOpaque(false);
 
         // ================= CANCEL BUTTON =================
         JButton cancelBtn = new JButton();
-        cancelBtn.setBounds(27, 538, 130, 38);
-        styleButton(cancelBtn);
+        cancelBtn.setBounds(516, 625, 117, 32);
+        cancelBtn.setBorder(null);
+        cancelBtn.setContentAreaFilled(false);
+        cancelBtn.setFocusPainted(false);
+        cancelBtn.setOpaque(false);
+
+     
 
         cancelBtn.addActionListener(e -> parent.closeAddStudent());
 
@@ -245,7 +299,7 @@ public class AddStudentPanel extends JPanel {
 
         background.add(addBtn);
         background.add(cancelBtn);
-        add(background);
+        this.add(background);
     }
 
     // ================= HELPERS =================
@@ -259,12 +313,7 @@ public class AddStudentPanel extends JPanel {
         return tf;
     }
 
-    private void styleButton(JButton b) {
-        b.setBorder(null);
-        b.setContentAreaFilled(false);
-        b.setFocusPainted(false);
-        b.setOpaque(false);
-    }
+  
 
     private void applyStudentIdFormatter(JTextField field) {
         ((AbstractDocument) field.getDocument()).setDocumentFilter(
