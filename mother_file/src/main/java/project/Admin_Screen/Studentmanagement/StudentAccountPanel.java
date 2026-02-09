@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -22,7 +24,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
@@ -37,7 +42,7 @@ import project.Main_System.MainFrame;
 
 public class StudentAccountPanel extends JPanel {
 
-    private MainFrame frame;
+    private final MainFrame frame;
 
     private JLayeredPane layeredPane;
     private JPanel dimOverlay;
@@ -50,6 +55,9 @@ public class StudentAccountPanel extends JPanel {
     private JTable table;
     private DefaultTableModel model;
     private TableRowSorter<DefaultTableModel> sorter;
+
+    private RowFilter<DefaultTableModel, Object> searchFilter;
+    private RowFilter<DefaultTableModel, Object> statusFilter;
 
     public StudentAccountPanel(MainFrame frame) {
         this.frame = frame;
@@ -68,22 +76,20 @@ public class StudentAccountPanel extends JPanel {
         add(layeredPane);
 
         // ================= BACKGROUND =================
-        ImageIcon icon = new ImageIcon(
-                getClass().getResource("/Images/Admin_Student management_Account.png")
+        JLabel background = new JLabel(
+            new ImageIcon(getClass().getResource(
+                "/Images/Admin_Student management_Account.png"))
         );
-
-        JLabel background = new JLabel(icon);
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
 
         // ================= SEARCH FIELD =================
-        String searchPlaceholder = "Search Book...";
-
+        String searchPlaceholder = "Search Student...";
         searchField = new JTextField(searchPlaceholder);
         searchField.setBounds(440, 284, 222, 27);
-        searchField.setForeground(Color.GRAY);
         searchField.setFont(new Font("Poppins", Font.PLAIN, 15));
+        searchField.setForeground(Color.GRAY);
         searchField.setBorder(null);
         background.add(searchField);
 
@@ -94,7 +100,6 @@ public class StudentAccountPanel extends JPanel {
                     searchField.setForeground(Color.BLACK);
                 }
             }
-
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
                     searchField.setText(searchPlaceholder);
@@ -104,18 +109,18 @@ public class StudentAccountPanel extends JPanel {
         });
 
         // ================= SORT BOX =================
-        String[] sortOption = {
-                "Default",
-                "Newest",
-                "Oldest",
-                "A to Z",
-                "Student ID",
-                "Active",
-                "Restricted",
-                "Blocked"
+        String[] sortOptions = {
+            "Default",
+            "Newest",
+            "Oldest",
+            "A to Z",
+            "Student ID",
+            "Active",
+            "Restricted",
+            "Blocked"
         };
 
-        sortBox = new JComboBox<>(sortOption);
+        sortBox = new JComboBox<>(sortOptions);
         sortBox.setBounds(689, 286, 145, 24);
         sortBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
         sortBox.setBackground(Color.WHITE);
@@ -124,9 +129,28 @@ public class StudentAccountPanel extends JPanel {
         background.add(sortBox);
 
         sortBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 220, 220), 0),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(2, 6, 2, 6)
         ));
+
+        sortBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton arrow = new JButton();
+                arrow.setBorder(null);
+                arrow.setContentAreaFilled(false);
+                arrow.setFocusPainted(false);
+
+                ImageIcon icon = new ImageIcon(
+                    getClass().getResource("/Images/down-chevron.png")
+                );
+
+                arrow.setIcon(new ImageIcon(
+                    icon.getImage().getScaledInstance(14, 14, Image.SCALE_SMOOTH)
+                ));
+                return arrow;
+            }
+        });
 
         sortBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -135,36 +159,32 @@ public class StudentAccountPanel extends JPanel {
                     boolean isSelected, boolean cellHasFocus) {
 
                 super.getListCellRendererComponent(
-                        list, value, index, isSelected, cellHasFocus);
+                    list, value, index, isSelected, cellHasFocus);
+
+                setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
 
                 if (index == -1 && value == null) {
                     setText("Sort by:");
                     setForeground(new Color(150, 150, 150));
+                } else if (index == -1) {
+                    setText("Sort by: " + value);
                 } else {
                     setText(value.toString());
-                    setForeground(new Color(60, 60, 60));
+                    setBackground(isSelected
+                        ? new Color(40, 70, 140)
+                        : Color.WHITE);
+                    setForeground(isSelected
+                        ? Color.WHITE
+                        : new Color(60, 60, 60));
                 }
                 return this;
             }
         });
 
-        // ================= ADD BUTTON =================
-        addButton = new JButton();
-        addButton.setBounds(1335, 277, 36, 38);
-        addButton.setBorder(null);
-        addButton.setContentAreaFilled(false);
-        background.add(addButton);
-
         // ================= TABLE =================
-        String[] columns = {
-                "Name",
-                "Student ID",
-                "Email",
-                "Status",
-                "Action"
-        };
-
-        model = new DefaultTableModel(columns, 0) {
+        model = new DefaultTableModel(
+            new String[]{"Name", "Student ID", "Email", "Status", "Action"}, 0
+        ) {
             @Override
             public boolean isCellEditable(int row, int col) {
                 return col == 4;
@@ -174,20 +194,25 @@ public class StudentAccountPanel extends JPanel {
         table = new JTable(model);
         table.setRowHeight(30);
         table.setShowGrid(false);
-        table.setIntercellSpacing(new Dimension(0, 0));
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setTableHeader(null);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setBackground(Color.WHITE);
-
-        TableColumnModel columnModel = table.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(300);
-        columnModel.getColumn(1).setPreferredWidth(140);
-        columnModel.getColumn(2).setPreferredWidth(250);
-        columnModel.getColumn(3).setPreferredWidth(150);
-        columnModel.getColumn(4).setPreferredWidth(150);
 
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
+
+        TableColumnModel cols = table.getColumnModel();
+        cols.getColumn(0).setPreferredWidth(300);
+        cols.getColumn(1).setPreferredWidth(140);
+        cols.getColumn(2).setPreferredWidth(250);
+        cols.getColumn(3).setPreferredWidth(150);
+        cols.getColumn(4).setPreferredWidth(150);
+
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 1; i <= 4; i++) {
+            cols.getColumn(i).setCellRenderer(center);
+        }
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(371, 378, 1030, 550);
@@ -195,12 +220,62 @@ public class StudentAccountPanel extends JPanel {
         scrollPane.getViewport().setBackground(Color.WHITE);
         background.add(scrollPane);
 
-        // ================= DIM OVERLAY (BookManagement-style) =================
-        dimOverlay = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
+        // ================= SORT LOGIC =================
+        sortBox.addActionListener(e -> {
+            statusFilter = null;
+            String opt = (String) sortBox.getSelectedItem();
+            if (opt == null) return;
 
+            switch (opt) {
+                case "Default" -> sorter.setSortKeys(null);
+                case "Newest" ->
+                    sorter.setSortKeys(List.of(
+                        new RowSorter.SortKey(1, SortOrder.DESCENDING)));
+                case "Oldest" ->
+                    sorter.setSortKeys(List.of(
+                        new RowSorter.SortKey(1, SortOrder.ASCENDING)));
+                case "A to Z" ->
+                    sorter.setSortKeys(List.of(
+                        new RowSorter.SortKey(0, SortOrder.ASCENDING)));
+                case "Student ID" ->
+                    sorter.setSortKeys(List.of(
+                        new RowSorter.SortKey(1, SortOrder.ASCENDING)));
+                case "Active", "Restricted", "Blocked" ->
+                    statusFilter =
+                        RowFilter.regexFilter("^" + opt + "$", 3);
+            }
+            applyFilters();
+        });
+
+        // ================= SEARCH FILTER =================
+        searchField.getDocument().addDocumentListener(
+            new javax.swing.event.DocumentListener() {
+                private void filter() {
+                    String text = searchField.getText().trim();
+                    if (text.isEmpty()
+                        || text.equalsIgnoreCase(searchPlaceholder)) {
+                        searchFilter = null;
+                    } else {
+                        searchFilter = RowFilter.regexFilter(
+                            "(?i)" + text, 0, 1, 2);
+                    }
+                    applyFilters();
+                }
+                public void insertUpdate(javax.swing.event.DocumentEvent e){filter();}
+                public void removeUpdate(javax.swing.event.DocumentEvent e){filter();}
+                public void changedUpdate(javax.swing.event.DocumentEvent e){filter();}
+            });
+
+        // ================= ADD BUTTON =================
+        addButton = new JButton();
+        addButton.setBounds(1335, 277, 36, 38);
+        addButton.setBorder(null);
+        addButton.setContentAreaFilled(false);
+        background.add(addButton);
+
+        // ================= DIM OVERLAY =================
+        dimOverlay = new JPanel() {
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setComposite(AlphaComposite.SrcOver.derive(0.12f));
                 g2.setColor(Color.BLACK);
@@ -208,108 +283,70 @@ public class StudentAccountPanel extends JPanel {
                 g2.dispose();
             }
         };
-
-        dimOverlay.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
+        dimOverlay.setBounds(0, 0, 1512, 982);
         dimOverlay.setOpaque(false);
         dimOverlay.setVisible(false);
-        dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
         layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
 
         // ================= ADD STUDENT PANEL =================
         addStudent = new AddStudentPanel(this);
-        addStudent.setSize(862, 678);;
+        addStudent.setSize(862, 678);
         addStudent.setVisible(false);
         layeredPane.add(addStudent, JLayeredPane.POPUP_LAYER);
 
-        SwingUtilities.invokeLater(() -> {
-            int x = (layeredPane.getWidth() - addStudent.getWidth()) / 2;
-            int y = (layeredPane.getHeight() - addStudent.getHeight()) / 2;
-            addStudent.setLocation(x, y);
-        });
-
-
-        int panelWidth = 862;
-        int panelHeight = 678;
-
-        int x = (layeredPane.getWidth() - panelWidth) / 2;
-        int y = (layeredPane.getHeight() - panelHeight) / 2;
-
-        addStudent.setBounds(x, y, panelWidth, panelHeight);
-
-
-        // ================= ADD BUTTON ACTION =================
         addButton.addActionListener(e -> {
             if (addStudent.isVisible()) return;
-
             searchField.setEnabled(false);
             sortBox.setEnabled(false);
             addButton.setEnabled(false);
-            sortBox.hidePopup();
-
             dimOverlay.setVisible(true);
+            addStudent.setLocation(
+                (layeredPane.getWidth() - addStudent.getWidth()) / 2,
+                (layeredPane.getHeight() - addStudent.getHeight()) / 2
+            );
             addStudent.setVisible(true);
         });
-
-        // ================= SEARCH FILTER =================
-        searchField.getDocument().addDocumentListener(
-                new javax.swing.event.DocumentListener() {
-
-                    private void filter() {
-                        String text = searchField.getText().trim();
-                        if (text.isEmpty() || text.equalsIgnoreCase(searchPlaceholder)) {
-                            sorter.setRowFilter(null);
-                        } else {
-                            sorter.setRowFilter(RowFilter.regexFilter(
-                                    "(?i)" + text, 0, 1, 2));
-                        }
-                    }
-
-                    public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-                    public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-                    public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-                }
-        );
     }
 
-    // ================= FIREBASE LOAD =================
+    private void applyFilters() {
+        if (searchFilter != null && statusFilter != null) {
+            sorter.setRowFilter(
+                RowFilter.andFilter(List.of(searchFilter, statusFilter)));
+        } else if (searchFilter != null) {
+            sorter.setRowFilter(searchFilter);
+        } else {
+            sorter.setRowFilter(statusFilter);
+        }
+    }
+
     private void loadStudents() {
-
-        StudentService.getRef()
-                .addValueEventListener(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-
-                        SwingUtilities.invokeLater(() -> {
-                            model.setRowCount(0);
-
-                            for (DataSnapshot data : snapshot.getChildren()) {
-                                Student s = data.getValue(Student.class);
-                                if (s == null) continue;
-
-                                model.addRow(new Object[]{
-                                        s.getFirstName() + " " + s.getSurname(),
-                                        s.getId(),
-                                        s.getEmail(),
-                                        s.getStatus(),
-                                        "Remove"
-                                });
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        System.out.println("Student load error: " + error.getMessage());
-                    }
-                });
+        StudentService.getRef().addValueEventListener(
+            new ValueEventListener() {
+                public void onDataChange(DataSnapshot snap) {
+                    SwingUtilities.invokeLater(() -> {
+                        model.setRowCount(0);
+                        for (DataSnapshot d : snap.getChildren()) {
+                            Student s = d.getValue(Student.class);
+                            if (s == null) continue;
+                            model.addRow(new Object[]{
+                                s.getFirstName() + " " + s.getSurname(),
+                                s.getId(),
+                                s.getEmail(),
+                                s.getStatus(),
+                                "Remove"
+                            });
+                        }
+                    });
+                }
+                public void onCancelled(DatabaseError err) {
+                    System.out.println(err.getMessage());
+                }
+            });
     }
 
-    // ================= CLOSE MODAL =================
     public void closeAddStudent() {
         addStudent.setVisible(false);
         dimOverlay.setVisible(false);
-
         searchField.setEnabled(true);
         sortBox.setEnabled(true);
         addButton.setEnabled(true);
