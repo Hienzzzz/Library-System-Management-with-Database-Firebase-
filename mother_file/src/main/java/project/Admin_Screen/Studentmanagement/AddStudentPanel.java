@@ -186,6 +186,12 @@ public class AddStudentPanel extends JPanel {
             @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { update(); }
         });
 
+       JLabel imgPreview = new JLabel();
+imgPreview.setBounds(32, 85, 175, 175);
+imgPreview.setOpaque(true); // IMPORTANT
+imgPreview.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+background.add(imgPreview);
+
 
  
         //upload Image

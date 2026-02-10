@@ -18,7 +18,7 @@ public class MainFrame extends javax.swing.JFrame{
         setResizable(false);
         setVisible(true);
 
-        
+
 
     }
 }
