@@ -15,7 +15,8 @@ public class Student extends User {
     private double penaltyAmount;
     private String status;              // ACTIVE, RESTRICTED, BLOCKED, OVERDUE
     private int offenseCount;
-    private long restrictionUntil;      // epoch millis (0 = no restriction)
+    private long restrictionUntil;  
+    private String imageUrl;
 
     // ===== REQUIRED FOR FIREBASE =====
     public Student() {
@@ -28,7 +29,8 @@ public class Student extends User {
             String surname,
             String email,
             String studentId,
-            String password
+            String password,
+            String imageUrl
     ) {
         super(firstName, surname, email, studentId, password);
         this.borrowedCount = 0;
@@ -36,6 +38,7 @@ public class Student extends User {
         this.offenseCount = 0;
         this.restrictionUntil = 0;
         this.status = STATUS_ACTIVE;
+        this.imageUrl = imageUrl;
     }
 
     // ===== GETTERS =====
@@ -79,6 +82,10 @@ public class Student extends User {
                 && penaltyAmount <= 0;
     }
 
+    public String getImageUrl() {
+            return imageUrl;
+        }
+
     // ===== SETTERS =====
     public void setBorrowedCount(int borrowedCount) {
         this.borrowedCount = borrowedCount;
@@ -98,5 +105,9 @@ public class Student extends User {
 
     public void setRestrictionUntil(long restrictionUntil) {
         this.restrictionUntil = restrictionUntil;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

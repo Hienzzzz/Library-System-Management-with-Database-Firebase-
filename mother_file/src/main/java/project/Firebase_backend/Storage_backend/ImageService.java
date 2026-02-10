@@ -45,7 +45,6 @@ public class ImageService {
                 contentType
             );
 
-       
             blob.createAcl(
                 com.google.cloud.storage.Acl.of(
                     com.google.cloud.storage.Acl.User.ofAllUsers(),
@@ -53,9 +52,6 @@ public class ImageService {
                 )
             );
 
-            System.out.println("Image uploaded: " + filename);
-
-         
             return String.format(
                 "https://storage.googleapis.com/%s/%s",
                 bucket.getName(),
@@ -68,30 +64,82 @@ public class ImageService {
         }
     }
 
-    public static void deleteBookCoverByUrl(String coverUrl) {
-    try {
-        if (coverUrl == null || coverUrl.isEmpty()) return;
+    public static String uploadStudentImage(File file, String studentId) {
 
-        Bucket bucket = StorageClient.getInstance().bucket();
+        try {
+            Bucket bucket = StorageClient.getInstance().bucket();
 
-       
-        int index = coverUrl.indexOf(bucket.getName());
-        if (index == -1) return;
+            if (bucket == null) {
+                throw new IllegalStateException(
+                    "Firebase Storage bucket not initialized."
+                );
+            }
 
-        String objectPath = coverUrl.substring(
-            index + bucket.getName().length() + 1
-        );
+            String safeId = (studentId != null && !studentId.isEmpty())
+                    ? studentId
+                    : "temp_" + System.currentTimeMillis();
 
-        Blob blob = bucket.get(objectPath);
+            String fileName = file.getName().toLowerCase(Locale.ROOT);
+            String extension = "jpg";
 
-        if (blob != null) {
-            blob.delete();
-            System.out.println("Deleted old cover image: " + objectPath);
+            if (fileName.endsWith(".png")) extension = "png";
+            else if (fileName.endsWith(".jpeg")) extension = "jpeg";
+            else if (fileName.endsWith(".jpg")) extension = "jpg";
+
+            String contentType = Files.probeContentType(file.toPath());
+            if (contentType == null) {
+                contentType = "image/" + extension;
+            }
+
+            String filename =
+                "student_images/" + safeId + "/profile." + extension;
+
+            Blob blob = bucket.create(
+                filename,
+                Files.readAllBytes(file.toPath()),
+                contentType
+            );
+
+            blob.createAcl(
+                com.google.cloud.storage.Acl.of(
+                    com.google.cloud.storage.Acl.User.ofAllUsers(),
+                    com.google.cloud.storage.Acl.Role.READER
+                )
+            );
+
+            return String.format(
+                "https://storage.googleapis.com/%s/%s",
+                bucket.getName(),
+                filename
+            );
+
+        } catch (Exception e) {
+            System.err.println("Student image upload failed: " + e.getMessage());
+            return null;
         }
-
-    } catch (Exception e) {
-        System.err.println("Failed to delete old cover image: " + e.getMessage());
     }
-}
 
+    public static void deleteBookCoverByUrl(String coverUrl) {
+        try {
+            if (coverUrl == null || coverUrl.isEmpty()) return;
+
+            Bucket bucket = StorageClient.getInstance().bucket();
+
+            int index = coverUrl.indexOf(bucket.getName());
+            if (index == -1) return;
+
+            String objectPath = coverUrl.substring(
+                index + bucket.getName().length() + 1
+            );
+
+            Blob blob = bucket.get(objectPath);
+
+            if (blob != null) {
+                blob.delete();
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to delete old cover image: " + e.getMessage());
+        }
+    }
 }

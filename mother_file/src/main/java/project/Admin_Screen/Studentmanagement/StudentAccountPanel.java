@@ -235,6 +235,12 @@ public class StudentAccountPanel extends JPanel {
         cols.getColumn(3).setPreferredWidth(150);
         cols.getColumn(4).setPreferredWidth(150);
 
+        table.getColumnModel().getColumn(4)
+            .setCellRenderer(new ActionButtonRenderer());
+
+        table.getColumnModel().getColumn(4)
+            .setCellEditor(new ActionButtonEditor(this));
+
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 1; i <= 4; i++) {
@@ -403,12 +409,13 @@ private void applyFilters() {
                         for (DataSnapshot d : snap.getChildren()) {
                             Student s = d.getValue(Student.class);
                             if (s == null) continue;
+
                             model.addRow(new Object[]{
                                 s.getFirstName() + " " + s.getSurname(),
                                 s.getId(),
                                 s.getEmail(),
                                 s.getStatus(),
-                                "Remove"
+                                "•••"
                             });
                         }
                     });
@@ -475,5 +482,146 @@ private void applyFilters() {
             table.clearSelection();
         }
     }
+
+            // =================button renderer ==============================
+
+    class ActionButtonRenderer extends JButton
+            implements javax.swing.table.TableCellRenderer {
+
+        public ActionButtonRenderer() {
+            setText("•••");
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(true);
+            setOpaque(true);
+            setFont(new Font("Poppins", Font.BOLD, 18));
+            setBorder(BorderFactory.createEmptyBorder());
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+
+            int modelRow = table.convertRowIndexToModel(row);
+
+            Color even = new Color(245, 245, 245);
+            Color odd = Color.WHITE;
+            Color hover = new Color(230, 240, 255);
+            Color select = new Color(200, 220, 255);
+
+            setBackground(modelRow % 2 == 0 ? even : odd);
+            setForeground(Color.BLACK);
+
+            if (table.getSelectedRow() == row && table.isEnabled()) {
+                setBackground(select);
+            }
+
+            return this;
+        }
+
+        
+    }
+
+            // =================button editor ==============================
+
+    class ActionButtonEditor extends javax.swing.DefaultCellEditor {
+
+        private JButton button;
+        private int selectedRow;
+        private StudentAccountPanel parent;
+
+        public ActionButtonEditor(StudentAccountPanel parent) {
+            super(new JTextField());
+            this.parent = parent;
+
+            button = new JButton("•••");
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setContentAreaFilled(true);
+            button.setOpaque(true);
+            button.setFont(new Font("Poppins", Font.BOLD, 18));
+
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                parent.showStudentDetails(selectedRow);
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int viewRow, int column) {
+
+            selectedRow = table.convertRowIndexToModel(viewRow);
+            button.setBackground(viewRow % 2 == 0
+                    ? new Color(245, 245, 245)
+                    : Color.WHITE);
+
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "•••";
+        }
+    }
+
+        // =================show book details ==============================
+    public void showStudentDetails(int row) {
+
+        String studentId = model.getValueAt(row, 1).toString();
+
+        StudentService.getRef()
+            .child(studentId)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    Student student = snapshot.getValue(Student.class);
+                    if (student == null) return;
+
+                    
+
+                SwingUtilities.invokeLater(() -> {
+
+                    setBackgroundEnabled(false);
+                    dimOverlay.setVisible(true);
+                    dimOverlay.requestFocusInWindow();
+
+                    final StudentDetailsPanel[] holder = new StudentDetailsPanel[1];
+
+                    holder[0] = new StudentDetailsPanel(
+                        StudentAccountPanel.this,
+                        student,
+                        () -> {
+                            layeredPane.remove(holder[0]);
+                            dimOverlay.setVisible(false);
+                            setBackgroundEnabled(true);
+                            layeredPane.repaint();
+                        }
+                    );
+
+                    holder[0].setBounds(
+                        (layeredPane.getWidth() - holder[0].getWidth()) / 2,
+                        (layeredPane.getHeight() - holder[0].getHeight()) / 2,
+                        holder[0].getWidth(),
+                        holder[0].getHeight()
+                    );
+
+                    layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
+                    layeredPane.repaint();
+                });
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    System.out.println(error.getMessage());
+                }
+            });
+    }
+
+
+    
 
 }
