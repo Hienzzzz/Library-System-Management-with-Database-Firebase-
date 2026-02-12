@@ -23,9 +23,19 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import project.Firebase_backend.User_backend.UserExistsCallback;
+import project.Firebase_backend.User_backend.EmailService;
+import project.Firebase_backend.User_backend.PasswordUtil;
+import project.Firebase_backend.User_backend.RegisterCallback;
+
+
+
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
+import project.Firebase_backend.User_backend.VerificationUtil;
 import project.Main_System.MainFrame;
+
+
 
 public class Register extends javax.swing.JPanel{
 
@@ -58,6 +68,8 @@ public class Register extends javax.swing.JPanel{
         );
         gif.setIcon(gifIcon);
 
+
+        
 
         //Firstname===========================================================================================
 
@@ -594,59 +606,118 @@ public void replace(FilterBypass fb, int offset, int length,
             }else{
                 verify_password.setForeground(normalColor);
             }
-
-            String firstName = firstname.getText().trim();
-            String surname = lastname.getText().trim();
-            String fullname = firstName + " " + surname;
-            String Email = email.getText().trim();
+            String firstName = capitalizeWords(firstname.getText().trim());
+            String surname = capitalizeWords(lastname.getText().trim());
+            String Email = email.getText().trim().toLowerCase();
             String id = Student_ID.getText().trim();
-            String Password = new String(password.getPassword());
+            String rawPassword = new String(password.getPassword());
+            String Password = PasswordUtil.hashPassword(rawPassword);
 
             User newUser = new User(
-                firstName,
-                surname,
-                Email,
-                id, 
-                Password
+                    id,
+                    "STUDENT",
+                    Email,
+                    firstName + " " + surname,
+                    Password
             );
-            
 
-            if(UserService.userExists(Email) ||
-                UserService.userExists(fullname)){
-                    JOptionPane.showMessageDialog(
-                        frame, 
-                        "User already Exists!",
-                        "Registration Fialed",
+            //=============for verification
+            String verificationCode = VerificationUtil.generateCode();
+
+            EmailService.sendEmail(
+                    Email,
+                    "Library Account Verification",
+                    "Your verification code is: " + verificationCode
+            );
+
+            String inputCode = JOptionPane.showInputDialog(
+                    frame,
+                    "Enter the verification code sent to your email:"
+            );
+
+            if (inputCode == null || !inputCode.equals(verificationCode)) {
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Invalid verification code!",
+                        "Verification Failed",
                         JOptionPane.ERROR_MESSAGE
-                    );
-                    return;
-                }
-
-            boolean registered = UserService.registerUser(newUser);
-
-            if(registered){
-                JOptionPane.showMessageDialog(
-                    frame, 
-                    "Student account has been successfully added!\n\n" +
-                    "Role: STUDENT",
-                    "Account Created",
-                    JOptionPane.INFORMATION_MESSAGE
                 );
-
-                System.out.println("Switching to Login page");
-                frame.setContentPane(new Login (frame));
-                frame.revalidate();
-                frame.repaint();
-            }else{
-                JOptionPane.showMessageDialog(
-                    frame, 
-                    "Registration failed. Please try again.",
-                    "Error",
-                JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
-            Arrays.fill(password.getPassword(), '\0');
-            Arrays.fill(verify_password.getPassword(), '\0');
+
+
+
+       UserService.userExistsAsync(Email,
+        new UserExistsCallback() {
+
+            @Override
+            public void onComplete(boolean exists) {
+
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        if (exists) {
+                            JOptionPane.showMessageDialog(
+                                    frame,
+                                    "Email already registered!",
+                                    "Registration Failed",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                            return;
+                        }
+
+                        UserService.registerUserAsync(newUser,
+                            new RegisterCallback() {
+
+                                @Override
+                                public void onComplete(boolean success) {
+
+                                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+
+                                            if (success) {
+
+                                                Arrays.fill(password.getPassword(), '\0');
+                                                Arrays.fill(verify_password.getPassword(), '\0');
+
+                                                JOptionPane.showMessageDialog(
+                                                        frame,
+                                                        "Student account successfully created!\n\nRole: STUDENT",
+                                                        "Account Created",
+                                                        JOptionPane.INFORMATION_MESSAGE
+                                                );
+
+                                                frame.setContentPane(new Login(frame));
+                                                frame.revalidate();
+                                                frame.repaint();
+
+                                            } else {
+
+                                                JOptionPane.showMessageDialog(
+                                                        frame,
+                                                        "Registration failed. Please try again.",
+                                                        "Error",
+                                                        JOptionPane.ERROR_MESSAGE
+                                                );
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                });
+            }
+    });
+
+
+
+
+            
 
         
         });
@@ -684,5 +755,21 @@ public void replace(FilterBypass fb, int offset, int length,
         background.setIcon(image);
         this.add(background);
     }
+
     
+    private String capitalizeWords(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        String[] words = input.trim().toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            result.append(Character.toUpperCase(word.charAt(0)))
+                .append(word.substring(1))
+                .append(" ");
+        }
+
+        return result.toString().trim();
+    }
+
 }

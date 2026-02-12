@@ -23,8 +23,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 import project.Firebase_backend.Storage_backend.ImageService;
-import project.Firebase_backend.Studnet_backend.Student;
-import project.Firebase_backend.Studnet_backend.StudentService;
+//import project.Firebase_backend.Studnet_backend.Student;
+//import project.Firebase_backend.Studnet_backend.StudentService;
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
 
@@ -257,7 +257,7 @@ public class AddStudentPanel extends JPanel {
             if (!pw.matches("^\\S+$") || pw.length() < 8) return;
             if (!pw.equals(cpw)) return;
 
-            if (UserService.userExists(em) || UserService.userExists(sid)) {
+           /*  if (UserService.userExists(em) || UserService.userExists(sid)) {
                 JOptionPane.showMessageDialog(
                     this,
                     "A student account with this email or ID already exists.",
@@ -266,7 +266,7 @@ public class AddStudentPanel extends JPanel {
                 );
                 return;
             }
-
+*/
             int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to add this student account?\n\n"

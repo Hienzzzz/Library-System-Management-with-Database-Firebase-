@@ -6,7 +6,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import project.Firebase_backend.Studnet_backend.Student;
+//import project.Firebase_backend.Studnet_backend.Student;
 
 public class StudentDetailsPanel extends JPanel{
 

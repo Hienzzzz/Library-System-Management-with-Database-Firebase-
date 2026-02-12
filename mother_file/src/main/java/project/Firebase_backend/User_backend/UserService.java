@@ -1,174 +1,187 @@
 package project.Firebase_backend.User_backend;
 
-
-
-import java.util.concurrent.CountDownLatch;
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+public class UserService {
+
+    private static DatabaseReference usersRef =
+            FirebaseDatabase.getInstance().getReference("users");
 
 
 
+    // ================= LOGIN =================
 
-public class UserService{
+    public static void loginAsync(
+            String input,
+            String password,
+            LoginCallback callback
+    ) {
 
-    private static final String[] ROLE_PATH = {
-        "students",
-        "librarians",
-        "admins"
-    };
+        Query queryEmail = usersRef
+                .orderByChild("email")
+                .equalTo(input.toLowerCase());
 
-    private static String getRolePath(String id) {
-        if (id == null) return null;
+        queryEmail.addListenerForSingleValueEvent(
+                new ValueEventListener() {
 
-        if (id.matches("^AD\\d{7}$")) return "admins";
-        if (id.matches("^LB\\d{7}$")) return "librarians";
-        if (id.matches("^\\d{4}-\\d{7}$")) return "students";
-
-        return null;
-    }
-
-
-    //register
-    public static boolean registerUser(User user){
-
-        String rolePath = getRolePath(user.getId());
-        if(rolePath == null) return  false;
-
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-            .getReference("users")
-            .child(rolePath)
-            .child(user.getId());
-
-            try {
-                ref.setValueAsync(user).get();
-                System.out.println("Fullname: " + user.getFullname());
-                System.out.println("Email: " + user.getEmail());
-                System.out.println("ID no.: " + user.getId());
-                System.out.println("Register as: " + rolePath);
-                return  true;
-            } catch (Exception e) {
-                System.out.println("Failed to register");
-                e. printStackTrace();
-                return false;
-            }
-    }
-
-    //login
-    public static LoginResult login(String input, String password){
-
-        boolean userFound = false;
-
-        for(String role : ROLE_PATH){
-           LoginResult result = tryLoginInRole(role, input, password);
-
-           if(result.getStatus() == LoginResult.Status.WRONG_PASSWORD){
-            return result;
-           }
-         if(result.getStatus() == LoginResult.Status.SUCCESS){
-            return result;
-           }
-        if(result.getStatus() == LoginResult.Status.USER_NOT_FOUND){
-            userFound = userFound || false;
-           }
-        }
-        return new LoginResult(LoginResult.Status.USER_NOT_FOUND, null);
-    }
-    
-   private static LoginResult tryLoginInRole(String role, String input, String password) {
-
-    CountDownLatch latch = new CountDownLatch(1);
-    final LoginResult[] result =
-            { new LoginResult(LoginResult.Status.USER_NOT_FOUND, null) };
-
-    DatabaseReference ref = FirebaseDatabase.getInstance()
-            .getReference("users")
-            .child(role);
-
-    ref.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot snapshot) {
-
-            for (DataSnapshot child : snapshot.getChildren()) {
-                User user = child.getValue(User.class);
-                if (user == null) continue;
-
-                if (user.getEmail().equalsIgnoreCase(input) ||
-                    user.getFullname().equalsIgnoreCase(input)) {
-
-                    if (user.getPassword().equals(password)) {
-                        result[0] = new LoginResult(
-                                LoginResult.Status.SUCCESS, user);
-                    } else {
-                        result[0] = new LoginResult(
-                                LoginResult.Status.WRONG_PASSWORD, null);
-                    }
-                    break;
-                }
-            }
-            latch.countDown();
-        }
-
-        @Override
-        public void onCancelled(DatabaseError error) {
-            latch.countDown();
-        }
-    });
-
-    try { latch.await(); } catch (InterruptedException e) {}
-
-    return result[0];
-}
-
-
-    public static boolean userExists(String input){
-        for(String role: ROLE_PATH){
-            if (existsInRole(role, input)) return true;
-        }
-        return false;
-    }
-
-    private static boolean existsInRole(String role, String input){
-        
-        CountDownLatch latch = new CountDownLatch(1);
-
-        final boolean[] exists = {false};
-
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-            .getReference("users")
-            .child(role);
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot account){
-                for(DataSnapshot child : account.getChildren()){
-                    User user = child.getValue(User.class);
-                    if(user == null) continue;
+            public void onDataChange(DataSnapshot snapshot) {
 
-                    if(user.getFullname().equalsIgnoreCase(input) ||
-                        user.getEmail().equals(input)){
-                        exists[0] = true;
-                        break;
+                if (snapshot.exists()) {
+
+                    for (DataSnapshot child : snapshot.getChildren()) {
+
+                        User user = child.getValue(User.class);
+
+                        if (user.getStatus().equals("BLOCKED")) {
+                            callback.onComplete(
+                                    new LoginResult(
+                                            LoginResult.Status.ACCOUNT_BLOCKED,
+                                            null));
+                            return;
+                        }
+                        String hashedInput = PasswordUtil.hashPassword(password);
+
+                        if (user.getPassword().equals(hashedInput)) {
+                            callback.onComplete(
+                                    new LoginResult(
+                                            LoginResult.Status.SUCCESS,
+                                            user));
+                        } else {
+                            callback.onComplete(
+                                    new LoginResult(
+                                            LoginResult.Status.WRONG_PASSWORD,
+                                            null));
+                        }
+
+                        return;
                     }
                 }
-                latch.countDown();
+
+                // If not found by email → try full name
+                Query queryName = usersRef
+                        .orderByChild("fullName")
+                        .equalTo(capitalizeWords(input));
+
+                queryName.addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snap) {
+
+                        if (!snap.exists()) {
+                            callback.onComplete(
+                                    new LoginResult(
+                                            LoginResult.Status.USER_NOT_FOUND,
+                                            null));
+                            return;
+                        }
+
+                        for (DataSnapshot child : snap.getChildren()) {
+
+                            User user = child.getValue(User.class);
+
+                            String hashedInput = PasswordUtil.hashPassword(password);
+
+                            if (user.getPassword().equals(hashedInput)) {
+                                callback.onComplete(
+                                        new LoginResult(
+                                                LoginResult.Status.SUCCESS,
+                                                user));
+                            } else {
+                                callback.onComplete(
+                                        new LoginResult(
+                                                LoginResult.Status.WRONG_PASSWORD,
+                                                null));
+                            }
+
+                            return;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {}
+                });
             }
 
             @Override
-            public void onCancelled(DatabaseError error){
-                latch.countDown();
+            public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    private static String capitalizeWords(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        String[] words = input.trim().toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            result.append(Character.toUpperCase(word.charAt(0)))
+                  .append(word.substring(1))
+                  .append(" ");
+        }
+
+        return result.toString().trim();
+    }
+        //=====================register 
+        public static void userExistsAsync(String email,
+            UserExistsCallback callback) {
+
+        DatabaseReference usersRef =
+                FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("email")
+                .equalTo(email.toLowerCase())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                callback.onComplete(snapshot.exists());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onComplete(false);
             }
         });
+    }
+
+    public static void registerUserAsync(User user,
+            RegisterCallback callback) {
+
+        DatabaseReference usersRef =
+                FirebaseDatabase.getInstance().getReference("users");
 
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+            usersRef.child(user.getId()).setValueAsync(user).get();
+
+            if (user.getRole().equals("STUDENT")) {
+
+                DatabaseReference studentRef =
+                        usersRef.child(user.getId())
+                                .child("studentData");
+
+                studentRef.child("borrowedCount").setValueAsync(0);
+                studentRef.child("offenseCount").setValueAsync(0);
+                studentRef.child("penaltyAmount").setValueAsync(0);
+                studentRef.child("restricted").setValueAsync(false);
+                studentRef.child("restrictionUntil").setValueAsync(0);
+            }
+
+            callback.onComplete(true);
+
+        } catch (Exception e) {
+            callback.onComplete(false);
         }
-        return exists[0];
+
     }
+
+    
+
 }

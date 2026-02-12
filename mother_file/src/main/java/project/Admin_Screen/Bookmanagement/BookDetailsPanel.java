@@ -31,13 +31,13 @@ import project.Firebase_backend.Book_backend.Books;
 
 public class BookDetailsPanel extends JPanel {
 
-    private BookMagement parent;
+    private BookManagement parent;
     private Books book;
     private Runnable onClose;
 
 
 
-    public BookDetailsPanel(BookMagement parent, Books book, Runnable onClose){
+    public BookDetailsPanel(BookManagement parent, Books book, Runnable onClose){
         this.parent = parent;
         this.book = book;
         this.onClose = onClose;

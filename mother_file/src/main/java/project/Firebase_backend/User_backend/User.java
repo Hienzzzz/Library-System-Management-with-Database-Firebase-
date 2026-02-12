@@ -1,55 +1,51 @@
 package project.Firebase_backend.User_backend;
 
+public class User {
 
-public  class User{
-    private String firstName;
-    private String surname;
-    private String fullname;
-    private String email;
     private String id;
+    private String role;
+    private String email;
+    private String fullName;
     private String password;
+    private String status;
+    private long createdAt;
 
-    public User(){}
+    // Required empty constructor for Firebase
+    public User() {}
 
-    public User(String firstName, String surname, String email, String id, String password){
-        this.firstName = firstName;
-        this.surname = surname;
-        this.fullname = firstName + " " + surname;
-        this.email = email;
+    public User(String id, String role, String email,
+                String fullName, String password) {
+
         this.id = id;
-        this.password = password; 
+        this.role = role;
+        this.email = email.toLowerCase();
+        this.fullName = capitalizeWords(fullName);
+        this.password = password;
+        this.status = null;
+        this.createdAt = System.currentTimeMillis();
     }
 
- 
-    public String getFirstName(){
-        return  firstName;
+    // Capitalize helper
+    private String capitalizeWords(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        String[] words = input.trim().toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            result.append(Character.toUpperCase(word.charAt(0)))
+                  .append(word.substring(1))
+                  .append(" ");
+        }
+
+        return result.toString().trim();
     }
 
-    public String getSurname(){
-        return  surname;
-    }
-    public String getFullname(){
-        return  fullname;
-    }
-
-    public String getEmail(){
-        return email;
-    }
-    public String getId(){
-        return  id;
-    }
-
-    public String getPassword(){
-        return  password;
-    }
-
-    public String getRole() {
-        if (id == null) return "UNKNOWN";
-        if (id.matches("^AD\\d{7}$")) return "ADMIN";
-        if (id.matches("^LB\\d{7}$")) return "LIBRARIAN";
-        if (id.matches("^\\d{4}-\\d{7}$")) return "STUDENT";
-        return "UNKNOWN";
-    }
-
-
+    // Getters
+    public String getId() { return id; }
+    public String getRole() { return role; }
+    public String getEmail() { return email; }
+    public String getFullName() { return fullName; }
+    public String getPassword() { return password; }
+    public String getStatus() { return status; }
 }

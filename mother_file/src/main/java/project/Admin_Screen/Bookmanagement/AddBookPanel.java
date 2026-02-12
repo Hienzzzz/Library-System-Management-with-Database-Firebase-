@@ -33,9 +33,9 @@ import project.Firebase_backend.Storage_backend.ImageService;
 
 public class AddBookPanel  extends JPanel{
 
-    private BookMagement parent;
+    private BookManagement parent;
 
-    public AddBookPanel(BookMagement parent){
+    public AddBookPanel(BookManagement parent){
         this.parent = parent;
 
         setLayout(null);
@@ -272,15 +272,14 @@ background.add(scrollPane);
             }
 
 
-            Books book = new Books(
-                Title.getText().trim(),
-                null,
-                Author.getText().trim(),
-                (int) quantityButton.getValue(),
-                Genre.getText().trim(),
-                description.getText().trim(),
-                coverURL
-
+                Books book = new Books(
+                Title.getText().trim(),          // title
+                null,                            // bookId (Firebase generates)
+                Author.getText().trim(),         // author
+                (int) quantityButton.getValue(), // quantity
+                Genre.getText().trim(),          // genre
+                description.getText().trim(),    // description
+                coverURL                         // coverURL
             );
             
             BookService.checkDuplicateAndAdd(book);

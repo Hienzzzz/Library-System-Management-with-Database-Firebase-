@@ -18,13 +18,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+
+import project.Firebase_backend.User_backend.LoginCallback;
+import project.Firebase_backend.User_backend.PasswordUtil;
+
+
 import project.Admin_Screen.Dashboard.AdminDashboard;
-import project.Firebase_backend.User_backend.UserService;
+import project.Firebase_backend.User_backend.LoginCallback;
 import project.Firebase_backend.User_backend.LoginResult;
 import project.Firebase_backend.User_backend.User;
+import project.Firebase_backend.User_backend.UserService;
 import project.Librarian_screen.Dashboard.Librarian_dashboard;
 import project.Main_System.MainFrame;
-import project.Student_Screen.Student_dashboard.Student_dashboard;
+import project.Student_Screen.Student_dashboard.Student_Dashboard;
  
 public class Login extends javax.swing.JPanel{
  
@@ -224,7 +230,11 @@ public class Login extends javax.swing.JPanel{
                 }
 
                 String loginInput = username.getText().trim();
-                String passwordInput = new String (password.getPassword());
+                String rawPassword = new String(password.getPassword());
+
+                // Hash the password before sending
+                String passwordInput = PasswordUtil.hashPassword(rawPassword);
+
 
                 //check if walang laman
                 if(loginInput.isEmpty() || passwordInput.isEmpty()){
@@ -233,48 +243,69 @@ public class Login extends javax.swing.JPanel{
                 }
 
                 //login attemp
-                LoginResult result = UserService.login(loginInput, passwordInput);
+                UserService.loginAsync(loginInput, passwordInput, 
+                    new LoginCallback() {
 
-                switch (result.getStatus()) {
-                    case SUCCESS:
-                        User loggedUser = result.getUser();
-                        JOptionPane.showMessageDialog(
-                            frame, 
-                            "Login successful! \nRole: " + loggedUser.getRole()
-                        );
+                        @Override
+                        public void onComplete(LoginResult result) {
 
-                        switch (loggedUser.getRole()) {
-                            case "ADMIN":
-                                frame.setContentPane(new AdminDashboard(frame));
-                                break;
-                            case "STUDENT":
-                                frame.setContentPane(new Student_dashboard(frame));
-                                break;
-                            case "LIBRARIAN":
-                                frame.setContentPane(new Librarian_dashboard(frame));
-                                break;
+                            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    switch (result.getStatus()) {
+
+                                        case SUCCESS:
+                                            User loggedUser = result.getUser();
+
+                                            JOptionPane.showMessageDialog(
+                                                    frame,
+                                                    "Login successful!\nRole: " + loggedUser.getRole()
+                                            );
+
+                                            switch (loggedUser.getRole()) {
+                                                case "ADMIN":
+                                                    frame.setContentPane(new AdminDashboard(frame));
+                                                    break;
+                                                case "STUDENT":
+                                                    frame.setContentPane(new Student_Dashboard(frame));
+                                                    break;
+                                                case "LIBRARIAN":
+                                                    frame.setContentPane(new Librarian_dashboard(frame));
+                                                    break;
+                                            }
+
+                                            frame.revalidate();
+                                            frame.repaint();
+                                            break;
+
+                                        case WRONG_PASSWORD:
+                                            JOptionPane.showMessageDialog(frame, "Incorrect password");
+                                            break;
+
+                                        case USER_NOT_FOUND:
+                                            JOptionPane.showMessageDialog(frame, "User not found");
+                                            break;
+                                        case ACCOUNT_BLOCKED:
+                                            JOptionPane.showMessageDialog(
+                                                frame,
+                                                "Your acocunt has been blocked.\nPlease contanct the administrator.",
+                                                "Account Blocked",
+                                                JOptionPane.ERROR_MESSAGE
+                                            );
+                                            break;
+                                    }
+
+                                }
+                            });
                         }
-                        frame.revalidate();
-                        frame.repaint();
-                        break;
-                    case WRONG_PASSWORD :
-                        password.setForeground(errorRed);
-                        JOptionPane.showMessageDialog(
-                            frame,
-                            "Incorrect password");
-                        break;
-                    case USER_NOT_FOUND :
-                        username.setForeground(errorRed);
-                        password.setForeground(errorRed);
-                        JOptionPane.showMessageDialog(
-                            frame, 
-                            "Username or Email not Found");
-                            break;
-                } 
+                });
+
 
             }
         });
- 
+
         //register button=================================================================
         JButton register = new JButton();
         register.setBounds(279,759, 165, 30);
@@ -302,7 +333,7 @@ public class Login extends javax.swing.JPanel{
         this.add(background);
     
        
- 
+    
  
  
     }

@@ -38,12 +38,12 @@ import project.Firebase_backend.Storage_backend.ImageService;
 
 
 public class EditBookPanel  extends  JPanel{
-    private BookMagement parent;
+    private BookManagement parent;
     private Books book;
     private Runnable onClose;
     private JLabel imgPreview;
 
-    public EditBookPanel(BookMagement parent, Books book, Runnable onClose) {
+    public EditBookPanel(BookManagement parent, Books book, Runnable onClose) {
         this.parent = parent;
         this.book = book;
         this.onClose = onClose;
