@@ -143,33 +143,32 @@ public class ImageService {
         }
     }
 
-    
-        public static void deleteImageByUrl(String imageUrl) {
+    // ================= DELETE IMAGE BY FULL URL (Generic) =================
+    public static void deleteImageByUrl(String imageUrl) {
 
-            try {
+        try {
+            if (imageUrl == null || imageUrl.isEmpty()) return;
 
-                if (imageUrl == null || imageUrl.isEmpty()) return;
+            Bucket bucket = StorageClient.getInstance().bucket();
 
-                Bucket bucket = StorageClient.getInstance().bucket();
-                if (bucket == null) return;
+            if (bucket == null) return;
 
-                int index = imageUrl.indexOf(bucket.getName());
-                if (index == -1) return;
+            int index = imageUrl.indexOf(bucket.getName());
+            if (index == -1) return;
 
-                String objectPath = imageUrl.substring(
-                        index + bucket.getName().length() + 1
-                );
+            String objectPath = imageUrl.substring(
+                    index + bucket.getName().length() + 1
+            );
 
-                Blob blob = bucket.get(objectPath);
+            Blob blob = bucket.get(objectPath);
 
-                if (blob != null) {
-                    blob.delete();
-                }
-
-            } catch (Exception e) {
-                System.err.println("Failed to delete image: " + e.getMessage());
+            if (blob != null) {
+                blob.delete();
             }
-        }
 
+        } catch (Exception e) {
+            System.err.println("Failed to delete image: " + e.getMessage());
+        }
+    }
 
 }

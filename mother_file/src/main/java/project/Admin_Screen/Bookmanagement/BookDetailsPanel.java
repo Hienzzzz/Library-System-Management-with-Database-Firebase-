@@ -227,7 +227,7 @@ description.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 JScrollPane scrollPane = new JScrollPane(description);
 scrollPane.setBounds(33, 355, 700, 150);
-//scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADDE2)));
+scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADDE2)));
 scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 scrollPane.getVerticalScrollBar().setUnitIncrement(16);

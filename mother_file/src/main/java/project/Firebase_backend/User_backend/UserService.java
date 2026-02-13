@@ -36,10 +36,14 @@ public class UserService {
     // ================= REGISTER USER PROFILE =================
     // NOTE: Password is NOT stored anymore
     public static void registerUserAsync(User user,
-                                     RegisterCallback callback) {
+                                    RegisterCallback callback) {
+
+        if (user == null || user.getId() == null) {
+            callback.onComplete(false);
+            return;
+        }
 
         try {
-
             // Save main user profile
             usersRef.child(user.getId())
                     .setValueAsync(user)
@@ -133,8 +137,13 @@ public class UserService {
                         for (DataSnapshot child : snapshot.getChildren()) {
 
                             User user = child.getValue(User.class);
-                            callback.onComplete(user);
-                            return;
+                                if (user != null) {
+                                    callback.onComplete(user);
+                                } else {
+                                    callback.onComplete(null);
+                                }
+                                return;
+
                         }
                     }
 
@@ -161,7 +170,47 @@ public class UserService {
         return result.toString().trim();
     }
 
-    // ================= UPDATE USER PROFILE IMAGE =================
+    // ================= FETCH USER BY LAST NAME =================
+    public static void fetchUserByLastName(String lastName,
+                                        FetchUserCallback callback) {
+
+        if (lastName == null || lastName.trim().isEmpty()) {
+            callback.onComplete(null);
+            return;
+        }
+
+        usersRef.orderByChild("lastName")
+                .equalTo(capitalizeWords(lastName))
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        if (!snapshot.exists()) {
+                            callback.onComplete(null);
+                            return;
+                        }
+
+                        for (DataSnapshot child : snapshot.getChildren()) {
+
+                            User user = child.getValue(User.class);
+                            if (user != null) {
+                                callback.onComplete(user);
+                            } else {
+                                callback.onComplete(null);
+                            }
+                            return;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        callback.onComplete(null);
+                    }
+                });
+    }
+
+    
   
         // ================= UPDATE STUDENT PROFILE IMAGE WITH CLEANUP =================
         public static void updateStudentProfileImageWithCleanup(
@@ -223,6 +272,60 @@ public class UserService {
                 }
             });
         }
+
+        // ================= DELETE STUDENT PROFILE IMAGE =================
+        public static void deleteStudentProfileImage(
+                String userId,
+                RegisterCallback callback
+        ) {
+
+            usersRef.child(userId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+
+                    if (!snapshot.exists()) {
+                        callback.onComplete(false);
+                        return;
+                    }
+
+                    User user = snapshot.getValue(User.class);
+
+                    if (user == null ||
+                        user.getProfileImageUrl() == null ||
+                        user.getProfileImageUrl().isEmpty()) {
+
+                        callback.onComplete(false);
+                        return;
+                    }
+
+                    try {
+                        // 1️⃣ Delete from storage
+                        project.Firebase_backend.Storage_backend.ImageService
+                                .deleteImageByUrl(user.getProfileImageUrl());
+
+                        // 2️⃣ Remove URL from database
+                        usersRef.child(userId)
+                                .child("profileImageUrl")
+                                .removeValueAsync()
+                                .get();
+
+                        callback.onComplete(true);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        callback.onComplete(false);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onComplete(false);
+                }
+            });
+        }
+
 
 
 

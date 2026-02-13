@@ -1,11 +1,45 @@
 package project.Admin_Screen.Studentmanagement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.*;
+import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -14,20 +48,17 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
-
-
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Bookmanagement.BookManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
-//import project.Firebase_backend.Studnet_backend.Student;
-//import project.Firebase_backend.Studnet_backend.StudentService;
+import project.Firebase_backend.User_backend.User;
 import project.Main_System.MainFrame;
 
 public class StudentAccountPanel extends JPanel {
@@ -41,6 +72,9 @@ public class StudentAccountPanel extends JPanel {
     private JTextField searchField;
     private JComboBox<String> sortBox;
     private JButton addButton;
+    private int hoveredRow = -1;
+    private boolean tableHasFocus = false;
+
 
     private JTable table;
     private DefaultTableModel model;
@@ -58,21 +92,20 @@ public class StudentAccountPanel extends JPanel {
 
         setLayout(null);
         setPreferredSize(new Dimension(1512, 982));
-
         layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, 1512, 982);
         add(layeredPane);
 
         ImageIcon icon = new ImageIcon(
-            getClass().getResource(
-                "/Images/Admin_Student_accountM.png")
+            getClass().getResource("/Images/Admin_Student_accountM.png")
+
             );
         JLabel background = new JLabel(icon);
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
         layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
 
-
+        
         // ============================= buttons ====================================
          TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
@@ -294,6 +327,8 @@ public class StudentAccountPanel extends JPanel {
                         JScrollBar vBar = sp.getVerticalScrollBar();
                         vBar.setUI(new ModernScrollBarUI());
                         vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+
+
                     }
                 });
             }
@@ -312,11 +347,47 @@ public class StudentAccountPanel extends JPanel {
         };
 
         table = new JTable(model);
-        table.setRowHeight(30);
-        table.setShowGrid(false);
-        table.setTableHeader(null);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setRowHeight(28);
         table.setBackground(Color.WHITE);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setFocusable(true);
+
+        table.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseMoved(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                if (row != hoveredRow) {
+                    hoveredRow = row;
+                    table.repaint();
+                }
+            }
+        });
+
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseExited(MouseEvent e) {
+                hoveredRow = -1;
+                table.repaint();
+            }
+        });
+
+        table.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                tableHasFocus = true;
+                table.repaint();
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                tableHasFocus = false;
+                hoveredRow = -1;
+                table.clearSelection();
+                table.repaint();
+            }
+        });
+
+
 
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
@@ -334,17 +405,74 @@ public class StudentAccountPanel extends JPanel {
         table.getColumnModel().getColumn(4)
             .setCellEditor(new ActionButtonEditor(this));
 
-        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-        center.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 1; i <= 4; i++) {
-            cols.getColumn(i).setCellRenderer(center);
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
+            private final Color HOVER_COLOR = new Color(230, 240, 255);
+            private final Color SELECT_COLOR = new Color(200, 220, 255);
+            private final Color EVEN_ROW = new Color(245, 245, 245);
+            private final Color ODD_ROW = Color.WHITE;
+
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable table, Object value,
+                    boolean isSelected, boolean hasFocus,
+                    int row, int column) {
+
+                super.getTableCellRendererComponent(
+                        table, value, false, false, row, column
+                );
+
+                int modelRow = table.convertRowIndexToModel(row);
+
+                setBackground(modelRow % 2 == 0 ? EVEN_ROW : ODD_ROW);
+                setForeground(Color.BLACK);
+
+                if (row == hoveredRow && tableHasFocus) {
+                    setBackground(HOVER_COLOR);
+                }
+
+                if (table.getSelectedRow() == row && tableHasFocus) {
+                    setBackground(SELECT_COLOR);
+                }
+
+                setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+                setVerticalAlignment(SwingConstants.CENTER);
+
+                return this;
+            }
+        });
+
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            int w = table.getColumnModel().getColumn(i).getPreferredWidth();
+            table.getColumnModel().getColumn(i).setMinWidth(w);
+            table.getColumnModel().getColumn(i).setMaxWidth(w);
         }
+
+
+
+       
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(371, 378, 1030, 550);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        // Apply BookManagement scrollbar style
+        JScrollBar vBar = scrollPane.getVerticalScrollBar();
+        vBar.setUI(new ModernScrollBarUI());
+        vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+
         background.add(scrollPane);
+
+        // ================= HEADER (HIDDEN LIKE BOOK MANAGEMENT) =================
+        table.setTableHeader(null);
+        scrollPane.setColumnHeaderView(null);
+
+
 
         addButton = new JButton();
         addButton.setBounds(1335, 277, 36, 38);
@@ -353,28 +481,24 @@ public class StudentAccountPanel extends JPanel {
         background.add(addButton);
 
        dimOverlay = new JPanel() {
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setComposite(AlphaComposite.SrcOver.derive(0.12f));
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, getWidth(), getHeight());
-        g2.dispose();
-    }
-};
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setComposite(AlphaComposite.SrcOver.derive(0.12f));
+                g2.setColor(Color.BLACK);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+            }
+        };
 
-// 🔑 KEY PARTS
-dimOverlay.setBounds(0, 0, 1512, 982);
-dimOverlay.setOpaque(false);
-dimOverlay.setVisible(false);
-dimOverlay.setFocusable(true); // ⬅ important
+        dimOverlay.setBounds(0, 0, 1512, 982);
+        dimOverlay.setOpaque(false);
+        dimOverlay.setVisible(false);
+        dimOverlay.addMouseListener(new MouseAdapter() {});
 
-// Consume ALL mouse events
-dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
-dimOverlay.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {});
-dimOverlay.addKeyListener(new java.awt.event.KeyAdapter() {});
 
-layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
+        layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
 
 
         addStudent = new AddStudentPanel(this);
@@ -388,8 +512,6 @@ layeredPane.add(dimOverlay, JLayeredPane.MODAL_LAYER);
             setBackgroundEnabled(false);
 
             dimOverlay.setVisible(true);
-            dimOverlay.requestFocusInWindow(); // 🔑 trap keyboard focus
-
             addStudent.setLocation(
                 (layeredPane.getWidth() - addStudent.getWidth()) / 2,
                 (layeredPane.getHeight() - addStudent.getHeight()) / 2
@@ -493,31 +615,46 @@ private void applyFilters() {
 
 
 
-    private void loadStudents() {
-        StudentService.getRef().addValueEventListener(
-            new ValueEventListener() {
-                public void onDataChange(DataSnapshot snap) {
+        private void loadStudents() {
+
+            DatabaseReference usersRef =
+                    FirebaseDatabase.getInstance().getReference("users");
+
+            usersRef.addValueEventListener(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+
                     SwingUtilities.invokeLater(() -> {
                         model.setRowCount(0);
-                        for (DataSnapshot d : snap.getChildren()) {
-                            Student s = d.getValue(Student.class);
-                            if (s == null) continue;
+
+                        for (DataSnapshot child : snapshot.getChildren()) {
+
+                            User user = child.getValue(User.class);
+
+                            if (user == null) continue;
+
+                            // ✅ Only show students
+                            if (!"STUDENT".equals(user.getRole())) continue;
 
                             model.addRow(new Object[]{
-                                s.getFirstName() + " " + s.getSurname(),
-                                s.getId(),
-                                s.getEmail(),
-                                s.getStatus(),
-                                "•••"
+                                    user.getFullName(),
+                                    user.getId(),
+                                    user.getEmail(),
+                                    user.getStatus(),
+                                    "•••"
                             });
                         }
                     });
                 }
-                public void onCancelled(DatabaseError err) {
-                    System.out.println(err.getMessage());
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    System.err.println("Failed to load students: " + error.getMessage());
                 }
             });
-    }
+        }
+
 
     public void closeAddStudent() {
         addStudent.setVisible(false);
@@ -529,40 +666,52 @@ private void applyFilters() {
 
     private static class ModernScrollBarUI extends BasicScrollBarUI {
 
+        @Override
         protected void configureScrollBarColors() {
             thumbColor = new Color(180, 180, 180);
             trackColor = new Color(245, 245, 245);
         }
 
-        protected JButton createDecreaseButton(int o) { return zero(); }
-        protected JButton createIncreaseButton(int o) { return zero(); }
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
 
-        private JButton zero() {
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        private JButton createZeroButton() {
             JButton b = new JButton();
             b.setPreferredSize(new Dimension(0, 0));
+            b.setMinimumSize(new Dimension(0, 0));
+            b.setMaximumSize(new Dimension(0, 0));
             return b;
         }
 
-        protected void paintThumb(Graphics g, Component c, Rectangle r) {
+        @Override
+        protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON
-            );
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(thumbColor);
             g2.fillRoundRect(
-                r.x + 2, r.y + 2,
-                r.width - 4, r.height - 4,
-                10, 10
+                    r.x + 2, r.y + 2,
+                    r.width - 4, r.height - 4,
+                    10, 10
             );
             g2.dispose();
         }
 
-        protected void paintTrack(Graphics g, Component c, Rectangle r) {
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
             g.setColor(trackColor);
             g.fillRect(r.x, r.y, r.width, r.height);
         }
     }
+    
+
 
     private void setBackgroundEnabled(boolean enabled) {
         searchField.setEnabled(enabled);
@@ -660,59 +809,62 @@ private void applyFilters() {
     }
 
         // =================show book details ==============================
-    public void showStudentDetails(int row) {
+        public void showStudentDetails(int row) {
 
-        String studentId = model.getValueAt(row, 1).toString();
+            String studentId = model.getValueAt(row, 1).toString();
 
-        StudentService.getRef()
-            .child(studentId)
-            .addListenerForSingleValueEvent(new ValueEventListener() {
+            DatabaseReference userRef =
+                    FirebaseDatabase.getInstance()
+                            .getReference("users")
+                            .child(studentId);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    Student student = snapshot.getValue(Student.class);
-                    if (student == null) return;
 
-                    
+                    User user = snapshot.getValue(User.class);
+                    if (user == null) return;
 
-                SwingUtilities.invokeLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
 
-                    setBackgroundEnabled(false);
-                    dimOverlay.setVisible(true);
-                    dimOverlay.requestFocusInWindow();
+                        setBackgroundEnabled(false);
+                        dimOverlay.setVisible(true);
+                        dimOverlay.requestFocusInWindow();
 
-                    final StudentDetailsPanel[] holder = new StudentDetailsPanel[1];
+                        final StudentDetailsPanel[] holder =
+                                new StudentDetailsPanel[1];
 
-                    holder[0] = new StudentDetailsPanel(
-                        StudentAccountPanel.this,
-                        student,
-                        () -> {
-                            layeredPane.remove(holder[0]);
-                            dimOverlay.setVisible(false);
-                            setBackgroundEnabled(true);
-                            layeredPane.repaint();
-                        }
-                    );
+                        holder[0] = new StudentDetailsPanel(
+                                StudentAccountPanel.this,
+                                user, // 🔥 PASS USER INSTEAD OF STUDENT
+                                () -> {
+                                    layeredPane.remove(holder[0]);
+                                    dimOverlay.setVisible(false);
+                                    setBackgroundEnabled(true);
+                                    layeredPane.repaint();
+                                }
+                        );
 
-                    holder[0].setBounds(
-                        (layeredPane.getWidth() - holder[0].getWidth()) / 2,
-                        (layeredPane.getHeight() - holder[0].getHeight()) / 2,
-                        holder[0].getWidth(),
-                        holder[0].getHeight()
-                    );
+                        holder[0].setBounds(
+                                (layeredPane.getWidth() - holder[0].getWidth()) / 2,
+                                (layeredPane.getHeight() - holder[0].getHeight()) / 2,
+                                holder[0].getWidth(),
+                                holder[0].getHeight()
+                        );
 
-                    layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
-                    layeredPane.repaint();
-                });
-
+                        layeredPane.add(holder[0], JLayeredPane.POPUP_LAYER);
+                        layeredPane.repaint();
+                    });
                 }
 
                 @Override
                 public void onCancelled(DatabaseError error) {
-                    System.out.println(error.getMessage());
+                    System.err.println("Failed to load student: " + error.getMessage());
                 }
             });
-    }
+        }
+
 
     //============================buttons methods================================
 

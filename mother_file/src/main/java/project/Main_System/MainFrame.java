@@ -6,14 +6,14 @@ import java.awt.GraphicsEnvironment;
 
 import javax.swing.JFrame;
 
-import project.Admin_Screen.Bookmanagement.BookManagement;
+import project.Admin_Screen.Studentmanagement.StudentAccountPanel;
 
 
 public class MainFrame extends javax.swing.JFrame{
     
     public MainFrame(){
         setTitle("Library System");
-        setContentPane(new BookManagement(this));
+        setContentPane(new StudentAccountPanel(this));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         pack();
@@ -25,9 +25,10 @@ public class MainFrame extends javax.swing.JFrame{
     }
 
     private static Font SANCHEZ_FONT;
+    private static Font POPPOPINS_FONT;
  
     public static Font loadSanchez(float size) {
-        if (SANCHEZ_FONT == null) {
+        if (SANCHEZ_FONT == null ) {
             try {
                 SANCHEZ_FONT = Font.createFont(
                     Font.TRUETYPE_FONT,
@@ -44,5 +45,7 @@ public class MainFrame extends javax.swing.JFrame{
         }
         return SANCHEZ_FONT.deriveFont(size);
     }
+
+    
 
 }

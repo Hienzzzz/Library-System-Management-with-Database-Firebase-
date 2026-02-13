@@ -22,9 +22,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import project.Firebase_backend.Storage_backend.ImageService;
-//import project.Firebase_backend.Studnet_backend.Student;
-//import project.Firebase_backend.Studnet_backend.StudentService;
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
 
@@ -218,7 +215,7 @@ public class AddStudentPanel extends JPanel {
 
             String fn = firstName.getText().trim();
             String ln = lastName.getText().trim();
-            String em = email.getText().trim();
+            String em = email.getText().trim().toLowerCase();
             String sid = studentId.getText().trim();
             String pw = new String(password.getPassword());
             String cpw = new String(C_password.getPassword());
@@ -234,39 +231,20 @@ public class AddStudentPanel extends JPanel {
                 return;
             }
 
-            String imageUrl = null;
-            if (selectedFile[0] != null) {
-                imageUrl = ImageService.uploadStudentImage(selectedFile[0], sid);
-                if (imageUrl == null) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Image upload failed.\nPlease try again.",
-                        "Upload Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    return;
-                }
-            }
-
             if (!fn.matches("^[A-Za-z ]+$") ||
                 !fn.matches("^(?=(?:.*[A-Za-z]){2,}).*$")) return;
+
             if (!ln.matches("^[A-Za-z ]+$") ||
                 !ln.matches("^(?=(?:.*[A-Za-z]){2,}).*$")) return;
+
             if (!em.matches("^[A-Za-z0-9._%+-]+@students\\.nu-moa\\.edu\\.ph$")) return;
+
             if (!sid.matches("^\\d{4}-\\d{7}$")) return;
+
             if (!pw.matches("^\\S+$") || pw.length() < 8) return;
+
             if (!pw.equals(cpw)) return;
 
-           /*  if (UserService.userExists(em) || UserService.userExists(sid)) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "A student account with this email or ID already exists.",
-                    "Duplicate Account",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-*/
             int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to add this student account?\n\n"
@@ -278,18 +256,68 @@ public class AddStudentPanel extends JPanel {
 
             if (confirm != JOptionPane.YES_OPTION) return;
 
-            User user = new User(fn, ln, em, sid, pw);
-            if (!UserService.registerUser(user)) return;
+            // 🔍 Check if user exists first
+            UserService.userExistsAsync(em, exists -> {
 
-            Student student = new Student(fn, ln, em, sid, pw, imageUrl);
-            StudentService.addStudent(student);
+                if (exists) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "A student account with this email already exists.",
+                        "Duplicate Account",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                // ✅ Create new User object (NEW STRUCTURE)
+                User user = new User(
+                        sid,               // id
+                        "STUDENT",         // role
+                        em,                // email
+                        fn,                // first name
+                        ln                 // last name
+                );
 
 
+                // Save profile image AFTER registration
+                UserService.registerUserAsync(user, success -> {
 
-            Arrays.fill(password.getPassword(), '\0');
-            Arrays.fill(C_password.getPassword(), '\0');
+                    if (!success) {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Failed to register student.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        return;
+                    }
 
-            parent.closeAddStudent();
+                    // Upload image if selected
+                    if (selectedFile[0] != null) {
+                        UserService.updateStudentProfileImageWithCleanup(
+                                sid,
+                                selectedFile[0],
+                                imgSuccess -> {
+                                    if (!imgSuccess) {
+                                        System.err.println("Image upload failed.");
+                                    }
+                                }
+                        );
+                    }
+
+                    Arrays.fill(password.getPassword(), '\0');
+                    Arrays.fill(C_password.getPassword(), '\0');
+
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Student account successfully created!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    parent.closeAddStudent();
+                });
+            });
         });
 
         background.add(addBtn);

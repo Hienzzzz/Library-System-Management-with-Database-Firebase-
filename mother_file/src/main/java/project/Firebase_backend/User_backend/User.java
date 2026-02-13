@@ -5,6 +5,8 @@ public class User {
     private String id;
     private String role;
     private String email;
+    private String firstName;
+    private String lastName;
     private String fullName;
     private String status;
     private long createdAt;
@@ -13,17 +15,25 @@ public class User {
     // Required empty constructor for Firebase
     public User() {}
 
-    public User(String id, String role, String email,
-            String fullName) {
+        public User(String id,
+                    String role,
+                    String email,
+                    String firstName,
+                    String lastName) {
 
-        this.id = id;
-        this.role = role;
-        this.email = email.toLowerCase();
-        this.fullName = capitalizeWords(fullName);
-        this.status = "ACTIVE";
-        this.createdAt = System.currentTimeMillis();
-        this.profileImageUrl = null;
-    }
+            this.id = id;
+            this.role = role;
+            this.email = email.toLowerCase();
+
+            this.firstName = capitalizeWords(firstName);
+            this.lastName = capitalizeWords(lastName);
+            this.fullName = this.firstName + " " + this.lastName;
+
+            this.status = "ACTIVE";
+            this.createdAt = System.currentTimeMillis();
+            this.profileImageUrl = null;
+        }
+
 
 
     // Capitalize helper
@@ -62,6 +72,14 @@ public class User {
     public String getProfileImageUrl() {
     return profileImageUrl;
     }
+    public String getFirstName() {
+    return firstName;
+}
+
+    public String getLastName() {
+        return lastName;
+    }
+
 
     public void setStatus(String status){
         this.status = status;
