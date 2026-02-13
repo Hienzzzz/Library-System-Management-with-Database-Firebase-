@@ -23,16 +23,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import project.Firebase_backend.User_backend.UserExistsCallback;
-import project.Firebase_backend.User_backend.EmailService;
-import project.Firebase_backend.User_backend.PasswordUtil;
-import project.Firebase_backend.User_backend.RegisterCallback;
-
-
-
+import project.Firebase_backend.User_backend.FirebaseAuthService;
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
-import project.Firebase_backend.User_backend.VerificationUtil;
 import project.Main_System.MainFrame;
 
 
@@ -611,115 +604,80 @@ public void replace(FilterBypass fb, int offset, int length,
             String Email = email.getText().trim().toLowerCase();
             String id = Student_ID.getText().trim();
             String rawPassword = new String(password.getPassword());
-            String Password = PasswordUtil.hashPassword(rawPassword);
+
+    
 
             User newUser = new User(
                     id,
                     "STUDENT",
                     Email,
-                    firstName + " " + surname,
-                    Password
+                    firstName + " " + surname
             );
+
 
             //=============for verification
-            String verificationCode = VerificationUtil.generateCode();
 
-            EmailService.sendEmail(
-                    Email,
-                    "Library Account Verification",
-                    "Your verification code is: " + verificationCode
-            );
+            try {
 
-            String inputCode = JOptionPane.showInputDialog(
-                    frame,
-                    "Enter the verification code sent to your email:"
-            );
+                // 🔐 1️⃣ Create account in Firebase Authentication
+                org.json.JSONObject authResult =
+                        FirebaseAuthService.register(Email, rawPassword);
 
-            if (inputCode == null || !inputCode.equals(verificationCode)) {
+                if (authResult.has("error")) {
+
+                    String errorMessage =
+                            authResult.getJSONObject("error")
+                                    .getString("message");
+
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            "Registration failed:\n" + errorMessage,
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                String idToken = authResult.getString("idToken");
+                FirebaseAuthService.updateDisplayName(
+                        idToken,
+                        firstName + " " + surname
+                );
+
+
+                // 📧 2️⃣ Send Firebase verification email
+                FirebaseAuthService.sendVerification(idToken);
+
+                // 💾 3️⃣ Save user profile in database
+                UserService.registerUserAsync(newUser, success -> {});
+
                 JOptionPane.showMessageDialog(
                         frame,
-                        "Invalid verification code!",
-                        "Verification Failed",
+                        "Account created successfully!\n\n" +
+                        "Please check your Gmail and verify your email before logging in.",
+                        "Registration Successful",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // 🔐 Clear password from memory
+                java.util.Arrays.fill(password.getPassword(), '\0');
+                java.util.Arrays.fill(verify_password.getPassword(), '\0');
+
+                frame.setContentPane(new Login(frame));
+                frame.revalidate();
+                frame.repaint();
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Something went wrong.\nPlease try again.",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
-                return;
             }
-
-
-
-
-       UserService.userExistsAsync(Email,
-        new UserExistsCallback() {
-
-            @Override
-            public void onComplete(boolean exists) {
-
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        if (exists) {
-                            JOptionPane.showMessageDialog(
-                                    frame,
-                                    "Email already registered!",
-                                    "Registration Failed",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
-                            return;
-                        }
-
-                        UserService.registerUserAsync(newUser,
-                            new RegisterCallback() {
-
-                                @Override
-                                public void onComplete(boolean success) {
-
-                                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-
-                                        @Override
-                                        public void run() {
-
-                                            if (success) {
-
-                                                Arrays.fill(password.getPassword(), '\0');
-                                                Arrays.fill(verify_password.getPassword(), '\0');
-
-                                                JOptionPane.showMessageDialog(
-                                                        frame,
-                                                        "Student account successfully created!\n\nRole: STUDENT",
-                                                        "Account Created",
-                                                        JOptionPane.INFORMATION_MESSAGE
-                                                );
-
-                                                frame.setContentPane(new Login(frame));
-                                                frame.revalidate();
-                                                frame.repaint();
-
-                                            } else {
-
-                                                JOptionPane.showMessageDialog(
-                                                        frame,
-                                                        "Registration failed. Please try again.",
-                                                        "Error",
-                                                        JOptionPane.ERROR_MESSAGE
-                                                );
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                    }
-                });
-            }
-    });
-
-
-
-
-            
-
-        
         });
 
         JButton login = new JButton();

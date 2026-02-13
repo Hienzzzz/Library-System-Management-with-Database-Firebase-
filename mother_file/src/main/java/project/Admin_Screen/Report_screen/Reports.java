@@ -2,11 +2,21 @@ package project.Admin_Screen.Report_screen;
 
 
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Bookmanagement.BookManagement;
@@ -37,66 +47,71 @@ public class Reports extends javax.swing.JPanel {
         //======================buttons=======================
 
        
- 
-        TButton dashboard = new TButton("Dashboard");
+         TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
-        dashboard.setFont(MainFrame.loadSanchez(20f));
+        dashboard.setFont(MainFrame.loadSanchez(15f));
         dashboard.setForeground(new Color(93, 93, 93));
         dashboard.setHorizontalAlignment(SwingConstants.LEFT);
         dashboard.setMargin(new Insets(0, 60, 0, 0));
         dashboard.setCursor(new Cursor(Cursor.HAND_CURSOR));
         dashboard.addActionListener(e -> {
+            System.out.println("switching to dashboard screen");
             frame.setContentPane(new AdminDashboard(frame));
             frame.revalidate();
         });
  
         TButton reports = new TButton("Reports");
-        reports.setBounds(12, 398, 238, 49);
-        reports.setFont(MainFrame.loadSanchez(20f));
+        reports.setBounds(12, 297, 238, 49);
+        reports.setFont(MainFrame.loadSanchez(15f));
         reports.setForeground(new Color(93, 93, 93));
         reports.setHorizontalAlignment(SwingConstants.LEFT);
         reports.setMargin(new Insets(0, 60, 0, 0));
         reports.setCursor(new Cursor(Cursor.HAND_CURSOR));
         reports.addActionListener(e -> {
+            System.out.println("Switching to report screen");
             frame.setContentPane(new Reports(frame));
             frame.revalidate();
         });
  
         TButton bookManagement = new TButton("Book Management");
-        bookManagement.setBounds(12, 451, 238, 49);
-        bookManagement.setFont(MainFrame.loadSanchez(20f));
+        bookManagement.setBounds(12, 350, 238, 49);
+        bookManagement.setFont(MainFrame.loadSanchez(15f));
         bookManagement.setForeground(new Color(93, 93, 93));
         bookManagement.setHorizontalAlignment(SwingConstants.LEFT);
         bookManagement.setMargin(new Insets(0, 60, 0, 0));
         bookManagement.setCursor(new Cursor(Cursor.HAND_CURSOR));
         bookManagement.addActionListener(e -> {
+            System.out.println("Switching to book managemnet screen");
             frame.setContentPane(new BookManagement(frame));
             frame.revalidate();
         });
  
         TButton studentM = new TButton("Student Management");
-        studentM.setBounds(12, 504, 238, 49);
-        studentM.setFont(MainFrame.loadSanchez(20f));
+        studentM.setBounds(12, 403, 238, 49);
+        studentM.setFont(MainFrame.loadSanchez(15f));
         studentM.setForeground(new Color(93, 93, 93));
         studentM.setHorizontalAlignment(SwingConstants.LEFT);
         studentM.setMargin(new Insets(0, 60, 0, 0));
         studentM.setCursor(new Cursor(Cursor.HAND_CURSOR));
         studentM.addActionListener(e -> {
+            System.out.println("switching to student managemnet screen");
             frame.setContentPane(new StudentManagement(frame));
             frame.revalidate();
         });
  
         TButton accountM = new TButton("Admin Management");
-        accountM.setBounds(12, 557, 238, 49);
-        accountM.setFont(MainFrame.loadSanchez(20f));
+        accountM.setBounds(12, 457, 238, 49);
+        accountM.setFont(MainFrame.loadSanchez(15f));
         accountM.setForeground(new Color(93, 93, 93));
         accountM.setHorizontalAlignment(SwingConstants.LEFT);
         accountM.setMargin(new Insets(0, 60, 0, 0));
         accountM.setCursor(new Cursor(Cursor.HAND_CURSOR));
         accountM.addActionListener(e -> {
+            System.out.println("Switching to admin management screen");
             frame.setContentPane(new Admin_AccountManagement(frame));
             frame.revalidate();
         });
+ 
         
          // ================= BUTTONS =================
  

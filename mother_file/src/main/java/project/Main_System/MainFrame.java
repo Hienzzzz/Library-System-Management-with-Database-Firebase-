@@ -6,15 +6,14 @@ import java.awt.GraphicsEnvironment;
 
 import javax.swing.JFrame;
 
-import project.Admin_Screen.Dashboard.AdminDashboard;
-import project.Login_screen.Login;
+import project.Admin_Screen.Bookmanagement.BookManagement;
 
 
 public class MainFrame extends javax.swing.JFrame{
     
     public MainFrame(){
         setTitle("Library System");
-        setContentPane(new AdminDashboard(this));
+        setContentPane(new BookManagement(this));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         pack();

@@ -1,14 +1,27 @@
 package project.Admin_Screen.Bookmanagement;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Admin_Screen.Studentmanagement.StudentManagement;
 import project.Main_System.MainFrame;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.*;
 
 public class Overdue extends JPanel {
 
@@ -34,7 +47,7 @@ public class Overdue extends JPanel {
 
         TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
-        dashboard.setFont(MainFrame.loadSanchez(20f));
+        dashboard.setFont(MainFrame.loadSanchez(15f));
         dashboard.setForeground(new Color(93, 93, 93));
         dashboard.setHorizontalAlignment(SwingConstants.LEFT);
         dashboard.setMargin(new Insets(0, 60, 0, 0));
@@ -45,8 +58,8 @@ public class Overdue extends JPanel {
         });
 
         TButton reports = new TButton("Reports");
-        reports.setBounds(12, 398, 238, 49);
-        reports.setFont(MainFrame.loadSanchez(20f));
+        reports.setBounds(12, 297, 238, 49);
+        reports.setFont(MainFrame.loadSanchez(15f));
         reports.setForeground(new Color(93, 93, 93));
         reports.setHorizontalAlignment(SwingConstants.LEFT);
         reports.setMargin(new Insets(0, 60, 0, 0));
@@ -57,8 +70,8 @@ public class Overdue extends JPanel {
         });
 
         TButton bookManagement = new TButton("Book Management");
-        bookManagement.setBounds(12, 451, 238, 49);
-        bookManagement.setFont(MainFrame.loadSanchez(20f));
+        bookManagement.setBounds(12, 350, 238, 49);
+        bookManagement.setFont(MainFrame.loadSanchez(15f));
         bookManagement.setForeground(new Color(93, 93, 93));
         bookManagement.setHorizontalAlignment(SwingConstants.LEFT);
         bookManagement.setMargin(new Insets(0, 60, 0, 0));
@@ -69,8 +82,8 @@ public class Overdue extends JPanel {
         });
 
         TButton studentM = new TButton("Student Management");
-        studentM.setBounds(12, 504, 238, 49);
-        studentM.setFont(MainFrame.loadSanchez(20f));
+        studentM.setBounds(12, 564, 238, 49);
+        studentM.setFont(MainFrame.loadSanchez(15f));
         studentM.setForeground(new Color(93, 93, 93));
         studentM.setHorizontalAlignment(SwingConstants.LEFT);
         studentM.setMargin(new Insets(0, 60, 0, 0));
@@ -81,13 +94,13 @@ public class Overdue extends JPanel {
         });
 
         TButton accountM = new TButton("Admin Management");
-        accountM.setBounds(12, 557, 238, 49);
-        accountM.setFont(MainFrame.loadSanchez(20f));
+        accountM.setBounds(12, 615, 238, 49);
+        accountM.setFont(MainFrame.loadSanchez(15f));
         accountM.setForeground(new Color(93, 93, 93));
         accountM.setHorizontalAlignment(SwingConstants.LEFT);
         accountM.setMargin(new Insets(0, 60, 0, 0));
         accountM.setCursor(new Cursor(Cursor.HAND_CURSOR));
-         accountM.addActionListener(e -> {
+        accountM.addActionListener(e -> {
             frame.setContentPane(new Admin_AccountManagement(frame));
             frame.revalidate();
         });
@@ -95,8 +108,8 @@ public class Overdue extends JPanel {
         // ================= BOOK MANAGEMENT TABS =================
 
         TButton availableBooks = new TButton("Available Books");
-        availableBooks.setBounds(320, 240, 200, 45);
-        availableBooks.setFont(MainFrame.loadSanchez(18f));
+        availableBooks.setBounds(55, 405, 200, 35);
+        availableBooks.setFont(MainFrame.loadSanchez(13f));
         availableBooks.setForeground(new Color(93, 93, 93));
         availableBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
         availableBooks.addActionListener(e -> {
@@ -104,10 +117,9 @@ public class Overdue extends JPanel {
             frame.revalidate();
         });
 
-
         TButton borrowedBooks = new TButton("Borrowed Books");
-        borrowedBooks.setBounds(540, 240, 200, 45);
-        borrowedBooks.setFont(MainFrame.loadSanchez(18f));
+        borrowedBooks.setBounds(55, 442, 200, 35);
+        borrowedBooks.setFont(MainFrame.loadSanchez(13f));
         borrowedBooks.setForeground(new Color(93, 93, 93));
         borrowedBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
         borrowedBooks.addActionListener(e -> {
@@ -116,8 +128,8 @@ public class Overdue extends JPanel {
         });
 
         TButton pendingRequest = new TButton("Pending Request");
-        pendingRequest.setBounds(760, 240, 200, 45);
-        pendingRequest.setFont(MainFrame.loadSanchez(18f));
+        pendingRequest.setBounds(55, 477, 200, 35);
+        pendingRequest.setFont(MainFrame.loadSanchez(13f));
         pendingRequest.setForeground(new Color(93, 93, 93));
         pendingRequest.setCursor(new Cursor(Cursor.HAND_CURSOR));
         pendingRequest.addActionListener(e -> {
@@ -126,8 +138,8 @@ public class Overdue extends JPanel {
         });
 
         TButton overdue = new TButton("Overdue");
-        overdue.setBounds(980, 240, 200, 45);
-        overdue.setFont(MainFrame.loadSanchez(18f));
+        overdue.setBounds(55, 514, 200, 35);
+        overdue.setFont(MainFrame.loadSanchez(13f));
         overdue.setForeground(new Color(93, 93, 93));
         overdue.setCursor(new Cursor(Cursor.HAND_CURSOR));
         overdue.addActionListener(e -> {

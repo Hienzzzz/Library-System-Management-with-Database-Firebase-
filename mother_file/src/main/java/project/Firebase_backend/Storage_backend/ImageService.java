@@ -142,4 +142,34 @@ public class ImageService {
             System.err.println("Failed to delete old cover image: " + e.getMessage());
         }
     }
+
+    
+        public static void deleteImageByUrl(String imageUrl) {
+
+            try {
+
+                if (imageUrl == null || imageUrl.isEmpty()) return;
+
+                Bucket bucket = StorageClient.getInstance().bucket();
+                if (bucket == null) return;
+
+                int index = imageUrl.indexOf(bucket.getName());
+                if (index == -1) return;
+
+                String objectPath = imageUrl.substring(
+                        index + bucket.getName().length() + 1
+                );
+
+                Blob blob = bucket.get(objectPath);
+
+                if (blob != null) {
+                    blob.delete();
+                }
+
+            } catch (Exception e) {
+                System.err.println("Failed to delete image: " + e.getMessage());
+            }
+        }
+
+
 }

@@ -18,14 +18,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-
-import project.Firebase_backend.User_backend.LoginCallback;
-import project.Firebase_backend.User_backend.PasswordUtil;
-
+import org.json.JSONObject;
 
 import project.Admin_Screen.Dashboard.AdminDashboard;
-import project.Firebase_backend.User_backend.LoginCallback;
-import project.Firebase_backend.User_backend.LoginResult;
+import project.Firebase_backend.User_backend.FetchUserCallback;
+import project.Firebase_backend.User_backend.FirebaseAuthService;
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
 import project.Librarian_screen.Dashboard.Librarian_dashboard;
@@ -179,132 +176,190 @@ public class Login extends javax.swing.JPanel{
         loginButton.setFocusPainted(false);
  
         loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e){
-                System.out.println("switching to Dashboard");
- 
-                Color errorRed = new Color(220, 80, 80);
-                Color normalColor = Color.BLACK;
+           @Override
+public void actionPerformed(ActionEvent e){
 
-                boolean username_empty = 
-                username.getText().trim().isEmpty() ||
-                username.getText().equals(nameText_placaeHolder);
+    Color errorRed = new Color(220, 80, 80);
+    Color normalColor = Color.BLACK;
 
-                boolean password_empty =
-                password.getPassword().length == 0 ||
-                new String(password.getPassword()).equals(passText_Placeholder);
+    boolean username_empty =
+            username.getText().trim().isEmpty() ||
+            username.getText().equals(nameText_placaeHolder);
 
-                if(username_empty && password_empty){
-                    username.setForeground(errorRed);
-                    password.setForeground(errorRed);
+    boolean password_empty =
+            password.getPassword().length == 0 ||
+            new String(password.getPassword()).equals(passText_Placeholder);
+
+    if(username_empty && password_empty){
+        username.setForeground(errorRed);
+        password.setForeground(errorRed);
+
+        JOptionPane.showMessageDialog(
+                frame,
+                "Please fill out all required fields",
+                "Required Fields",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if(username_empty){
+        username.setForeground(errorRed);
+        JOptionPane.showMessageDialog(
+                frame,
+                "Please enter your username",
+                "Required Field",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    } else {
+        username.setForeground(normalColor);
+    }
+
+    if(password_empty){
+        password.setForeground(errorRed);
+        JOptionPane.showMessageDialog(
+                frame,
+                "Please enter your password",
+                "Required Field",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    } else {
+        password.setForeground(normalColor);
+    }
+
+    String loginInput = username.getText().trim();
+    String rawPassword = new String(password.getPassword());
+
+    try {
+
+        JSONObject loginResult =
+                FirebaseAuthService.login(loginInput, rawPassword);
+
+        if (loginResult.has("error")) {
+
+            String errorMsg =
+                    loginResult.getJSONObject("error")
+                               .getString("message");
+
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Login Failed:\n" + errorMsg,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        String idToken = loginResult.getString("idToken");
+
+        // 🔐 Check email verification
+        boolean verified =
+                FirebaseAuthService.isEmailVerified(idToken);
+
+        if (!verified) {
+
+            int choice = JOptionPane.showConfirmDialog(
+                    frame,
+                    "Your email is not verified.\n\n" +
+                    "Would you like to resend the verification email?",
+                    "Email Not Verified",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (choice == JOptionPane.YES_OPTION) {
+                FirebaseAuthService.sendVerification(idToken);
+
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Verification email has been resent.\n" +
+                        "Please check your Gmail.",
+                        "Email Sent",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+
+            return; // 🔴 VERY IMPORTANT: STOP LOGIN
+        }
+
+        // 💾 Fetch user profile
+        UserService.fetchUserByEmail(loginInput, user -> {
+
+            javax.swing.SwingUtilities.invokeLater(() -> {
+
+                if (user == null) {
+                    JOptionPane.showMessageDialog(
+                            frame,
+                            "User profile not found.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                switch (user.getRole()) {
+                    case "ADMIN":
+                        frame.setContentPane(new AdminDashboard(frame));
+                        break;
+                    case "STUDENT":
+                        frame.setContentPane(new Student_Dashboard(frame));
+                        break;
+                    case "LIBRARIAN":
+                        frame.setContentPane(new Librarian_dashboard(frame));
+                        break;
+                }
+
+                frame.revalidate();
+                frame.repaint();
+            });
+        });
+
+    } catch (Exception ex) {
+
+        ex.printStackTrace();
+
+        JOptionPane.showMessageDialog(
+                frame,
+                "Something went wrong.\nPlease try again.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
+
+        });
+
+        //=================forgot password===============================
+
+        JButton forgotPassword = new JButton("Forgot Password?");
+        forgotPassword.setBounds(195, 560, 200, 30); // adjust if needed
+        forgotPassword.setBorderPainted(false);
+        forgotPassword.setContentAreaFilled(false);
+        forgotPassword.setFocusPainted(false);
+
+        forgotPassword.addActionListener(e -> {
+
+            String emailInput = JOptionPane.showInputDialog(
+                    frame,
+                    "Enter your registered email:"
+            );
+
+            if (emailInput != null && !emailInput.trim().isEmpty()) {
+
+                try {
+                    FirebaseAuthService.sendPasswordReset(emailInput.trim());
 
                     JOptionPane.showMessageDialog(
-                        frame, 
-                        "Please fill out all required fields",
-                        "Required Fields",
-                    JOptionPane.ERROR_MESSAGE);
-                    return;
+                            frame,
+                            "Password reset email sent.\nCheck your Gmail.",
+                            "Reset Sent",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                if(username_empty){
-                    username.setForeground(errorRed);
-                    JOptionPane.showMessageDialog(
-                        frame, 
-                    "Please enter your username",
-                    "Required Field",
-                    JOptionPane.ERROR_MESSAGE);
-                    return;
-                }else{
-                    username.setForeground(normalColor);
-                }
-                
-                if(password_empty){
-                    password.setForeground(errorRed);
-                    JOptionPane.showMessageDialog(
-                        frame, 
-                    "Please enter your password",
-                    "Required field",
-                    JOptionPane.ERROR_MESSAGE);
-                    return;
-                }else{
-                    password.setForeground(normalColor);
-                }
-
-                String loginInput = username.getText().trim();
-                String rawPassword = new String(password.getPassword());
-
-                // Hash the password before sending
-                String passwordInput = PasswordUtil.hashPassword(rawPassword);
-
-
-                //check if walang laman
-                if(loginInput.isEmpty() || passwordInput.isEmpty()){
-                    JOptionPane.showMessageDialog(frame, "Please fill in all fields");
-                    return;
-                }
-
-                //login attemp
-                UserService.loginAsync(loginInput, passwordInput, 
-                    new LoginCallback() {
-
-                        @Override
-                        public void onComplete(LoginResult result) {
-
-                            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-
-                                    switch (result.getStatus()) {
-
-                                        case SUCCESS:
-                                            User loggedUser = result.getUser();
-
-                                            JOptionPane.showMessageDialog(
-                                                    frame,
-                                                    "Login successful!\nRole: " + loggedUser.getRole()
-                                            );
-
-                                            switch (loggedUser.getRole()) {
-                                                case "ADMIN":
-                                                    frame.setContentPane(new AdminDashboard(frame));
-                                                    break;
-                                                case "STUDENT":
-                                                    frame.setContentPane(new Student_Dashboard(frame));
-                                                    break;
-                                                case "LIBRARIAN":
-                                                    frame.setContentPane(new Librarian_dashboard(frame));
-                                                    break;
-                                            }
-
-                                            frame.revalidate();
-                                            frame.repaint();
-                                            break;
-
-                                        case WRONG_PASSWORD:
-                                            JOptionPane.showMessageDialog(frame, "Incorrect password");
-                                            break;
-
-                                        case USER_NOT_FOUND:
-                                            JOptionPane.showMessageDialog(frame, "User not found");
-                                            break;
-                                        case ACCOUNT_BLOCKED:
-                                            JOptionPane.showMessageDialog(
-                                                frame,
-                                                "Your acocunt has been blocked.\nPlease contanct the administrator.",
-                                                "Account Blocked",
-                                                JOptionPane.ERROR_MESSAGE
-                                            );
-                                            break;
-                                    }
-
-                                }
-                            });
-                        }
-                });
-
-
             }
         });
+
 
         //register button=================================================================
         JButton register = new JButton();
@@ -323,6 +378,8 @@ public class Login extends javax.swing.JPanel{
             }
         });
 
+
+        background.add(forgotPassword);
         background.add(showPassword);
         background.add(loginButton);
         background.add(clearButton);
@@ -337,4 +394,79 @@ public class Login extends javax.swing.JPanel{
  
  
     }
+
+    private void loginWithFirebase(String email, String password) {
+
+        try {
+
+            JSONObject loginResult =
+                    FirebaseAuthService.login(email, password);
+
+            if (loginResult.has("error")) {
+
+                String errorMsg =
+                        loginResult.getJSONObject("error")
+                                .getString("message");
+
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Login Failed:\n" + errorMsg,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+
+                return;
+            }
+
+            String idToken = loginResult.getString("idToken");
+
+            boolean verified =
+                    FirebaseAuthService.isEmailVerified(idToken);
+
+            if (!verified) {
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Please verify your email before logging in.",
+                        "Email Not Verified",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+            UserService.fetchUserByEmail(email, user -> {
+
+                javax.swing.SwingUtilities.invokeLater(() -> {
+
+                    if (user == null) {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "User profile not found.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                        return;
+                    }
+
+                    switch (user.getRole()) {
+                        case "ADMIN":
+                            frame.setContentPane(new AdminDashboard(frame));
+                            break;
+                        case "STUDENT":
+                            frame.setContentPane(new Student_Dashboard(frame));
+                            break;
+                        case "LIBRARIAN":
+                            frame.setContentPane(new Librarian_dashboard(frame));
+                            break;
+                    }
+
+                    frame.revalidate();
+                    frame.repaint();
+                });
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -6,24 +6,25 @@ public class User {
     private String role;
     private String email;
     private String fullName;
-    private String password;
     private String status;
     private long createdAt;
+    private String profileImageUrl;
 
     // Required empty constructor for Firebase
     public User() {}
 
     public User(String id, String role, String email,
-                String fullName, String password) {
+            String fullName) {
 
         this.id = id;
         this.role = role;
         this.email = email.toLowerCase();
         this.fullName = capitalizeWords(fullName);
-        this.password = password;
-        this.status = null;
+        this.status = "ACTIVE";
         this.createdAt = System.currentTimeMillis();
+        this.profileImageUrl = null;
     }
+
 
     // Capitalize helper
     private String capitalizeWords(String input) {
@@ -42,10 +43,40 @@ public class User {
     }
 
     // Getters
-    public String getId() { return id; }
-    public String getRole() { return role; }
-    public String getEmail() { return email; }
-    public String getFullName() { return fullName; }
-    public String getPassword() { return password; }
-    public String getStatus() { return status; }
+    public String getId() { 
+        return id; 
+    }
+    public String getRole() { 
+        return role;
+     }
+    public String getEmail() { 
+        return email; 
+    }
+    public String getFullName() {
+        return fullName; 
+    }
+    public String getStatus() {
+         return status; 
+        }
+
+    public String getProfileImageUrl() {
+    return profileImageUrl;
+    }
+
+    public void setStatus(String status){
+        this.status = status;
+    }
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
 }
+
+
+
+
+/*
+
+Do you think this is possible to code using pure Java and Firebase?
+
+I have an idea: I will use a JTable with a scroll bar, and for the card design, I’ll use a plain card background as a JLabel background or a JPanel. What do you think? Do you have any suggestions?*/

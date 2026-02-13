@@ -1,15 +1,27 @@
 package project.Admin_Screen.Studentmanagement;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Bookmanagement.BookManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Main_System.MainFrame;
-import java.awt.*;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.*;
 
 public class StudentManagement extends JPanel {
 
@@ -35,7 +47,7 @@ public class StudentManagement extends JPanel {
 
         TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
-        dashboard.setFont(MainFrame.loadSanchez(20f));
+        dashboard.setFont(MainFrame.loadSanchez(15f));
         dashboard.setForeground(new Color(93, 93, 93));
         dashboard.setHorizontalAlignment(SwingConstants.LEFT);
         dashboard.setMargin(new Insets(0, 60, 0, 0));
@@ -46,8 +58,8 @@ public class StudentManagement extends JPanel {
         });
 
         TButton reports = new TButton("Reports");
-        reports.setBounds(12, 398, 238, 49);
-        reports.setFont(MainFrame.loadSanchez(20f));
+        reports.setBounds(12, 297, 238, 49);
+        reports.setFont(MainFrame.loadSanchez(15f));
         reports.setForeground(new Color(93, 93, 93));
         reports.setHorizontalAlignment(SwingConstants.LEFT);
         reports.setMargin(new Insets(0, 60, 0, 0));
@@ -58,8 +70,8 @@ public class StudentManagement extends JPanel {
         });
 
         TButton bookManagement = new TButton("Book Management");
-        bookManagement.setBounds(12, 451, 238, 49);
-        bookManagement.setFont(MainFrame.loadSanchez(20f));
+        bookManagement.setBounds(12, 350, 238, 49);
+        bookManagement.setFont(MainFrame.loadSanchez(15f));
         bookManagement.setForeground(new Color(93, 93, 93));
         bookManagement.setHorizontalAlignment(SwingConstants.LEFT);
         bookManagement.setMargin(new Insets(0, 60, 0, 0));
@@ -70,8 +82,8 @@ public class StudentManagement extends JPanel {
         });
 
         TButton studentM = new TButton("Student Management");
-        studentM.setBounds(12, 504, 238, 49);
-        studentM.setFont(MainFrame.loadSanchez(20f));
+        studentM.setBounds(12, 403, 238, 49);
+        studentM.setFont(MainFrame.loadSanchez(15f));
         studentM.setForeground(new Color(93, 93, 93));
         studentM.setHorizontalAlignment(SwingConstants.LEFT);
         studentM.setMargin(new Insets(0, 60, 0, 0));
@@ -82,8 +94,8 @@ public class StudentManagement extends JPanel {
         });
 
         TButton accountM = new TButton("Admin Management");
-        accountM.setBounds(12, 557, 238, 49);
-        accountM.setFont(MainFrame.loadSanchez(20f));
+        accountM.setBounds(12, 592, 238, 49);
+        accountM.setFont(MainFrame.loadSanchez(15f));
         accountM.setForeground(new Color(93, 93, 93));
         accountM.setHorizontalAlignment(SwingConstants.LEFT);
         accountM.setMargin(new Insets(0, 60, 0, 0));
@@ -96,22 +108,37 @@ public class StudentManagement extends JPanel {
         // ================= STUDENT MANAGEMENT SUB BUTTONS =================
 
         TButton smAccount = new TButton("Account");
-        smAccount.setBounds(30, 553, 220, 40);
-        smAccount.setFont(MainFrame.loadSanchez(16f));
-        smAccount.setForeground(new Color(120, 120, 120));
+        smAccount.setBounds(40, 468, 220, 35);
+        smAccount.setFont(MainFrame.loadSanchez(13f));
+        smAccount.setForeground(new Color(93, 93, 93));
+        smAccount.setHorizontalAlignment(SwingConstants.LEFT);
         smAccount.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        smAccount.setMargin(new Insets(0, 58, 0, 0));
         smAccount.addActionListener(e -> {
             frame.setContentPane(new StudentAccountPanel(frame));
             frame.revalidate();
         });
 
         TButton smActiveBorrower = new TButton("Active Borrower");
-        smActiveBorrower.setBounds(30, 593, 220, 40);
-        smActiveBorrower.setFont(MainFrame.loadSanchez(16f));
-        smActiveBorrower.setForeground(new Color(120, 120, 120));
+        smActiveBorrower.setBounds(40, 503, 220, 35);
+        smActiveBorrower.setFont(MainFrame.loadSanchez(13f));
+        smActiveBorrower.setForeground(new Color(93, 93, 93));
+        smActiveBorrower.setHorizontalAlignment(SwingConstants.LEFT);
+        smActiveBorrower.setMargin(new Insets(0, 58, 0, 0));
         smActiveBorrower.setCursor(new Cursor(Cursor.HAND_CURSOR));
         smActiveBorrower.addActionListener(e -> {
             frame.setContentPane(new Activeborrower(frame));
+            frame.revalidate();
+        });
+        TButton Offense = new TButton("Offenses");
+        Offense.setBounds(40, 540, 220, 35);
+        Offense.setFont(MainFrame.loadSanchez(13f));
+        Offense.setForeground(new Color(93, 93, 93));
+        Offense.setHorizontalAlignment(SwingConstants.LEFT);
+        Offense.setMargin(new Insets(0, 58, 0, 0));
+        Offense.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        Offense.addActionListener(e -> {
+            frame.setContentPane(new Offenses(frame));
             frame.revalidate();
         });
 
@@ -120,7 +147,7 @@ public class StudentManagement extends JPanel {
         background.add(bookManagement);
         background.add(studentM);
         background.add(accountM);
-
+        background.add(Offense);
         background.add(smAccount);
         background.add(smActiveBorrower);
 

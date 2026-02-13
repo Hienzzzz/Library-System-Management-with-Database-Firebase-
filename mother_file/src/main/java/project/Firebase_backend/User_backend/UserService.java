@@ -7,112 +7,144 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+
 public class UserService {
 
-    private static DatabaseReference usersRef =
+    private static final DatabaseReference usersRef =
             FirebaseDatabase.getInstance().getReference("users");
 
+    // ================= CHECK IF USER PROFILE EXISTS =================
+    public static void userExistsAsync(String email,
+                                       UserExistsCallback callback) {
+
+        usersRef.orderByChild("email")
+                .equalTo(email.toLowerCase())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        callback.onComplete(snapshot.exists());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        callback.onComplete(false);
+                    }
+                });
+    }
+
+    // ================= REGISTER USER PROFILE =================
+    // NOTE: Password is NOT stored anymore
+    public static void registerUserAsync(User user,
+                                     RegisterCallback callback) {
+
+        try {
+
+            // Save main user profile
+            usersRef.child(user.getId())
+                    .setValueAsync(user)
+                    .get(); // wait for completion
+
+            // If student, create default studentData
+            if ("STUDENT".equals(user.getRole())) {
+
+                DatabaseReference studentRef =
+                        usersRef.child(user.getId())
+                                .child("studentData");
+
+                studentRef.child("borrowedCount")
+                        .setValueAsync(0).get();
+
+                studentRef.child("offenseCount")
+                        .setValueAsync(0).get();
+
+                studentRef.child("penaltyAmount")
+                        .setValueAsync(0).get();
+
+                studentRef.child("restricted")
+                        .setValueAsync(false).get();
+
+                studentRef.child("restrictionUntil")
+                        .setValueAsync(0).get();
+            }
+
+            callback.onComplete(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.onComplete(false);
+        }
+    }
 
 
-    // ================= LOGIN =================
+    // ================= FETCH USER BY EMAIL =================
+    // Used AFTER Firebase Auth login success
+    public static void fetchUserByEmail(String email,
+                                        FetchUserCallback callback) {
 
-    public static void loginAsync(
-            String input,
-            String password,
-            LoginCallback callback
-    ) {
-
-        Query queryEmail = usersRef
+        Query query = usersRef
                 .orderByChild("email")
-                .equalTo(input.toLowerCase());
+                .equalTo(email.toLowerCase());
 
-        queryEmail.addListenerForSingleValueEvent(
-                new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot snapshot) {
 
-                if (snapshot.exists()) {
-
-                    for (DataSnapshot child : snapshot.getChildren()) {
-
-                        User user = child.getValue(User.class);
-
-                        if (user.getStatus().equals("BLOCKED")) {
-                            callback.onComplete(
-                                    new LoginResult(
-                                            LoginResult.Status.ACCOUNT_BLOCKED,
-                                            null));
-                            return;
-                        }
-                        String hashedInput = PasswordUtil.hashPassword(password);
-
-                        if (user.getPassword().equals(hashedInput)) {
-                            callback.onComplete(
-                                    new LoginResult(
-                                            LoginResult.Status.SUCCESS,
-                                            user));
-                        } else {
-                            callback.onComplete(
-                                    new LoginResult(
-                                            LoginResult.Status.WRONG_PASSWORD,
-                                            null));
-                        }
-
-                        return;
-                    }
+                if (!snapshot.exists()) {
+                    callback.onComplete(null);
+                    return;
                 }
 
-                // If not found by email → try full name
-                Query queryName = usersRef
-                        .orderByChild("fullName")
-                        .equalTo(capitalizeWords(input));
+                for (DataSnapshot child : snapshot.getChildren()) {
 
-                queryName.addListenerForSingleValueEvent(
-                        new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot snap) {
-
-                        if (!snap.exists()) {
-                            callback.onComplete(
-                                    new LoginResult(
-                                            LoginResult.Status.USER_NOT_FOUND,
-                                            null));
-                            return;
-                        }
-
-                        for (DataSnapshot child : snap.getChildren()) {
-
-                            User user = child.getValue(User.class);
-
-                            String hashedInput = PasswordUtil.hashPassword(password);
-
-                            if (user.getPassword().equals(hashedInput)) {
-                                callback.onComplete(
-                                        new LoginResult(
-                                                LoginResult.Status.SUCCESS,
-                                                user));
-                            } else {
-                                callback.onComplete(
-                                        new LoginResult(
-                                                LoginResult.Status.WRONG_PASSWORD,
-                                                null));
-                            }
-
-                            return;
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {}
-                });
+                    User user = child.getValue(User.class);
+                    callback.onComplete(user);
+                    return;
+                }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {}
+            public void onCancelled(DatabaseError error) {
+                callback.onComplete(null);
+            }
         });
     }
+
+    //===============login by fulkl name 
+
+    public static void fetchUserByFullName(String fullName,
+                                       FetchUserCallback callback) {
+
+        String formattedName = capitalizeWords(fullName);
+
+        usersRef.orderByChild("fullName")
+                .equalTo(formattedName)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        if (!snapshot.exists()) {
+                            callback.onComplete(null);
+                            return;
+                        }
+
+                        for (DataSnapshot child : snapshot.getChildren()) {
+
+                            User user = child.getValue(User.class);
+                            callback.onComplete(user);
+                            return;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        callback.onComplete(null);
+                    }
+                });
+    }
+
 
     private static String capitalizeWords(String input) {
         if (input == null || input.isEmpty()) return input;
@@ -122,66 +154,76 @@ public class UserService {
 
         for (String word : words) {
             result.append(Character.toUpperCase(word.charAt(0)))
-                  .append(word.substring(1))
-                  .append(" ");
+                .append(word.substring(1))
+                .append(" ");
         }
 
         return result.toString().trim();
     }
-        //=====================register 
-        public static void userExistsAsync(String email,
-            UserExistsCallback callback) {
 
-        DatabaseReference usersRef =
-                FirebaseDatabase.getInstance().getReference("users");
+    // ================= UPDATE USER PROFILE IMAGE =================
+  
+        // ================= UPDATE STUDENT PROFILE IMAGE WITH CLEANUP =================
+        public static void updateStudentProfileImageWithCleanup(
+                String userId,
+                java.io.File newFile,
+                RegisterCallback callback
+        ) {
 
-        usersRef.orderByChild("email")
-                .equalTo(email.toLowerCase())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+            usersRef.child(userId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                callback.onComplete(snapshot.exists());
-            }
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                callback.onComplete(false);
-            }
-        });
-    }
+                    if (!snapshot.exists()) {
+                        callback.onComplete(false);
+                        return;
+                    }
 
-    public static void registerUserAsync(User user,
-            RegisterCallback callback) {
+                    User user = snapshot.getValue(User.class);
+                    String oldImageUrl = user != null
+                            ? user.getProfileImageUrl()
+                            : null;
 
-        DatabaseReference usersRef =
-                FirebaseDatabase.getInstance().getReference("users");
+                    // 1️⃣ Upload new image
+                    String newImageUrl =
+                            project.Firebase_backend.Storage_backend.ImageService
+                                    .uploadStudentImage(newFile, userId);
 
-        try {
+                    if (newImageUrl == null) {
+                        callback.onComplete(false);
+                        return;
+                    }
 
-            usersRef.child(user.getId()).setValueAsync(user).get();
+                    try {
+                        // 2️⃣ Update database
+                        usersRef.child(userId)
+                                .child("profileImageUrl")
+                                .setValueAsync(newImageUrl)
+                                .get();
 
-            if (user.getRole().equals("STUDENT")) {
+                        // 3️⃣ Delete old image
+                        if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                            project.Firebase_backend.Storage_backend.ImageService
+                                    .deleteImageByUrl(oldImageUrl);
+                        }
 
-                DatabaseReference studentRef =
-                        usersRef.child(user.getId())
-                                .child("studentData");
+                        callback.onComplete(true);
 
-                studentRef.child("borrowedCount").setValueAsync(0);
-                studentRef.child("offenseCount").setValueAsync(0);
-                studentRef.child("penaltyAmount").setValueAsync(0);
-                studentRef.child("restricted").setValueAsync(false);
-                studentRef.child("restrictionUntil").setValueAsync(0);
-            }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        callback.onComplete(false);
+                    }
+                }
 
-            callback.onComplete(true);
-
-        } catch (Exception e) {
-            callback.onComplete(false);
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onComplete(false);
+                }
+            });
         }
 
-    }
 
-    
 
 }

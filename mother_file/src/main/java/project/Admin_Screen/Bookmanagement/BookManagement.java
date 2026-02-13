@@ -3,6 +3,7 @@ package project.Admin_Screen.Bookmanagement;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -17,9 +18,6 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import java.awt.*;
-import javax.swing.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -42,6 +40,7 @@ import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -50,11 +49,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableRowSorter;
 
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
 
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
@@ -113,7 +110,7 @@ public class BookManagement extends JPanel {
 
         TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
-        dashboard.setFont(MainFrame.loadSanchez(20f));
+        dashboard.setFont(MainFrame.loadSanchez(15f));
         dashboard.setForeground(new Color(93, 93, 93));
         dashboard.setHorizontalAlignment(SwingConstants.LEFT);
         dashboard.setMargin(new Insets(0, 60, 0, 0));
@@ -124,8 +121,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton reports = new TButton("Reports");
-        reports.setBounds(12, 398, 238, 49);
-        reports.setFont(MainFrame.loadSanchez(20f));
+        reports.setBounds(12, 297, 238, 49);
+        reports.setFont(MainFrame.loadSanchez(15f));
         reports.setForeground(new Color(93, 93, 93));
         reports.setHorizontalAlignment(SwingConstants.LEFT);
         reports.setMargin(new Insets(0, 60, 0, 0));
@@ -136,8 +133,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton bookManagement = new TButton("Book Management");
-        bookManagement.setBounds(12, 451, 238, 49);
-        bookManagement.setFont(MainFrame.loadSanchez(20f));
+        bookManagement.setBounds(12, 350, 238, 49);
+        bookManagement.setFont(MainFrame.loadSanchez(15f));
         bookManagement.setForeground(new Color(93, 93, 93));
         bookManagement.setHorizontalAlignment(SwingConstants.LEFT);
         bookManagement.setMargin(new Insets(0, 60, 0, 0));
@@ -148,8 +145,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton studentM = new TButton("Student Management");
-        studentM.setBounds(12, 504, 238, 49);
-        studentM.setFont(MainFrame.loadSanchez(20f));
+        studentM.setBounds(12, 564, 238, 49);
+        studentM.setFont(MainFrame.loadSanchez(15f));
         studentM.setForeground(new Color(93, 93, 93));
         studentM.setHorizontalAlignment(SwingConstants.LEFT);
         studentM.setMargin(new Insets(0, 60, 0, 0));
@@ -160,8 +157,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton accountM = new TButton("Admin Management");
-        accountM.setBounds(12, 557, 238, 49);
-        accountM.setFont(MainFrame.loadSanchez(20f));
+        accountM.setBounds(12, 615, 238, 49);
+        accountM.setFont(MainFrame.loadSanchez(15f));
         accountM.setForeground(new Color(93, 93, 93));
         accountM.setHorizontalAlignment(SwingConstants.LEFT);
         accountM.setMargin(new Insets(0, 60, 0, 0));
@@ -174,8 +171,8 @@ public class BookManagement extends JPanel {
         // ================= BOOK MANAGEMENT TABS =================
 
         TButton availableBooks = new TButton("Available Books");
-        availableBooks.setBounds(320, 240, 200, 45);
-        availableBooks.setFont(MainFrame.loadSanchez(18f));
+        availableBooks.setBounds(55, 405, 200, 35);
+        availableBooks.setFont(MainFrame.loadSanchez(13f));
         availableBooks.setForeground(new Color(93, 93, 93));
         availableBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
         availableBooks.addActionListener(e -> {
@@ -184,8 +181,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton borrowedBooks = new TButton("Borrowed Books");
-        borrowedBooks.setBounds(540, 240, 200, 45);
-        borrowedBooks.setFont(MainFrame.loadSanchez(18f));
+        borrowedBooks.setBounds(55, 442, 200, 35);
+        borrowedBooks.setFont(MainFrame.loadSanchez(13f));
         borrowedBooks.setForeground(new Color(93, 93, 93));
         borrowedBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
         borrowedBooks.addActionListener(e -> {
@@ -194,8 +191,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton pendingRequest = new TButton("Pending Request");
-        pendingRequest.setBounds(760, 240, 200, 45);
-        pendingRequest.setFont(MainFrame.loadSanchez(18f));
+        pendingRequest.setBounds(55, 477, 200, 35);
+        pendingRequest.setFont(MainFrame.loadSanchez(13f));
         pendingRequest.setForeground(new Color(93, 93, 93));
         pendingRequest.setCursor(new Cursor(Cursor.HAND_CURSOR));
         pendingRequest.addActionListener(e -> {
@@ -204,8 +201,8 @@ public class BookManagement extends JPanel {
         });
 
         TButton overdue = new TButton("Overdue");
-        overdue.setBounds(980, 240, 200, 45);
-        overdue.setFont(MainFrame.loadSanchez(18f));
+        overdue.setBounds(55, 514, 200, 35);
+        overdue.setFont(MainFrame.loadSanchez(13f));
         overdue.setForeground(new Color(93, 93, 93));
         overdue.setCursor(new Cursor(Cursor.HAND_CURSOR));
         overdue.addActionListener(e -> {
