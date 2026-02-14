@@ -11,6 +11,8 @@ public class User {
     private String status;
     private long createdAt;
     private String profileImageUrl;
+    private String uid;
+
 
     // Required empty constructor for Firebase
     public User() {}
@@ -80,6 +82,11 @@ public class User {
         return lastName;
     }
 
+    public String getUid() {
+        return uid;
+    }
+
+
 
     public void setStatus(String status){
         this.status = status;
@@ -87,6 +94,11 @@ public class User {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
 
 }
 

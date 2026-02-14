@@ -611,7 +611,8 @@ public void replace(FilterBypass fb, int offset, int length,
                     id,
                     "STUDENT",
                     Email,
-                    firstName + " " + surname
+                    firstName ,
+                     surname
             );
 
 
@@ -639,6 +640,10 @@ public void replace(FilterBypass fb, int offset, int length,
                 }
 
                 String idToken = authResult.getString("idToken");
+                String uid = authResult.getString("localId");
+                newUser.setUid(uid);
+
+
                 FirebaseAuthService.updateDisplayName(
                         idToken,
                         firstName + " " + surname
@@ -649,23 +654,34 @@ public void replace(FilterBypass fb, int offset, int length,
                 FirebaseAuthService.sendVerification(idToken);
 
                 // 💾 3️⃣ Save user profile in database
-                UserService.registerUserAsync(newUser, success -> {});
+                UserService.registerUserAsync(newUser, success -> {
 
-                JOptionPane.showMessageDialog(
+                    if (!success) {
+                        JOptionPane.showMessageDialog(
+                            frame,
+                            "Failed to save user profile in database.",
+                            "Database Error",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        return;
+                    }
+
+                    JOptionPane.showMessageDialog(
                         frame,
                         "Account created successfully!\n\n" +
                         "Please check your Gmail and verify your email before logging in.",
                         "Registration Successful",
                         JOptionPane.INFORMATION_MESSAGE
-                );
+                    );
 
-                // 🔐 Clear password from memory
-                java.util.Arrays.fill(password.getPassword(), '\0');
-                java.util.Arrays.fill(verify_password.getPassword(), '\0');
+                    Arrays.fill(password.getPassword(), '\0');
+                    Arrays.fill(verify_password.getPassword(), '\0');
 
-                frame.setContentPane(new Login(frame));
-                frame.revalidate();
-                frame.repaint();
+                    frame.setContentPane(new Login(frame));
+                    frame.revalidate();
+                    frame.repaint();
+                });
+
 
             } catch (Exception ex) {
 

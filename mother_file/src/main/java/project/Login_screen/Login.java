@@ -447,6 +447,18 @@ public void actionPerformed(ActionEvent e){
                         return;
                     }
 
+                     // 🔴 ADD THIS BLOCK HERE
+                    if ("DELETED".equalsIgnoreCase(user.getStatus())) {
+                        JOptionPane.showMessageDialog(
+                                frame,
+                                "This account has been removed by the administrator.",
+                                "Access Denied",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                        return;
+                    }
+                    // 🔴 END BLOCK
+
                     switch (user.getRole()) {
                         case "ADMIN":
                             frame.setContentPane(new AdminDashboard(frame));
@@ -462,6 +474,8 @@ public void actionPerformed(ActionEvent e){
                     frame.revalidate();
                     frame.repaint();
                 });
+
+
             });
 
         } catch (Exception e) {

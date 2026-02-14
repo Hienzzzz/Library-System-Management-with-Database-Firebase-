@@ -866,6 +866,7 @@ public class BookManagement extends JPanel {
 
                         case "Out of Stock":
                             return quantity == 0;
+                        
 
                         default:
                             return true;
@@ -920,6 +921,10 @@ public class BookManagement extends JPanel {
             case "Author":
                 keys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
                 break;
+            case "Book ID":
+                keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+                break;
+
 
             default:
                 sorter.setSortKeys(null);
@@ -1065,7 +1070,7 @@ public class BookManagement extends JPanel {
                 JTable table, Object value, boolean isSelected, int viewRow, int column) {
 
           
-            selectedRow = table.convertRowIndexToModel(viewRow);
+           selectedRow = viewRow; 
 
             if (isSelected) {
                 button.setBackground(table.getSelectionBackground());

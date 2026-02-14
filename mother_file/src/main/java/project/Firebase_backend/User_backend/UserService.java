@@ -47,7 +47,14 @@ public class UserService {
             // Save main user profile
             usersRef.child(user.getId())
                     .setValueAsync(user)
-                    .get(); // wait for completion
+                    .get();
+
+            if (user.getStatus() == null) {
+                usersRef.child(user.getId())
+                        .child("status")
+                        .setValueAsync("ACTIVE")
+                        .get();
+            }
 
             // If student, create default studentData
             if ("STUDENT".equals(user.getRole())) {
@@ -70,6 +77,12 @@ public class UserService {
 
                 studentRef.child("restrictionUntil")
                         .setValueAsync(0).get();
+
+                usersRef.child(user.getId())
+                    .child("status")
+                    .setValueAsync("ACTIVE")
+                    .get();
+
             }
 
             callback.onComplete(true);
@@ -325,6 +338,64 @@ public class UserService {
                 }
             });
         }
+
+        // ================= DELETE USER COMPLETELY (AUTH + DATABASE + STORAGE) =================
+        public static void deleteUserCompletely(String studentId,
+                                        RegisterCallback callback) {
+
+            DatabaseReference userRef =
+                    usersRef.child(studentId);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+
+                    if (!snapshot.exists()) {
+                        callback.onComplete(false);
+                        return;
+                    }
+
+                    User user = snapshot.getValue(User.class);
+
+                    try {
+
+                        // 🔥 1️⃣ Delete from Firebase Authentication using UID
+                        if (user.getUid() != null && !user.getUid().isEmpty()) {
+
+                            com.google.firebase.auth.FirebaseAuth
+                                    .getInstance()
+                                    .deleteUser(user.getUid());
+                        }
+
+                        // 🔥 2️⃣ Delete profile image if exists
+                        if (user.getProfileImageUrl() != null &&
+                                !user.getProfileImageUrl().isEmpty()) {
+
+                            project.Firebase_backend.Storage_backend.ImageService
+                                    .deleteImageByUrl(user.getProfileImageUrl());
+                        }
+
+                        // 🔥 3️⃣ Delete from Realtime Database
+                        usersRef.child(studentId).removeValueAsync();
+
+                        callback.onComplete(true);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        callback.onComplete(false);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    callback.onComplete(false);
+                }
+            });
+        }
+
+
+
 
 
 

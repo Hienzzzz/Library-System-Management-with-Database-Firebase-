@@ -1,105 +1,103 @@
 package project.Admin_Screen.Bookmanagement;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Admin_Screen.Studentmanagement.StudentManagement;
+import project.Firebase_backend.Book_backend.BookService;
+import project.Firebase_backend.Book_backend.Books;
 import project.Main_System.MainFrame;
 
 public class Pendingreq extends JPanel {
 
     private MainFrame frame;
+    private JTable table;
+    private DefaultTableModel model;
 
     public Pendingreq(MainFrame frame) {
         this.frame = frame;
-        panel();
+        initUI();
+        loadPendingRequests();
     }
 
-    public void panel() {
-        this.setLayout(null);
-        this.setPreferredSize(new Dimension(1512, 982));
+    private void initUI() {
+
+        setLayout(null);
+        setPreferredSize(new Dimension(1512, 982));
 
         ImageIcon icon = new ImageIcon(
-            getClass().getResource("/Images/Admin_pendingRequest.png")
+                getClass().getResource("/Images/Admin_pendingRequest.png")
         );
+
         JLabel background = new JLabel(icon);
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
 
-        // ================= BUTTONS =================
+        // ================= SIDEBAR BUTTONS =================
 
-        TButton dashboard = new TButton("Dashboard");
-        dashboard.setBounds(12, 240, 238, 49);
-        dashboard.setFont(MainFrame.loadSanchez(15f));
-        dashboard.setForeground(new Color(93, 93, 93));
-        dashboard.setHorizontalAlignment(SwingConstants.LEFT);
-        dashboard.setMargin(new Insets(0, 60, 0, 0));
-        dashboard.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton dashboard = createMainButton("Dashboard", 240);
         dashboard.addActionListener(e -> {
             frame.setContentPane(new AdminDashboard(frame));
             frame.revalidate();
         });
 
-        TButton reports = new TButton("Reports");
-        reports.setBounds(12, 297, 238, 49);
-        reports.setFont(MainFrame.loadSanchez(15f));
-        reports.setForeground(new Color(93, 93, 93));
-        reports.setHorizontalAlignment(SwingConstants.LEFT);
-        reports.setMargin(new Insets(0, 60, 0, 0));
-        reports.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton reports = createMainButton("Reports", 297);
         reports.addActionListener(e -> {
             frame.setContentPane(new Reports(frame));
             frame.revalidate();
         });
 
-        TButton bookManagement = new TButton("Book Management");
-        bookManagement.setBounds(12, 350, 238, 49);
-        bookManagement.setFont(MainFrame.loadSanchez(15f));
-        bookManagement.setForeground(new Color(93, 93, 93));
-        bookManagement.setHorizontalAlignment(SwingConstants.LEFT);
-        bookManagement.setMargin(new Insets(0, 60, 0, 0));
-        bookManagement.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton bookManagement = createMainButton("Book Management", 350);
         bookManagement.addActionListener(e -> {
             frame.setContentPane(new BookManagement(frame));
             frame.revalidate();
         });
 
-        TButton studentM = new TButton("Student Management");
-        studentM.setBounds(12, 564, 238, 49);
-        studentM.setFont(MainFrame.loadSanchez(15f));
-        studentM.setForeground(new Color(93, 93, 93));
-        studentM.setHorizontalAlignment(SwingConstants.LEFT);
-        studentM.setMargin(new Insets(0, 60, 0, 0));
-        studentM.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton studentM = createMainButton("Student Management", 564);
         studentM.addActionListener(e -> {
             frame.setContentPane(new StudentManagement(frame));
             frame.revalidate();
         });
 
-        TButton accountM = new TButton("Admin Management");
-        accountM.setBounds(12, 615, 238, 49);
-        accountM.setFont(MainFrame.loadSanchez(15f));
-        accountM.setForeground(new Color(93, 93, 93));
-        accountM.setHorizontalAlignment(SwingConstants.LEFT);
-        accountM.setMargin(new Insets(0, 60, 0, 0));
-        accountM.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton accountM = createMainButton("Admin Management", 615);
         accountM.addActionListener(e -> {
             frame.setContentPane(new Admin_AccountManagement(frame));
             frame.revalidate();
@@ -107,49 +105,29 @@ public class Pendingreq extends JPanel {
 
         // ================= BOOK MANAGEMENT TABS =================
 
-        TButton availableBooks = new TButton("Available Books");
-        availableBooks.setBounds(55, 405, 200, 35);
-        availableBooks.setFont(MainFrame.loadSanchez(13f));
-        availableBooks.setForeground(new Color(93, 93, 93));
-        availableBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton availableBooks = createSubButton("Available Books", 405);
         availableBooks.addActionListener(e -> {
             frame.setContentPane(new AvailabaleBooks(frame));
             frame.revalidate();
         });
 
-        TButton borrowedBooks = new TButton("Borrowed Books");
-        borrowedBooks.setBounds(55, 442, 200, 35);
-        borrowedBooks.setFont(MainFrame.loadSanchez(13f));
-        borrowedBooks.setForeground(new Color(93, 93, 93));
-        borrowedBooks.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton borrowedBooks = createSubButton("Borrowed Books", 442);
         borrowedBooks.addActionListener(e -> {
             frame.setContentPane(new BorrowedBook(frame));
             frame.revalidate();
         });
 
-        TButton pendingRequest = new TButton("Pending Request");
-        pendingRequest.setBounds(55, 477, 200, 35);
-        pendingRequest.setFont(MainFrame.loadSanchez(13f));
-        pendingRequest.setForeground(new Color(93, 93, 93));
-        pendingRequest.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton pendingRequest = createSubButton("Pending Request", 477);
         pendingRequest.addActionListener(e -> {
             frame.setContentPane(new Pendingreq(frame));
             frame.revalidate();
         });
 
-        TButton overdue = new TButton("Overdue");
-        overdue.setBounds(55, 514, 200, 35);
-        overdue.setFont(MainFrame.loadSanchez(13f));
-        overdue.setForeground(new Color(93, 93, 93));
-        overdue.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        TButton overdue = createSubButton("Overdue", 514);
         overdue.addActionListener(e -> {
             frame.setContentPane(new Overdue(frame));
             frame.revalidate();
         });
-
-       
-
-        // ================= ADD COMPONENTS =================
 
         background.add(dashboard);
         background.add(reports);
@@ -162,8 +140,329 @@ public class Pendingreq extends JPanel {
         background.add(pendingRequest);
         background.add(overdue);
 
-        this.add(background);
+        // ================= TABLE =================
+            String[] columns = {
+                "Book Title",
+                "Book ID",
+                "Student ID",
+                "Request Type",
+                "Action"
+            };
+
+
+        model = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int col) {
+                return col == 4;
+            }
+        };
+
+        table = new JTable(model);
+        table.setRowHeight(30);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setTableHeader(null);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        int[] widths = {400, 150, 200, 180, 120};
+
+
+        for (int i = 0; i < widths.length; i++) {
+            TableColumn column = table.getColumnModel().getColumn(i);
+            column.setPreferredWidth(widths[i]);
+            column.setMinWidth(widths[i]);
+            column.setMaxWidth(widths[i]);
+        }
+        table.getColumnModel().getColumn(4).setPreferredWidth(100);
+
+
+        table.setDefaultRenderer(Object.class, new PendingRenderer());
+        table.getColumnModel().getColumn(4)
+                .setCellRenderer(new ActionRenderer());
+        table.getColumnModel().getColumn(4)
+                .setCellEditor(new ActionEditor());
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBounds(371, 383, 1025, 490);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        scroll.getVerticalScrollBar().setUI(new ModernScroll());
+
+        background.add(scroll);
+        add(background);
+
+      
+
+
+// table.setTableHeader(null); // comment this temporarily
+
     }
+
+    // ================= BUTTON HELPERS =================
+
+    private TButton createMainButton(String text, int y) {
+        TButton btn = new TButton(text);
+        btn.setBounds(12, y, 238, 49);
+        btn.setFont(MainFrame.loadSanchez(15f));
+        btn.setForeground(new Color(93, 93, 93));
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setMargin(new Insets(0, 60, 0, 0));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    private TButton createSubButton(String text, int y) {
+        TButton btn = new TButton(text);
+        btn.setBounds(55, y, 200, 35);
+        btn.setFont(MainFrame.loadSanchez(13f));
+        btn.setForeground(new Color(93, 93, 93));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    // ================= LOAD + APPROVE + REJECT =================
+
+    private void loadPendingRequests() {
+
+        DatabaseReference ref = BookService.getRef()
+                .getParent()
+                .child("book_requests");
+
+        ref.addValueEventListener(new ValueEventListener() {
+
+            public void onDataChange(DataSnapshot snapshot) {
+
+                model.setRowCount(0);
+
+                for (DataSnapshot data : snapshot.getChildren()) {
+
+                    String status = data.child("status").getValue(String.class);
+                    if (!"Pending".equals(status)) continue;
+
+                    String studentId =
+                            data.child("studentId").getValue(String.class);
+                    String bookId =
+                            data.child("bookId").getValue(String.class);
+                    Long time =
+                            data.child("timestamp").getValue(Long.class);
+
+                    String requestId = data.getKey();
+
+                    loadStudentAndBook(requestId, studentId, bookId, time);
+                }
+            }
+
+            public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    private void loadStudentAndBook(
+            String requestId,
+            String studentId,
+            String bookId,
+            Long time) {
+
+        DatabaseReference root =
+                BookService.getRef().getParent();
+
+        root.child("users").child(studentId)
+                .addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+
+                            public void onDataChange(DataSnapshot studentSnap) {
+
+                                String studentName =
+                                        studentSnap.child("fullName")
+                                                .getValue(String.class);
+
+                                root.child("books").child(bookId)
+                                        .addListenerForSingleValueEvent(
+                                                new ValueEventListener() {
+
+                                                    public void onDataChange(DataSnapshot bookSnap) {
+
+                                                        Books book =
+                                                                bookSnap.getValue(Books.class);
+
+                                                        if (book == null) return;
+
+                                                        String date = "N/A";
+
+                                                        if (time != null) {
+                                                            date = new SimpleDateFormat("MMM dd, yyyy")
+                                                                    .format(new Date(time));
+                                                        }
+
+                                                       model.addRow(new Object[]{
+                                                                book.getTitle(),     // 0 Book Title
+                                                                bookId,              // 1 Book ID
+                                                                studentId,           // 2 Student ID
+                                                                "Borrow",            // 3 Request Type (or get from Firebase)
+                                                                requestId            // 4 Action (hidden ID)
+                                                        });
+
+                                                    }
+
+                                                    public void onCancelled(DatabaseError e) {}
+                                                });
+                            }
+
+                            public void onCancelled(DatabaseError e) {}
+                        });
+    }
+
+    private void approveRequest(String requestId) {
+
+        DatabaseReference root =
+                BookService.getRef().getParent();
+
+        root.child("book_requests")
+                .child(requestId)
+                .child("status")
+                .setValue("Approved", null);
+    }
+
+    private void rejectRequest(String requestId) {
+
+        DatabaseReference root =
+                BookService.getRef().getParent();
+
+        root.child("book_requests")
+                .child(requestId)
+                .child("status")
+                .setValue("Rejected", null);
+    }
+
+    // ================= TABLE STYLING =================
+
+    private class PendingRenderer extends DefaultTableCellRenderer {
+
+            private final Color EVEN = new Color(245, 245, 245);
+            private final Color ODD  = Color.WHITE;
+
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable table, Object value,
+                    boolean isSelected, boolean hasFocus,
+                    int row, int col) {
+
+                super.getTableCellRendererComponent(
+                        table, value, false, false, row, col);
+
+                // Alternating row color
+                setBackground(row % 2 == 0 ? EVEN : ODD);
+
+                // Reset text color
+                setForeground(Color.BLACK);
+
+                // Padding
+                setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+
+                // Align columns properly
+                if (col == 4) { // Action column
+                    setHorizontalAlignment(SwingConstants.CENTER);
+                } else {
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                }
+
+                return this;
+            }
+        }
+
+
+    private class ActionRenderer extends JButton
+        implements TableCellRenderer {
+
+    public ActionRenderer() {
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setOpaque(true);
+        setFont(new Font("Poppins", Font.BOLD, 12));
+        setForeground(Color.WHITE);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(
+            JTable table, Object value,
+            boolean isSel, boolean hasFocus,
+            int row, int col) {
+
+        setText("Pending");
+
+
+        // Center text
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setMargin(new Insets(5, 10, 5, 10));
+
+
+        // Match row background
+        if (row % 2 == 0) {
+            setBackground(new Color(255, 180, 0));
+        } else {
+            setBackground(new Color(255, 170, 0));
+        }
+
+        return this;
+    }
+    
+}
+
+
+    private class ActionEditor extends DefaultCellEditor {
+
+        private JButton button;
+        private String requestId;
+
+        public ActionEditor() {
+            super(new JTextField());
+
+            button = new JButton("Pending");
+            button.setBackground(new Color(255, 180, 0));
+            button.setForeground(Color.WHITE);
+            button.setHorizontalAlignment(SwingConstants.CENTER);
+
+
+            button.addActionListener(e -> {
+
+                int option = JOptionPane.showOptionDialog(
+                        Pendingreq.this,
+                        "Choose action for this request",
+                        "Request Action",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        new String[]{"Approve", "Reject", "Cancel"},
+                        "Approve"
+                );
+
+                if (option == 0) approveRequest(requestId);
+                else if (option == 1) rejectRequest(requestId);
+
+                fireEditingStopped();
+            });
+        }
+
+        public Component getTableCellEditorComponent(
+                JTable table, Object value,
+                boolean isSel, int row, int col) {
+
+            requestId = model.getValueAt(row, 4).toString();
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            return requestId;
+        }
+    }
+
+    private static class ModernScroll extends BasicScrollBarUI {
+        protected JButton createDecreaseButton(int o){ return new JButton(); }
+        protected JButton createIncreaseButton(int o){ return new JButton(); }
+    }
+
+    // ================= TButton =================
 
     class TButton extends JButton {
 
@@ -193,13 +492,10 @@ public class Pendingreq extends JPanel {
             });
 
             addMouseListener(new MouseAdapter() {
-                @Override
                 public void mouseEntered(MouseEvent e) {
                     fadeOut.stop();
                     fadeIn.start();
                 }
-
-                @Override
                 public void mouseExited(MouseEvent e) {
                     fadeIn.stop();
                     fadeOut.start();
@@ -207,7 +503,6 @@ public class Pendingreq extends JPanel {
             });
         }
 
-        @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -215,17 +510,6 @@ public class Pendingreq extends JPanel {
 
             if (alpha > 0f) {
                 int a = (int) (alpha * 77);
-
-                for (int i = 4; i >= 1; i--) {
-                    g2.setColor(new Color(205, 205, 205, (int) (a * (i / 4f))));
-                    g2.fillRoundRect(
-                            -i, -i,
-                            getWidth() + i * 2,
-                            getHeight() + i * 2,
-                            30, 30
-                    );
-                }
-
                 g2.setColor(new Color(205, 205, 205, a));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }

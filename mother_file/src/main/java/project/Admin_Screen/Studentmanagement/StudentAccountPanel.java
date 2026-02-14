@@ -80,6 +80,8 @@ public class StudentAccountPanel extends JPanel {
     private DefaultTableModel model;
     private TableRowSorter<DefaultTableModel> sorter;
 
+    
+
     private RowFilter<DefaultTableModel, Object> searchFilter;
 
     public StudentAccountPanel(MainFrame frame) {
@@ -620,7 +622,7 @@ private void applyFilters() {
             DatabaseReference usersRef =
                     FirebaseDatabase.getInstance().getReference("users");
 
-            usersRef.addValueEventListener(new ValueEventListener() {
+            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
@@ -635,10 +637,13 @@ private void applyFilters() {
                             if (user == null) continue;
 
                             // ✅ Only show students
-                            if (!"STUDENT".equals(user.getRole())) continue;
+                           if (!"STUDENT".equals(user.getRole())) continue;
+
+                            if ("DELETED".equalsIgnoreCase(user.getStatus())) continue;
+
 
                             model.addRow(new Object[]{
-                                    user.getFullName(),
+                                    user.getFirstName() + " " + user.getLastName(),
                                     user.getId(),
                                     user.getEmail(),
                                     user.getStatus(),
@@ -657,11 +662,27 @@ private void applyFilters() {
 
 
     public void closeAddStudent() {
+
         addStudent.setVisible(false);
         dimOverlay.setVisible(false);
 
+        layeredPane.remove(addStudent);
+        layeredPane.repaint();
+        layeredPane.revalidate();
+
+        // recreate panel fresh (prevents stale state)
+        addStudent = new AddStudentPanel(this);
+        addStudent.setSize(862, 678);
+        addStudent.setVisible(false);
+        layeredPane.add(addStudent, JLayeredPane.POPUP_LAYER);
+
         setBackgroundEnabled(true);
     }
+    public void reloadStudents() {
+        loadStudents();
+    }
+
+
 
 
     private static class ModernScrollBarUI extends BasicScrollBarUI {

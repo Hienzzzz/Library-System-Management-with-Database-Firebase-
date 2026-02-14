@@ -98,33 +98,36 @@ public class StudentDetailsPanel extends JPanel {
 
             if (confirm != javax.swing.JOptionPane.YES_OPTION) return;
 
-            com.google.firebase.database.FirebaseDatabase
-                    .getInstance()
-                    .getReference("users")
-                    .child(user.getId())
-                    .removeValue((error, ref) -> {
+            project.Firebase_backend.User_backend.UserService
+                .deleteUserCompletely(user.getId(), success -> {
 
-                        if (error != null) {
-                            javax.swing.JOptionPane.showMessageDialog(
-                                    this,
-                                    "Failed to remove account:\n" + error.getMessage(),
-                                    "Error",
-                                    javax.swing.JOptionPane.ERROR_MESSAGE
-                            );
-                        } else {
+            javax.swing.SwingUtilities.invokeLater(() -> {
 
-                            javax.swing.JOptionPane.showMessageDialog(
-                                    this,
-                                    "Student account removed successfully.",
-                                    "Success",
-                                    javax.swing.JOptionPane.INFORMATION_MESSAGE
-                            );
+                if (!success) {
 
-                            if (onClose != null) {
-                                onClose.run(); // close panel after delete
-                            }
-                        }
-                    });
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Failed to completely delete account.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Student account permanently deleted.",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                if (onClose != null) {
+                    onClose.run();
+                }
+            });
+        });
+
+
         });
 
 

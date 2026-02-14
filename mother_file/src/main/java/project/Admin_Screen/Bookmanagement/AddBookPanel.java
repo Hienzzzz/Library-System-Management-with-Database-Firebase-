@@ -236,55 +236,78 @@ background.add(scrollPane);
 });
         addBook_button.addActionListener(e -> {
 
-            if(Title.getText().isEmpty() || Author.getText().isEmpty() || Genre.getText().isEmpty() || description.getText().isEmpty()){
-                JOptionPane.showMessageDialog(
-                    this, 
-                    "Please fill in required fields",
-                    "Invalid",
-                    JOptionPane.ERROR_MESSAGE);
-                    return;
-            }
+    String titleText = Title.getText().trim();
+    String authorText = Author.getText().trim();
+    String genreText = Genre.getText().trim();
+    String descriptionText = description.getText().trim();
 
-            String coverURL = null;
+    // ✅ REQUIRED FIELD VALIDATION
+    if (titleText.isEmpty() ||
+        authorText.isEmpty() ||
+        genreText.isEmpty() ||
+        descriptionText.isEmpty()) {
 
-            if (selectedFile[0] == null) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Please upload a book cover image.",
-                    "Missing Image",
-                    JOptionPane.WARNING_MESSAGE
-                );
-                return;
-            }
+        JOptionPane.showMessageDialog(
+                this,
+                "All fields are required.",
+                "Missing Information",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-           if (selectedFile[0] != null) {
-                coverURL = ImageService.uploadBookCover(selectedFile[0], null);
+    // ✅ IMAGE REQUIRED VALIDATION
+    if (selectedFile[0] == null) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Book cover image is REQUIRED before adding a book.",
+                "Missing Book Cover",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-                if (coverURL == null) {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Image upload failed.\n\nPlease try again.",
-                        "Upload Error",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                    return;
-                }
-            }
+    // ✅ UPLOAD IMAGE
+    String coverURL = ImageService.uploadBookCover(selectedFile[0], null);
 
+    if (coverURL == null) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Image upload failed.\nPlease try again.",
+                "Upload Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-                Books book = new Books(
-                Title.getText().trim(),          // title
-                null,                            // bookId (Firebase generates)
-                Author.getText().trim(),         // author
-                (int) quantityButton.getValue(), // quantity
-                Genre.getText().trim(),          // genre
-                description.getText().trim(),    // description
-                coverURL                         // coverURL
-            );
-            
-            BookService.checkDuplicateAndAdd(book);
-            parent.closeAddBook();
-        });
+    // ✅ CREATE BOOK OBJECT
+    Books book = new Books(
+            titleText,
+            null,
+            authorText,
+            (int) quantityButton.getValue(),
+            genreText,
+            descriptionText,
+            coverURL
+    );
+
+    // ✅ SAVE BOOK
+    BookService.checkDuplicateAndAdd(book);
+
+    // ✅ CLEAR FORM
+    Title.setText("");
+    Author.setText("");
+    Genre.setText("");
+    description.setText("");
+    quantityButton.setValue(1);
+
+    imgPreview.setIcon(null);
+    selectedFile[0] = null;
+
+    // ✅ CLOSE PANEL
+    parent.closeAddBook();
+});
+
 
        
         

@@ -22,6 +22,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import com.google.firebase.database.DatabaseReference;
+
 import project.Firebase_backend.User_backend.User;
 import project.Firebase_backend.User_backend.UserService;
 
@@ -191,14 +193,14 @@ public class AddStudentPanel extends JPanel {
         addBtn.setFocusPainted(false);
         addBtn.setOpaque(false);
 
-        JButton cancelBtn = new JButton();
-        cancelBtn.setBounds(516, 625, 117, 32);
-        cancelBtn.setBorder(null);
-        cancelBtn.setContentAreaFilled(false);
-        cancelBtn.setFocusPainted(false);
-        cancelBtn.setOpaque(false);
+        JButton Close = new JButton();
+        Close.setBounds(815, 15, 22, 22);
+        //Close.setBorder(null);
+        Close.setContentAreaFilled(false);
+        Close.setFocusPainted(false);
+        Close.setOpaque(false);
 
-        cancelBtn.addActionListener(e -> {
+        Close.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to close?\nAll entered information will be lost",
@@ -211,117 +213,246 @@ public class AddStudentPanel extends JPanel {
             }
         });
 
+        JButton clear = new JButton();
+        clear.setBounds(516, 625, 117, 32);
+        clear.setBorder(null);
+        clear.setContentAreaFilled(false);
+        clear.setFocusPainted(false);
+        clear.setOpaque(false);
+
+        clear.addActionListener(e -> {
+
+    int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to clear all fields?",
+            "Confirm Clear",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+    );
+
+    if (confirm != JOptionPane.YES_OPTION) return;
+
+    // Clear text fields
+    firstName.setText("");
+    lastName.setText("");
+    email.setText("");
+    studentId.setText("");
+
+    // Clear password fields safely
+    Arrays.fill(password.getPassword(), '\0');
+    Arrays.fill(C_password.getPassword(), '\0');
+    password.setText("");
+    C_password.setText("");
+
+    // Reset preview labels
+    studentFullName.setText("student name here");
+    studentFullName.setForeground(new Color(120, 120, 120));
+
+    student_ID.setText("student id here");
+    student_ID.setForeground(new Color(120, 120, 120));
+
+    // Clear image preview
+    imgPreview.setIcon(null);
+    selectedFile[0] = null;
+
+    // Re-enable add button
+    addBtn.setEnabled(true);
+});
+
+
         addBtn.addActionListener(e -> {
 
-            String fn = firstName.getText().trim();
-            String ln = lastName.getText().trim();
-            String em = email.getText().trim().toLowerCase();
-            String sid = studentId.getText().trim();
-            String pw = new String(password.getPassword());
-            String cpw = new String(C_password.getPassword());
+        String fn = firstName.getText().trim();
+        String ln = lastName.getText().trim();
+        String em = email.getText().trim().toLowerCase();
+        String sid = studentId.getText().trim();
+        String pw = new String(password.getPassword());
+        String cpw = new String(C_password.getPassword());
 
-            if (fn.isEmpty() || ln.isEmpty() || em.isEmpty()
-                    || sid.isEmpty() || pw.isEmpty() || cpw.isEmpty()) {
-                JOptionPane.showMessageDialog(
+        if (fn.isEmpty() || ln.isEmpty() || em.isEmpty()
+                || sid.isEmpty() || pw.isEmpty() || cpw.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
                     this,
                     "Please fill out all required fields.",
                     "Required Fields",
                     JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
+            );
+            return;
+        }
 
-            if (!fn.matches("^[A-Za-z ]+$") ||
-                !fn.matches("^(?=(?:.*[A-Za-z]){2,}).*$")) return;
+        if (!pw.equals(cpw)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Passwords do not match.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
-            if (!ln.matches("^[A-Za-z ]+$") ||
-                !ln.matches("^(?=(?:.*[A-Za-z]){2,}).*$")) return;
-
-            if (!em.matches("^[A-Za-z0-9._%+-]+@students\\.nu-moa\\.edu\\.ph$")) return;
-
-            if (!sid.matches("^\\d{4}-\\d{7}$")) return;
-
-            if (!pw.matches("^\\S+$") || pw.length() < 8) return;
-
-            if (!pw.equals(cpw)) return;
-
-            int confirm = JOptionPane.showConfirmDialog(
+        int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to add this student account?\n\n"
-                + "Name: " + fn + " " + ln + "\n"
-                + "Student ID: " + sid,
+                        + "Name: " + fn + " " + ln + "\n"
+                        + "Student ID: " + sid,
                 "Confirm Add Account",
                 JOptionPane.YES_NO_OPTION
-            );
+        );
 
-            if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) return;
 
-            // 🔍 Check if user exists first
-            UserService.userExistsAsync(em, exists -> {
+        // Disable button to prevent double click
+        addBtn.setEnabled(false);
 
-                if (exists) {
+        DatabaseReference usersRef =
+                com.google.firebase.database.FirebaseDatabase
+                        .getInstance()
+                        .getReference("users");
+
+        // Check if Student ID exists
+        usersRef.child(sid)
+                .addListenerForSingleValueEvent(
+                        new com.google.firebase.database.ValueEventListener() {
+
+            @Override
+            public void onDataChange(
+                    com.google.firebase.database.DataSnapshot snapshot) {
+
+                if (snapshot.exists()) {
                     JOptionPane.showMessageDialog(
-                        this,
-                        "A student account with this email already exists.",
-                        "Duplicate Account",
-                        JOptionPane.ERROR_MESSAGE
+                            AddStudentPanel.this,
+                            "Student ID already exists.",
+                            "Duplicate ID",
+                            JOptionPane.ERROR_MESSAGE
                     );
+                    addBtn.setEnabled(true);
                     return;
                 }
 
-                // ✅ Create new User object (NEW STRUCTURE)
-                User user = new User(
-                        sid,               // id
-                        "STUDENT",         // role
-                        em,                // email
-                        fn,                // first name
-                        ln                 // last name
-                );
+                // Check email duplication
+                UserService.userExistsAsync(em, exists -> {
 
-
-                // Save profile image AFTER registration
-                UserService.registerUserAsync(user, success -> {
-
-                    if (!success) {
+                    if (exists) {
                         JOptionPane.showMessageDialog(
-                            this,
-                            "Failed to register student.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
+                                AddStudentPanel.this,
+                                "Email already exists.",
+                                "Duplicate Email",
+                                JOptionPane.ERROR_MESSAGE
                         );
+                        addBtn.setEnabled(true);
                         return;
                     }
 
-                    // Upload image if selected
-                    if (selectedFile[0] != null) {
-                        UserService.updateStudentProfileImageWithCleanup(
+                    try {
+
+                        // 1️⃣ Create Firebase Auth account
+                        org.json.JSONObject authResult =
+                                project.Firebase_backend.User_backend.FirebaseAuthService
+                                        .register(em, pw);
+
+                        if (authResult.has("error")) {
+
+                            String errorMessage =
+                                    authResult.getJSONObject("error")
+                                            .getString("message");
+
+                            JOptionPane.showMessageDialog(
+                                    AddStudentPanel.this,
+                                    "Registration failed:\n" + errorMessage,
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+
+                            addBtn.setEnabled(true);
+                            return;
+                        }
+
+                        String idToken = authResult.getString("idToken");
+                        String uid = authResult.getString("localId");
+
+                        project.Firebase_backend.User_backend.FirebaseAuthService
+                                .updateDisplayName(idToken, fn + " " + ln);
+
+                        User newUser = new User(
                                 sid,
-                                selectedFile[0],
-                                imgSuccess -> {
-                                    if (!imgSuccess) {
-                                        System.err.println("Image upload failed.");
-                                    }
-                                }
+                                "STUDENT",
+                                em,
+                                fn,
+                                ln
                         );
+
+                        newUser.setUid(uid);
+
+                        
+                        UserService.registerUserAsync(newUser, success -> {
+
+                            if (!success) {
+                                JOptionPane.showMessageDialog(
+                                        AddStudentPanel.this,
+                                        "Failed to save profile.",
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                                addBtn.setEnabled(true);
+                                return;
+                            }
+
+                            // Upload image if exists
+                            if (selectedFile[0] != null) {
+                                UserService.updateStudentProfileImageWithCleanup(
+                                        sid,
+                                        selectedFile[0],
+                                        imgSuccess -> {}
+                                );
+                            }
+
+                            Arrays.fill(password.getPassword(), '\0');
+                            Arrays.fill(C_password.getPassword(), '\0');
+
+                            JOptionPane.showMessageDialog(
+                                    AddStudentPanel.this,
+                                    "Student account successfully created!",
+                                    "Success",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+
+                            // ✅ CLOSE PANEL PROPERLY
+                            parent.reloadStudents();
+                            parent.closeAddStudent();
+
+                        });
+
+                    } catch (Exception ex) {
+
+                        ex.printStackTrace();
+
+                        JOptionPane.showMessageDialog(
+                                AddStudentPanel.this,
+                                "Something went wrong.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+
+                        addBtn.setEnabled(true);
                     }
 
-                    Arrays.fill(password.getPassword(), '\0');
-                    Arrays.fill(C_password.getPassword(), '\0');
-
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Student account successfully created!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
-
-                    parent.closeAddStudent();
                 });
-            });
+            }
+
+            @Override
+            public void onCancelled(
+                    com.google.firebase.database.DatabaseError error) {
+
+                addBtn.setEnabled(true);
+            }
         });
+    });
+
 
         background.add(addBtn);
-        background.add(cancelBtn);
+        background.add(clear);
+        background.add(Close);
         add(background);
     }
 
