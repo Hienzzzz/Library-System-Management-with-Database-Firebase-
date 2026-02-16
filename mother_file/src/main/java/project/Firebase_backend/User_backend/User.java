@@ -1,48 +1,95 @@
 package project.Firebase_backend.User_backend;
 
+/* =========================================================
+ * ======================== USER MODEL =====================
+ * =========================================================
+ * Represents a User entity stored in Firebase.
+ * Used for:
+ * - Registration
+ * - Profile storage
+ * - Role management
+ * ========================================================= */
+
 public class User {
 
+    /* =====================================================
+     * ===================== IDENTIFIERS ====================
+     * ===================================================== */
+
+    // 🔑 Student ID / Internal ID
     private String id;
-    private String role;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String fullName;
-    private String status;
-    private long createdAt;
-    private String profileImageUrl;
+
+    // 🔐 Firebase UID
     private String uid;
 
 
-    // Required empty constructor for Firebase
+    /* =====================================================
+     * ===================== ACCOUNT INFO ===================
+     * ===================================================== */
+
+    private String role;
+    private String email;
+    private String status;
+    private long createdAt;
+
+
+    /* =====================================================
+     * ===================== PERSONAL INFO ==================
+     * ===================================================== */
+
+    private String firstName;
+    private String lastName;
+    private String fullName;
+
+
+    /* =====================================================
+     * ===================== PROFILE DATA ===================
+     * ===================================================== */
+
+    private String profileImageUrl;
+
+
+    /* =====================================================
+     * ===================== CONSTRUCTORS ===================
+     * ===================================================== */
+
+    // 🔴 Required empty constructor for Firebase
     public User() {}
 
-        public User(String id,
-                    String role,
-                    String email,
-                    String firstName,
-                    String lastName) {
 
-            this.id = id;
-            this.role = role;
-            this.email = email.toLowerCase();
+    public User(String id,
+                String role,
+                String email,
+                String firstName,
+                String lastName) {
 
-            this.firstName = capitalizeWords(firstName);
-            this.lastName = capitalizeWords(lastName);
-            this.fullName = this.firstName + " " + this.lastName;
+        this.id = id;
+        this.role = role;
+        this.email = email.toLowerCase();
 
-            this.status = "ACTIVE";
-            this.createdAt = System.currentTimeMillis();
-            this.profileImageUrl = null;
-        }
+        this.firstName = capitalizeWords(firstName);
+        this.lastName = capitalizeWords(lastName);
+        this.fullName = this.firstName + " " + this.lastName;
+
+        this.status = "ACTIVE";
+        this.createdAt = System.currentTimeMillis();
+        this.profileImageUrl = null;
+    }
 
 
+    /* =====================================================
+     * ===================== HELPER METHODS =================
+     * ===================================================== */
 
-    // Capitalize helper
+    // Capitalize first letter of each word
     private String capitalizeWords(String input) {
+
         if (input == null || input.isEmpty()) return input;
 
-        String[] words = input.trim().toLowerCase().split("\\s+");
+        String[] words = input.trim()
+                              .toLowerCase()
+                              .split("\\s+");
+
         StringBuilder result = new StringBuilder();
 
         for (String word : words) {
@@ -54,59 +101,71 @@ public class User {
         return result.toString().trim();
     }
 
-    // Getters
-    public String getId() { 
-        return id; 
-    }
-    public String getRole() { 
-        return role;
-     }
-    public String getEmail() { 
-        return email; 
-    }
-    public String getFullName() {
-        return fullName; 
-    }
-    public String getStatus() {
-         return status; 
-        }
 
-    public String getProfileImageUrl() {
-    return profileImageUrl;
-    }
-    public String getFirstName() {
-    return firstName;
-}
+    /* =====================================================
+     * ======================== GETTERS =====================
+     * ===================================================== */
 
-    public String getLastName() {
-        return lastName;
+    // ===== ID =====
+    public String getId() {
+        return id;
     }
 
+    // ===== UID =====
     public String getUid() {
         return uid;
     }
 
+    // ===== Role =====
+    public String getRole() {
+        return role;
+    }
+
+    // ===== Email =====
+    public String getEmail() {
+        return email;
+    }
+
+    // ===== Full Name =====
+    public String getFullName() {
+        return fullName;
+    }
+
+    // ===== First Name =====
+    public String getFirstName() {
+        return firstName;
+    }
+
+    // ===== Last Name =====
+    public String getLastName() {
+        return lastName;
+    }
+
+    // ===== Status =====
+    public String getStatus() {
+        return status;
+    }
+
+    // ===== Profile Image =====
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
 
 
-    public void setStatus(String status){
-        this.status = status;
-    }
-    public void setProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
+    /* =====================================================
+     * ======================== SETTERS =====================
+     * ===================================================== */
 
     public void setUid(String uid) {
         this.uid = uid;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 
 }
-
-
-
-
-/*
-
-Do you think this is possible to code using pure Java and Firebase?
-
-I have an idea: I will use a JTable with a scroll bar, and for the card design, I’ll use a plain card background as a JLabel background or a JPanel. What do you think? Do you have any suggestions?*/

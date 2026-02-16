@@ -1,5 +1,10 @@
 package project.Admin_Screen.Bookmanagement;
 
+/* =========================================================
+ * ========================== IMPORTS ======================
+ * ========================================================= */
+
+// ================= AWT =================
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -11,6 +16,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+// ================= SWING =================
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,36 +31,68 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+// ================= FIREBASE =================
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+// ================= PROJECT SCREENS =================
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Admin_Screen.Studentmanagement.StudentManagement;
+
+// ================= BACKEND =================
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
+
+// ================= MAIN FRAME =================
 import project.Main_System.MainFrame;
 
+
+
+/* =========================================================
+ * ===================== CLASS DECLARATION =================
+ * ========================================================= */
+
 public class AvailabaleBooks extends JPanel {
+
+
+
+    /* =====================================================
+     * ===================== CLASS FIELDS ===================
+     * ===================================================== */
 
     private MainFrame frame;
     private JTable table;
     private DefaultTableModel model;
 
+
+
+    /* =====================================================
+     * ===================== CONSTRUCTOR ====================
+     * ===================================================== */
+
     public AvailabaleBooks(MainFrame frame) {
         this.frame = frame;
-        panel();
-        loadAvailableBooks();
+        panel();               // Build UI
+        loadAvailableBooks();  // Load Firebase data
     }
+
+
+
+    /* =====================================================
+     * ===================== MAIN PANEL UI ==================
+     * ===================================================== */
 
     public void panel() {
 
+        // ================= BASE PANEL =================
         setLayout(null);
         setPreferredSize(new Dimension(1512, 982));
 
+        // ================= BACKGROUND =================
         ImageIcon icon = new ImageIcon(
                 getClass().getResource("/Images/Admin_AvailableBook.png")
         );
@@ -63,39 +101,65 @@ public class AvailabaleBooks extends JPanel {
         background.setBounds(0, 0, 1512, 982);
         background.setLayout(null);
 
-        // ================= SIDEBAR BUTTONS =================
 
-        background.add(createSideButton("Dashboard",12,240,238,49,
+
+        /* =====================================================
+         * ================= SIDEBAR NAVIGATION =================
+         * ===================================================== */
+
+        background.add(createSideButton("Dashboard", 12, 240, 238, 49,
                 () -> frame.setContentPane(new AdminDashboard(frame))));
-        background.add(createSideButton("Reports",12,297,238,49,
+
+        background.add(createSideButton("Reports", 12, 297, 238, 49,
                 () -> frame.setContentPane(new Reports(frame))));
-        background.add(createSideButton("Book Management",12,350,238,49,
+
+        background.add(createSideButton("Book Management", 12, 350, 238, 49,
                 () -> frame.setContentPane(new BookManagement(frame))));
-        background.add(createSideButton("Student Management",12,564,238,49,
+
+        background.add(createSideButton("Student Management", 12, 564, 238, 49,
                 () -> frame.setContentPane(new StudentManagement(frame))));
-        background.add(createSideButton("Admin Management",12,615,238,49,
+
+        background.add(createSideButton("Admin Management", 12, 615, 238, 49,
                 () -> frame.setContentPane(new Admin_AccountManagement(frame))));
 
-        // ================= BOOK TABS =================
 
-        background.add(createTabButton("Available Books",55,405,
+
+        /* =====================================================
+         * ================= BOOK MANAGEMENT TABS ==============
+         * ===================================================== */
+
+        background.add(createTabButton("Available Books", 55, 405,
                 () -> frame.setContentPane(new AvailabaleBooks(frame))));
-        background.add(createTabButton("Borrowed Books",55,442,
+
+        background.add(createTabButton("Borrowed Books", 55, 442,
                 () -> frame.setContentPane(new BorrowedBook(frame))));
-        background.add(createTabButton("Pending Request",55,477,
+
+        background.add(createTabButton("Pending Request", 55, 477,
                 () -> frame.setContentPane(new Pendingreq(frame))));
-        background.add(createTabButton("Overdue",55,514,
+
+        background.add(createTabButton("Overdue", 55, 514,
                 () -> frame.setContentPane(new Overdue(frame))));
+
+
+
+        /* =====================================================
+         * ===================== TABLE SECTION =================
+         * ===================================================== */
 
         initTable(background);
 
         add(background);
     }
 
-    // ================= TABLE =================
 
-    private void initTable(JLabel background){
 
+    /* =====================================================
+     * ===================== TABLE SETUP ====================
+     * ===================================================== */
+
+    private void initTable(JLabel background) {
+
+        // ================= TABLE MODEL =================
         String[] columns = {
                 "Book ID",
                 "Title",
@@ -104,33 +168,37 @@ public class AvailabaleBooks extends JPanel {
                 "Available Quantity"
         };
 
-        model = new DefaultTableModel(columns,0){
-            public boolean isCellEditable(int row,int col){
+        model = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int col) {
                 return false;
             }
         };
 
+        // ================= TABLE COMPONENT =================
         table = new JTable(model);
         table.setRowHeight(32);
         table.setShowGrid(false);
-        table.setIntercellSpacing(new Dimension(0,0));
+        table.setIntercellSpacing(new Dimension(0, 0));
         table.setTableHeader(null);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setFillsViewportHeight(true);
 
-        int[] widths = {150,300,250,200,150};
+        // ================= FIXED COLUMN WIDTHS =================
+        int[] widths = {150, 300, 250, 200, 150};
 
-        for(int i=0;i<widths.length;i++){
+        for (int i = 0; i < widths.length; i++) {
             TableColumn column = table.getColumnModel().getColumn(i);
             column.setPreferredWidth(widths[i]);
             column.setMinWidth(widths[i]);
             column.setMaxWidth(widths[i]);
         }
 
-        table.setDefaultRenderer(Object.class,new AvailableRenderer());
+        // ================= CUSTOM RENDERER =================
+        table.setDefaultRenderer(Object.class, new AvailableRenderer());
 
+        // ================= SCROLL PANE =================
         JScrollPane scroll = new JScrollPane(table);
-        scroll.setBounds(373,383,1025,530);
+        scroll.setBounds(373, 383, 1025, 530);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.getViewport().setBackground(Color.WHITE);
         scroll.setHorizontalScrollBarPolicy(
@@ -141,25 +209,28 @@ public class AvailabaleBooks extends JPanel {
         background.add(scroll);
     }
 
-    // ================= LOAD AVAILABLE BOOKS =================
 
-    private void loadAvailableBooks(){
 
-        DatabaseReference ref =
-                BookService.getRef();
+    /* =====================================================
+     * ================= LOAD AVAILABLE BOOKS ===============
+     * ===================================================== */
 
-        ref.addValueEventListener(new ValueEventListener(){
+    private void loadAvailableBooks() {
 
-            public void onDataChange(DataSnapshot snapshot){
+        DatabaseReference ref = BookService.getRef();
+
+        ref.addValueEventListener(new ValueEventListener() {
+
+            public void onDataChange(DataSnapshot snapshot) {
 
                 model.setRowCount(0);
 
-                for(DataSnapshot data : snapshot.getChildren()){
+                for (DataSnapshot data : snapshot.getChildren()) {
 
                     Books book = data.getValue(Books.class);
-                    if(book == null) continue;
+                    if (book == null) continue;
 
-                    if(book.getQuantity() <= 0) continue;
+                    if (book.getQuantity() <= 0) continue;
 
                     model.addRow(new Object[]{
                             book.getBookId(),
@@ -171,82 +242,104 @@ public class AvailabaleBooks extends JPanel {
                 }
             }
 
-            public void onCancelled(DatabaseError error){}
+            public void onCancelled(DatabaseError error) {}
         });
     }
 
-    // ================= RENDERER =================
+
+
+    /* =====================================================
+     * ===================== TABLE RENDERER =================
+     * ===================================================== */
 
     private class AvailableRenderer
             extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(
-                JTable table,Object value,
-                boolean isSel,boolean hasFocus,
-                int row,int col){
+                JTable table, Object value,
+                boolean isSel, boolean hasFocus,
+                int row, int col) {
 
             super.getTableCellRendererComponent(
-                    table,value,false,false,row,col);
+                    table, value, false, false, row, col);
 
-            setBackground(row%2==0
-                    ? new Color(245,245,245)
+            setBackground(row % 2 == 0
+                    ? new Color(245, 245, 245)
                     : Color.WHITE);
 
-            setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
             return this;
         }
     }
 
-    // ================= MODERN SCROLL =================
+
+
+    /* =====================================================
+     * ===================== MODERN SCROLL ==================
+     * ===================================================== */
 
     private static class ModernScroll
-            extends BasicScrollBarUI{
+            extends BasicScrollBarUI {
 
-        protected JButton createDecreaseButton(int o){
+        protected JButton createDecreaseButton(int o) {
             return new JButton();
         }
-        protected JButton createIncreaseButton(int o){
+
+        protected JButton createIncreaseButton(int o) {
             return new JButton();
         }
     }
 
-    // ================= BUTTON HELPERS =================
+
+
+    /* =====================================================
+     * ===================== BUTTON HELPERS =================
+     * ===================================================== */
 
     private TButton createSideButton(
-            String text,int x,int y,int w,int h,
-            Runnable action){
+            String text, int x, int y, int w, int h,
+            Runnable action) {
 
         TButton btn = new TButton(text);
-        btn.setBounds(x,y,w,h);
+        btn.setBounds(x, y, w, h);
         btn.setFont(MainFrame.loadSanchez(15f));
-        btn.setForeground(new Color(93,93,93));
+        btn.setForeground(new Color(93, 93, 93));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
-        btn.setMargin(new Insets(0,60,0,0));
+        btn.setMargin(new Insets(0, 60, 0, 0));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
         btn.addActionListener(e -> {
             action.run();
             frame.revalidate();
         });
+
         return btn;
     }
 
     private TButton createTabButton(
-            String text,int x,int y,
-            Runnable action){
+            String text, int x, int y,
+            Runnable action) {
 
         TButton btn = new TButton(text);
-        btn.setBounds(x,y,200,35);
+        btn.setBounds(x, y, 200, 35);
         btn.setFont(MainFrame.loadSanchez(13f));
-        btn.setForeground(new Color(93,93,93));
+        btn.setForeground(new Color(93, 93, 93));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
         btn.addActionListener(e -> {
             action.run();
             frame.revalidate();
         });
+
         return btn;
     }
 
-    // ================= CUSTOM BUTTON =================
+
+
+    /* =====================================================
+     * ===================== CUSTOM BUTTON ==================
+     * ===================================================== */
 
     class TButton extends JButton {
 
@@ -267,39 +360,46 @@ public class AvailabaleBooks extends JPanel {
                 alpha = Math.min(alpha + SPEED, 1f);
                 repaint();
                 if (alpha >= 1f)
-                    ((javax.swing.Timer)e.getSource()).stop();
+                    ((javax.swing.Timer) e.getSource()).stop();
             });
 
             fadeOut = new javax.swing.Timer(16, e -> {
                 alpha = Math.max(alpha - SPEED, 0f);
                 repaint();
                 if (alpha <= 0f)
-                    ((javax.swing.Timer)e.getSource()).stop();
+                    ((javax.swing.Timer) e.getSource()).stop();
             });
 
             addMouseListener(new MouseAdapter() {
-                public void mouseEntered(MouseEvent e){
+                public void mouseEntered(MouseEvent e) {
                     fadeOut.stop();
                     fadeIn.start();
                 }
-                public void mouseExited(MouseEvent e){
+
+                public void mouseExited(MouseEvent e) {
                     fadeIn.stop();
                     fadeOut.start();
                 }
             });
         }
 
-        protected void paintComponent(Graphics g){
-            Graphics2D g2=(Graphics2D)g;
-            g2.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+        protected void paintComponent(Graphics g) {
 
-            if(alpha>0f){
-                int a=(int)(alpha*77);
-                g2.setColor(new Color(205,205,205,a));
-                g2.fillRoundRect(0,0,getWidth(),
-                        getHeight(),30,30);
+            Graphics2D g2 = (Graphics2D) g;
+
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+
+            if (alpha > 0f) {
+                int a = (int) (alpha * 77);
+                g2.setColor(new Color(205, 205, 205, a));
+                g2.fillRoundRect(
+                        0, 0,
+                        getWidth(),
+                        getHeight(),
+                        30, 30
+                );
             }
 
             super.paintComponent(g);

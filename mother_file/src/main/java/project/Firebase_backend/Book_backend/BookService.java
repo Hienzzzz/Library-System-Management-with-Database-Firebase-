@@ -1,32 +1,64 @@
 package project.Firebase_backend.Book_backend;
 
+/* =========================================================
+ * ========================= IMPORTS =======================
+ * ========================================================= */
+
+// ================= JAVA =================
 import java.util.Map;
 import java.util.Random;
 
+// ================= SWING =================
 import javax.swing.JOptionPane;
 
+// ================= FIREBASE =================
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+
+/* =========================================================
+ * ====================== BOOK SERVICE =====================
+ * ========================================================= */
+
 public class BookService {
 
+    /* =====================================================
+     * ================= STATIC REFERENCES ==================
+     * ===================================================== */
+
+    // ===== Firebase Reference =====
     private static final DatabaseReference ref =
             FirebaseDatabase.getInstance().getReference("books");
 
+    // ===== Random Generator for Book ID =====
     private static final Random RAND = new Random();
+
+
+    /* =====================================================
+     * ================= GETTERS ============================
+     * ===================================================== */
 
     public static DatabaseReference getRef() {
         return ref;
     }
 
-  
+
+    /* =====================================================
+     * ================= BOOK ID GENERATION =================
+     * ===================================================== */
+
     public static String generatedBookId() {
         int number = 100000 + RAND.nextInt(900000);
         return "BK-" + number;
     }
+
+
+    /* =====================================================
+     * ================= ADD BOOK SECTION ===================
+     * ===================================================== */
 
     public static void addBookWithUniqueId(Books book) {
         checkAndAdd(book, 0);
@@ -50,21 +82,25 @@ public class BookService {
             public void onDataChange(DataSnapshot snapshot) {
 
                 if (snapshot.exists()) {
+
+                    // Retry if duplicate ID found
                     checkAndAdd(book, attempts + 1);
+
                 } else {
-                    
+
+                    // Calculate status before saving
                     book.setStatus(calculateStatus(book.getQuantity()));
 
                     ref.child(newId).setValueAsync(book);
+
                     System.out.println("Book added with ID: " + newId);
                     System.out.println("STATUS BEFORE SAVE: " + book.getStatus());
 
-                    // for testing only
+                    // For testing only
                     System.out.println(
-                        "Q=" + book.getQuantity() +
-                        " STATUS=" + book.getStatus()
+                            "Q=" + book.getQuantity() +
+                            " STATUS=" + book.getStatus()
                     );
-
                 }
             }
 
@@ -74,65 +110,67 @@ public class BookService {
             }
         });
     }
+
+
+    /* =====================================================
+     * ============ DUPLICATE CHECK BEFORE ADDING ==========
+     * ===================================================== */
+
     public static void checkDuplicateAndAdd(Books book) {
 
-    String title = book.getTitle().trim().toLowerCase();
-    String author = book.getAuthor().trim().toLowerCase();
+        String title = book.getTitle().trim().toLowerCase();
+        String author = book.getAuthor().trim().toLowerCase();
 
-    ref.orderByChild("title")
-       .equalTo(title)
-       .addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.orderByChild("title")
+           .equalTo(title)
+           .addListenerForSingleValueEvent(new ValueEventListener() {
 
-        @Override
-        public void onDataChange(DataSnapshot snapshot) {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
 
-            for (DataSnapshot snap : snapshot.getChildren()) {
-                Books existingBook = snap.getValue(Books.class);
+                for (DataSnapshot snap : snapshot.getChildren()) {
 
-                if (existingBook != null &&
-                    existingBook.getAuthor().trim().toLowerCase().equals(author)) {
+                    Books existingBook = snap.getValue(Books.class);
 
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Book already exists!"
-                    );
-                    return; 
+                    if (existingBook != null &&
+                        existingBook.getAuthor().trim().toLowerCase().equals(author)) {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Book already exists!"
+                        );
+                        return;
+                    }
                 }
+
+                // If no duplicate found → proceed
+                addBookWithUniqueId(book);
             }
 
-          
-            addBookWithUniqueId(book);
-        }
+            @Override
+            public void onCancelled(DatabaseError error) {
 
-        @Override
-        public void onCancelled(DatabaseError error) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Error checking book: " + error.getMessage()
-            );
-        }
-    });
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Error checking book: " + error.getMessage()
+                );
+            }
+        });
     }
 
-    public static void deleteBook(String bookId){
+
+    /* =====================================================
+     * ================= DELETE SECTION =====================
+     * ===================================================== */
+
+    public static void deleteBook(String bookId) {
         ref.child(bookId).removeValueAsync();
     }
 
- 
-    
 
-    private static String calculateStatus(int quantity){
-        if(quantity == 0){
-            return "OUT OF STOCK";
-        }else if(quantity <= 2){
-            return  "LOW QUANTITY";
-        }else{
-            return "AVAILABLE";
-        }
-    }
-
-    
-    
+    /* =====================================================
+     * ================= UPDATE SECTION =====================
+     * ===================================================== */
 
     public static void updateBook(Books book) {
 
@@ -141,13 +179,14 @@ public class BookService {
             return;
         }
 
-     
+        // Recalculate status before updating
         book.setStatus(calculateStatus(book.getQuantity()));
 
         ref.child(book.getBookId()).setValueAsync(book);
 
         System.out.println("Book updated: " + book.getBookId());
     }
+
 
     public static void updateBookFields(String bookId, Map<String, Object> updates) {
 
@@ -159,7 +198,22 @@ public class BookService {
         ref.child(bookId).updateChildrenAsync(updates);
     }
 
-    
 
+    /* =====================================================
+     * ================= STATUS CALCULATION =================
+     * ===================================================== */
+
+    private static String calculateStatus(int quantity) {
+
+        if (quantity == 0) {
+            return "OUT OF STOCK";
+
+        } else if (quantity <= 2) {
+            return "LOW QUANTITY";
+
+        } else {
+            return "AVAILABLE";
+        }
+    }
 
 }

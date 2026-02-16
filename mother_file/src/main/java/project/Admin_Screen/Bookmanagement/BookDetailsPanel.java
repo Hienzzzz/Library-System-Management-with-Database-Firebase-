@@ -1,4 +1,10 @@
 package project.Admin_Screen.Bookmanagement;
+
+/* =========================================================
+ * ========================== IMPORTS ======================
+ * ========================================================= */
+
+// ================= AWT =================
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -11,7 +17,10 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
+// ================= IMAGE IO =================
 import javax.imageio.ImageIO;
+
+// ================= SWING =================
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,10 +35,23 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
+// ================= BACKEND =================
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
 
+
+
+/* =========================================================
+ * ===================== CLASS DECLARATION =================
+ * ========================================================= */
+
 public class BookDetailsPanel extends JPanel {
+
+
+
+    /* =====================================================
+     * ===================== CLASS FIELDS ===================
+     * ===================================================== */
 
     private BookManagement parent;
     private Books book;
@@ -37,26 +59,49 @@ public class BookDetailsPanel extends JPanel {
 
 
 
-    public BookDetailsPanel(BookManagement parent, Books book, Runnable onClose){
+    /* =====================================================
+     * ===================== CONSTRUCTOR ====================
+     * ===================================================== */
+
+    public BookDetailsPanel(
+            BookManagement parent,
+            Books book,
+            Runnable onClose) {
+
         this.parent = parent;
         this.book = book;
         this.onClose = onClose;
-       
+
+
+
+        /* =====================================================
+         * ===================== BASE PANEL =====================
+         * ===================================================== */
 
         setLayout(null);
         setBounds(439, 270, 762, 587);
         setOpaque(false);
 
+
+
+        /* =====================================================
+         * ===================== BACKGROUND =====================
+         * ===================================================== */
+
         ImageIcon image = new ImageIcon(
-            getClass().getResource("/Images/Admin_viewBook.png")
+                getClass().getResource("/Images/Admin_viewBook.png")
         );
 
         JLabel background = new JLabel(image);
         background.setBounds(0, 0, 762, 587);
         background.setLayout(null);
 
-       
-        
+
+
+        /* =====================================================
+         * ===================== BOOK HEADER ====================
+         * ===================================================== */
+
         JTextArea title = new JTextArea(book.getTitle());
         title.setWrapStyleWord(true);
         title.setLineWrap(true);
@@ -66,7 +111,13 @@ public class BookDetailsPanel extends JPanel {
         title.setFont(new Font("Poppins", Font.BOLD, 30));
         title.setBounds(200, 90, 500, 80);
 
-        JLabel bookId_textHolder = new JLabel("Book ID: " );
+
+
+        /* =====================================================
+         * ===================== BOOK META INFO =================
+         * ===================================================== */
+
+        JLabel bookId_textHolder = new JLabel("Book ID: ");
         bookId_textHolder.setBounds(200, 190, 300, 22);
         bookId_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
 
@@ -82,20 +133,22 @@ public class BookDetailsPanel extends JPanel {
         author.setBounds(200, 270, 300, 25);
         author.setFont(new Font("Poppins", Font.PLAIN, 17));
 
-       // ---- Genre label title ----
+
+
+        /* =====================================================
+         * ===================== GENRE SECTION =================
+         * ===================================================== */
+
         JLabel genre_textHolder = new JLabel("Genre:");
         genre_textHolder.setBounds(500, 190, 80, 25);
         genre_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
         genre_textHolder.setForeground(new Color(0x333333));
 
-
-        // ---- Genre value label ----
         JLabel genreLabel = new JLabel(book.getGenre());
         genreLabel.setFont(new Font("Poppins", Font.PLAIN, 17));
         genreLabel.setForeground(new Color(0x333333));
         genreLabel.setOpaque(false);
 
-        // ---- Scroll container ----
         JScrollPane genreScroll = new JScrollPane(
                 genreLabel,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -107,55 +160,48 @@ public class BookDetailsPanel extends JPanel {
         genreScroll.setOpaque(false);
         genreScroll.getViewport().setOpaque(false);
 
-        // Hide scrollbar by default
         JScrollBar hBar = genreScroll.getHorizontalScrollBar();
         hBar.setPreferredSize(new Dimension(0, 0));
         hBar.setOpaque(false);
         hBar.setVisible(false);
 
-        // Show scrollbar only when hovering or scrolling
         genreScroll.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 hBar.setPreferredSize(new Dimension(0, 3));
                 hBar.setVisible(true);
                 genreScroll.revalidate();
             }
 
-            @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
                 hBar.setPreferredSize(new Dimension(0, 0));
                 hBar.setVisible(false);
                 genreScroll.revalidate();
             }
         });
+
         hBar.setUI(new BasicScrollBarUI() {
-            @Override
             protected void configureScrollBarColors() {
                 thumbColor = new Color(0xB0B8C4);
                 trackColor = new Color(0xF1F3F6);
             }
-
-            @Override
-            protected JButton createDecreaseButton(int orientation) {
-                return createZeroButton();
-            }
-
-            @Override
-            protected JButton createIncreaseButton(int orientation) {
-                return createZeroButton();
-            }
-
-            private JButton createZeroButton() {
+            protected JButton createDecreaseButton(int o){ return createZeroButton(); }
+            protected JButton createIncreaseButton(int o){ return createZeroButton(); }
+            private JButton createZeroButton(){
                 JButton b = new JButton();
-                b.setPreferredSize(new Dimension(0, 0));
-                b.setMinimumSize(new Dimension(0, 0));
-                b.setMaximumSize(new Dimension(0, 0));
+                b.setPreferredSize(new Dimension(0,0));
+                b.setMinimumSize(new Dimension(0,0));
+                b.setMaximumSize(new Dimension(0,0));
                 return b;
             }
         });
-       
-        JLabel status_textHolder = new JLabel("Status: " );
+
+
+
+        /* =====================================================
+         * ===================== STATUS & QUANTITY =============
+         * ===================================================== */
+
+        JLabel status_textHolder = new JLabel("Status: ");
         status_textHolder.setBounds(500, 240, 300, 25);
         status_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
 
@@ -167,28 +213,31 @@ public class BookDetailsPanel extends JPanel {
         quantity.setBounds(500, 290, 300, 25);
         quantity.setFont(new Font("Poppins", Font.PLAIN, 15));
 
+
+
+        /* =====================================================
+         * ===================== COVER IMAGE ===================
+         * ===================================================== */
+
         JLabel book_cover = new JLabel();
         book_cover.setBounds(29, 90, 158, 238);
         book_cover.setOpaque(false);
         book_cover.setBackground(Color.GRAY);
-        
+
         background.add(book_cover);
 
         new Thread(() -> {
             try {
-                if (book.getCoverURL() == null || book.getCoverURL().isEmpty()) {
-                    System.out.println("Cover URL is null or empty");
+
+                if (book.getCoverURL() == null ||
+                        book.getCoverURL().isEmpty()) {
                     return;
                 }
 
                 URL url = new URL(book.getCoverURL());
-
-                // FORCE full load
                 BufferedImage bufferedImage = ImageIO.read(url);
-                if (bufferedImage == null) {
-                    System.out.println("Failed to load image from URL");
-                    return;
-                }
+
+                if (bufferedImage == null) return;
 
                 Image scaled = bufferedImage.getScaledInstance(
                         153, 223,
@@ -206,91 +255,49 @@ public class BookDetailsPanel extends JPanel {
             }
         }).start();
 
-        
-
-JTextArea description = new JTextArea(book.getDescription());
-description.setWrapStyleWord(true);
-description.setLineWrap(true);
-description.setEditable(false);
-description.setFont(new Font("Poppins", Font.PLAIN, 13));
-description.setForeground(new Color(0x333333));
-description.setBackground(new Color(0xF1F3F6));
-description.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
-description.setCaretPosition(0);
-description.setFocusable(false);
-description.setBorder(null);
-description.setFocusable(false);
-description.setFocusable(false);
-description.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 
+        /* =====================================================
+         * ===================== DESCRIPTION ===================
+         * ===================================================== */
 
-JScrollPane scrollPane = new JScrollPane(description);
-scrollPane.setBounds(33, 355, 700, 150);
-scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADDE2)));
-scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-scrollPane.setBackground(Color.WHITE);
-scrollPane.getViewport().setBackground(new Color(0xF1F3F6));
-scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
-scrollPane.setCorner(JScrollPane.LOWER_RIGHT_CORNER, new JPanel());
-scrollPane.setBorder(null);
-scrollPane.setOpaque(false);
-scrollPane.getViewport().setOpaque(false);
+        JTextArea description = new JTextArea(book.getDescription());
+        description.setWrapStyleWord(true);
+        description.setLineWrap(true);
+        description.setEditable(false);
+        description.setFont(new Font("Poppins", Font.PLAIN, 13));
+        description.setForeground(new Color(0x333333));
+        description.setBackground(new Color(0xF1F3F6));
+        description.setCaretPosition(0);
+        description.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+        JScrollPane scrollPane = new JScrollPane(description);
+        scrollPane.setBounds(33, 355, 700, 150);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+            protected void configureScrollBarColors(){
+                thumbColor = new Color(0xB0B8C4);
+                trackColor = new Color(0xF1F3F6);
+            }
+            protected JButton createDecreaseButton(int o){ return createZeroButton(); }
+            protected JButton createIncreaseButton(int o){ return createZeroButton(); }
+            private JButton createZeroButton(){
+                JButton b=new JButton();
+                b.setPreferredSize(new Dimension(0,0));
+                return b;
+            }
+        });
 
 
 
-
-Color SCROLL_TRACK = new Color(0xF1F3F6);
-Color SCROLL_THUMB = new Color(0xB0B8C4); // soft gray-blue
-Color SCROLL_THUMB_HOVER = new Color(0x8FA1B5);
-
-scrollPane.setBorder(null);
-
-scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
-
-        @Override
-        protected void configureScrollBarColors() {
-            thumbColor = SCROLL_THUMB;
-            trackColor = SCROLL_TRACK;
-        }
-
-        @Override
-        protected JButton createDecreaseButton(int orientation) {
-            return createZeroButton();
-        }
-
-        @Override
-        protected JButton createIncreaseButton(int orientation) {
-            return createZeroButton();
-        }
-
-        private JButton createZeroButton() {
-            JButton button = new JButton();
-            button.setPreferredSize(new Dimension(0, 0));
-            button.setMinimumSize(new Dimension(0, 0));
-            button.setMaximumSize(new Dimension(0, 0));
-            return button;
-        }
-
-        @Override
-        protected void paintThumb(Graphics g, JComponent c, Rectangle r) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON);
-
-            g2.setColor(isThumbRollover() ? SCROLL_THUMB_HOVER : SCROLL_THUMB);
-            g2.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
-            g2.dispose();
-        }
-
-        @Override
-        protected void paintTrack(Graphics g, JComponent c, Rectangle r) {
-            g.setColor(SCROLL_TRACK);
-            g.fillRect(r.x, r.y, r.width, r.height);
-        }
-    });
+        /* =====================================================
+         * ===================== ACTION BUTTONS ================
+         * ===================================================== */
 
         JButton close_Button = new JButton();
         close_Button.setBounds(724, 13, 25, 25);
@@ -301,20 +308,19 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
 
         close_Button.addActionListener(e -> {
 
-            
             int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to Close this Panel?",
-                "Confirm Close Panel",
-                JOptionPane.YES_NO_OPTION
+                    this,
+                    "Are you sure you want to Close this Panel?",
+                    "Confirm Close Panel",
+                    JOptionPane.YES_NO_OPTION
             );
-                if (confirm == JOptionPane.YES_OPTION){
-                    onClose.run();
-                }
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                onClose.run();
+            }
         });
 
 
-        
 
         JButton edit_button = new JButton();
         edit_button.setBounds(452, 531, 117, 38);
@@ -326,42 +332,34 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         edit_button.addActionListener(e -> {
 
             int result = JOptionPane.showConfirmDialog(
-                this,
-                "Do you want to edit this book?",
-                "Confirm Edit",
-                JOptionPane.YES_NO_OPTION
+                    this,
+                    "Do you want to edit this book?",
+                    "Confirm Edit",
+                    JOptionPane.YES_NO_OPTION
             );
 
             if (result != JOptionPane.YES_OPTION) return;
 
-            
             onClose.run();
 
-            final EditBookPanel[] editPanelHolder = new EditBookPanel[1];
+            final EditBookPanel[] holder = new EditBookPanel[1];
 
-            editPanelHolder[0] = new EditBookPanel(
-                parent,
-                book,   
-                () -> {
-                    parent.getLayeredPaneRef().remove(editPanelHolder[0]);
-                    parent.hideDimOverlay();
-                    parent.getLayeredPaneRef().revalidate();
-                    parent.getLayeredPaneRef().repaint();
-                }
+            holder[0] = new EditBookPanel(
+                    parent,
+                    book,
+                    () -> {
+                        parent.getLayeredPaneRef().remove(holder[0]);
+                        parent.hideDimOverlay();
+                        parent.getLayeredPaneRef().revalidate();
+                        parent.getLayeredPaneRef().repaint();
+                    }
             );
 
             parent.showDimOverlay();
-
-            parent.getLayeredPaneRef().add(
-                editPanelHolder[0],
-                JLayeredPane.POPUP_LAYER
-            );
-
+            parent.getLayeredPaneRef().add(holder[0], JLayeredPane.POPUP_LAYER);
             parent.getLayeredPaneRef().revalidate();
             parent.getLayeredPaneRef().repaint();
         });
-
-
 
 
 
@@ -374,26 +372,29 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
 
         delete_button.addActionListener(e -> {
 
-            if(book.getBorrowedCount() > 0){
+            if (book.getBorrowedCount() > 0) {
                 delete_button.setEnabled(false);
-                delete_button.setToolTipText("Book us currenltu borrowed");
-
+                delete_button.setToolTipText("Book is currently borrowed");
             }
 
             int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to delete this book?\nThis action cannot be undone",
-                "Confirm Delete",
-                JOptionPane.YES_NO_OPTION
+                    this,
+                    "Are you sure you want to delete this book?\nThis action cannot be undone",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION
             );
-                if (confirm == JOptionPane.YES_OPTION){
-                    BookService.deleteBook(book.getBookId());
-                    onClose.run();
-                }
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                BookService.deleteBook(book.getBookId());
+                onClose.run();
+            }
         });
 
-       
 
+
+        /* =====================================================
+         * ===================== ADD COMPONENTS ================
+         * ===================================================== */
 
         background.add(close_Button);
         background.add(status_textHolder);
@@ -409,8 +410,7 @@ scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
         background.add(title);
         background.add(delete_button);
         background.add(edit_button);
-        this.add(background);
 
+        this.add(background);
     }
-    
 }
