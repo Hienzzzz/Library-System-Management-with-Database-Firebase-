@@ -13,31 +13,24 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-
-// ================= UTIL =================
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-// ================= SWING =================
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -54,25 +47,18 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import javax.swing.table.TableRowSorter;
 
-// ================= FIREBASE =================
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-// ================= PROJECT SCREENS =================
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Dashboard.AdminDashboard;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Admin_Screen.Studentmanagement.StudentManagement;
-
-// ================= BACKEND =================
 import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Book_backend.Books;
-
-// ================= MAIN FRAME =================
 import project.Main_System.MainFrame;
 
 
@@ -311,10 +297,55 @@ public class BookManagement extends JPanel {
 
         // ================= TABLE COMPONENT =================
         table = new JTable(model);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setResizingAllowed(false);
         table.setRowHeight(28);
         table.setBackground(Color.WHITE);
         table.setShowGrid(false);
         table.setIntercellSpacing(new Dimension(0, 0));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 40));
+
+
+        //================== HEADER ADJUSTMENT =============
+        DefaultTableCellRenderer headerRenderer =
+        (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
+
+        headerRenderer.setBorder(BorderFactory.createEmptyBorder());
+        table.getTableHeader().setFont(new Font("Sanchez", Font.PLAIN, 17));
+        table.getTableHeader().setBackground(new Color(241, 243, 246));
+        table.getTableHeader().setForeground(new Color(60, 60, 60));
+        table.getTableHeader().setFont(MainFrame.loadSanchez(14f).deriveFont(Font.BOLD));
+        table.getTableHeader().setOpaque(true);
+        table.getTableHeader().setBorder(BorderFactory.createEmptyBorder());
+        table.getTableHeader().setBorder(
+            BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(0xb4b4b4))
+        );
+
+        table.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(
+                    JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+
+                JLabel label = (JLabel) super.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column);
+
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setBackground(new Color(241, 243, 246));
+                label.setForeground(new Color(60, 60, 60));
+                label.setFont(MainFrame.loadSanchez(14f).deriveFont(Font.BOLD));
+
+                // 🔹 REMOVE BORDER
+                label.setBorder(BorderFactory.createEmptyBorder());
+
+                return label;
+            }
+        });
+
+        
+
+
+
 
         // ================= COLUMN WIDTHS =================
         table.getColumnModel().getColumn(0).setPreferredWidth(410);
@@ -344,7 +375,7 @@ public class BookManagement extends JPanel {
          * ===================================================== */
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(371, 510, 1030, 412);
+        scrollPane.setBounds(367, 467, 1038, 412);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
         scrollPane.setHorizontalScrollBarPolicy(
@@ -870,14 +901,24 @@ public class BookManagement extends JPanel {
                 setBackground(SELECT_COLOR);
             }
 
-            if (column == 4) {
-                return this;
+           // ===== Alignment =====
+            if (column == 1) { // Quantity column
+                setHorizontalAlignment(SwingConstants.CENTER);
+            }else if (column == 2) {
+                setHorizontalAlignment(SwingConstants.CENTER);
+            } else if (column == 3) {
+                setHorizontalAlignment(SwingConstants.CENTER);
+            }else if (column == 4) {
+                return this; // Action handled separately
+            }  else {
+                setHorizontalAlignment(SwingConstants.LEFT);
             }
 
             setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
             setVerticalAlignment(SwingConstants.CENTER);
 
             return this;
+
         }
     }
 
