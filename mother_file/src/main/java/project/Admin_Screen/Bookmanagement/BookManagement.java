@@ -24,12 +24,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -97,6 +99,8 @@ public class BookManagement extends JPanel {
     private int hoveredRow = -1;
     private boolean tableHasFocus = false;
 
+    
+
 
 
     /* =====================================================
@@ -107,6 +111,8 @@ public class BookManagement extends JPanel {
         this.frame = frame;
         initUI();
         loadBooks();
+
+        
     }
 
 
@@ -281,6 +287,57 @@ public class BookManagement extends JPanel {
         dimOverlay.addMouseListener(new java.awt.event.MouseAdapter() {});
 
 
+         /* =====================================================
+         * =================== TOTAL BOOK OVERVIEW ================
+         * ===================================================== */
+
+        JLabel totalBookOverview = new JLabel("25");
+        totalBookOverview.setBounds(475, 240, 200, 60); // adjust to match your UI card
+        totalBookOverview.setFont(new Font("Sanchez", Font.PLAIN, 40));
+        totalBookOverview.setForeground(Color.WHITE);
+        //totalBookOverview.setHorizontalAlignment(SwingConstants.LEFT);
+
+        background.add(totalBookOverview);
+
+
+        /* =====================================================
+         * ================= AVAILABLE BOOK OVERVIEW ==============
+         * ===================================================== */
+
+        JLabel availableBookOverview = new JLabel("50");
+        availableBookOverview.setBounds(730, 240, 200, 60);
+        availableBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
+        availableBookOverview.setForeground(Color.white);
+
+        background.add(availableBookOverview);
+
+
+        /* =====================================================
+         * ================= BORROWED BOOK OVERVIEW ==============
+         * ===================================================== */
+
+        JLabel borrowedBookOverview = new JLabel("50");
+        borrowedBookOverview.setBounds(1000, 240, 200, 60);
+        borrowedBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
+        borrowedBookOverview.setForeground(Color.white);
+
+        background.add(borrowedBookOverview);
+
+
+        /* =====================================================
+         * ================= OVERDUE BOOK OVERVIEW ==============
+         * ===================================================== */
+
+        JLabel overdueBookOverview = new JLabel("50");
+        overdueBookOverview.setBounds(1275, 240, 200, 60);
+        overdueBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
+        overdueBookOverview.setForeground(Color.white);
+
+        background.add(overdueBookOverview);
+
+
+
+
         /* =====================================================
          * ====================== TABLE SETUP ===================
          * ===================================================== */
@@ -341,10 +398,6 @@ public class BookManagement extends JPanel {
                 return label;
             }
         });
-
-        
-
-
 
 
         // ================= COLUMN WIDTHS =================
@@ -454,24 +507,47 @@ public class BookManagement extends JPanel {
 
         String[] sortOption = {
                 "Default",
-                "Available Books",
+                "A to Z",
+                "Book ID",
                 "Low Quantity",
-                "Out of Stock",
                 "Newest",
                 "Oldest",
-                "A to Z",
-                "Title",
-                "Author",
-                "Book ID"
+                "Out of Stock"
         };
 
         sortBox = new JComboBox<>(sortOption);
-        sortBox.setBounds(854, 416, 145, 24);
+        sortBox.setBounds(850, 415, 155, 30);
         sortBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
         sortBox.setBackground(Color.WHITE);
         sortBox.setForeground(new Color(60, 60, 60));
         sortBox.setFocusable(false);
-        sortBox.setSelectedItem(null);
+
+        // sort custom renderer for defalt "sort by" display
+        sortBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                        list, value, index, isSelected, cellHasFocus);
+
+                if (index == -1 && value != null) {
+                    // This is the selected value shown in the box
+                    label.setText("Sort by: " + value.toString());
+                } else {
+                    // This is dropdown list items
+                    label.setText(value.toString());
+                }
+
+                label.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+                return label;
+            }
+        });
+
+
+
+        
 
         background.add(sortBox);
 
