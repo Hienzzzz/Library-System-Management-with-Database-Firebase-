@@ -365,9 +365,6 @@ public class BookManagement extends JPanel {
             layeredPane.repaint();
         });
         
-
-
-
         background.add(addNewBook);
         /* =====================================================
          * ====================== TABLE SETUP ===================
@@ -459,7 +456,7 @@ public class BookManagement extends JPanel {
          * ===================================================== */
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(367, 467, 1038, 412);
+        scrollPane.setBounds(367, 467, 1038, 452);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
         scrollPane.setHorizontalScrollBarPolicy(
