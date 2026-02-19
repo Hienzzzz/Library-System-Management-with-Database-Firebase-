@@ -367,6 +367,21 @@ public class AddBookPanel extends JPanel {
                 return;
             }
 
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to add this Book?\n\n" +
+                "Title: " + titleText + "\n" +
+                "Autor: " + authorText + "\n" +
+                "Quantity: " + quantityButton.getValue(),
+                "Comfirm add Book",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (confirm != JOptionPane.YES_OPTION){
+                return;
+            }
+
             Books book = new Books(
                     titleText,
                     null,
@@ -377,7 +392,15 @@ public class AddBookPanel extends JPanel {
                     coverURL
             );
 
-            BookService.checkDuplicateAndAdd(book);
+
+            BookService.checkDuplicateAndAdd(book, () ->{
+                JOptionPane.showMessageDialog(
+                    this, 
+                "Book added successfully!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE);
+            });
+           
 
             Title.setText("");
             Author.setText("");

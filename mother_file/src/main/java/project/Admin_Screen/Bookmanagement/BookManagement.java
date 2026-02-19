@@ -342,6 +342,34 @@ public class BookManagement extends JPanel {
 
 
         /* =====================================================
+         * ==================== ADD BOOK BUTTON =================
+         * ===================================================== */
+        JButton addNewBook = new JButton();
+        addNewBook.setBounds(1328, 402, 48, 50);
+        addNewBook.setContentAreaFilled(false);
+        addNewBook.setBorder(null);
+        addNewBook.setOpaque(false);
+        
+
+        addNewBook.addActionListener(e ->{
+            if (addBook != null){
+                layeredPane.remove(addBook);
+                addBook = null;
+            }
+
+            dimOverlay.setVisible(true);
+
+            addBook = new AddBookPanel(this);
+            layeredPane.add(addBook, JLayeredPane.POPUP_LAYER);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+        });
+        
+
+
+
+        background.add(addNewBook);
+        /* =====================================================
          * ====================== TABLE SETUP ===================
          * ===================================================== */
 
@@ -576,26 +604,6 @@ public class BookManagement extends JPanel {
 
 
         background.add(categoryBox);
-
-   /*     String[] genres = {
-                "All Categories",
-                "Fiction",
-                "Non-Fiction",
-                "Science",
-                "History",
-                "Technology",
-                "Education"
-        };
-
-        categoryBox = new JComboBox<>(genres);
-        categoryBox.setBounds(684, 414, 145, 26);
-        categoryBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
-        categoryBox.setBackground(Color.WHITE);
-        categoryBox.setForeground(new Color(60, 60, 60));
-        categoryBox.setFocusable(false);
-
-        background.add(categoryBox);
-*/ 
 
         /* =====================================================
          * ===================== SORT FILTER ====================
