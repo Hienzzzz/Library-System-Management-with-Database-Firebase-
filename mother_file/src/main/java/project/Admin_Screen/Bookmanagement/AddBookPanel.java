@@ -21,6 +21,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -318,7 +319,6 @@ public class AddBookPanel extends JPanel {
         });
 
 
-
         /* =====================================================
          * ===================== ADD BOOK LOGIC =================
          * ===================================================== */
@@ -381,6 +381,7 @@ public class AddBookPanel extends JPanel {
             if (confirm != JOptionPane.YES_OPTION){
                 return;
             }
+            
 
             Books book = new Books(
                     titleText,
@@ -396,9 +397,10 @@ public class AddBookPanel extends JPanel {
             BookService.checkDuplicateAndAdd(book, () ->{
                 JOptionPane.showMessageDialog(
                     this, 
-                "Book added successfully!",
-                "Success",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Book added successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
             });
            
 
