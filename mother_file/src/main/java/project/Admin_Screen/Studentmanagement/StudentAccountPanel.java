@@ -324,19 +324,26 @@ public class StudentAccountPanel extends JPanel {
                     JComboBox<?> box = (JComboBox<?>) e.getSource();
                     JPopupMenu popup =
                         (JPopupMenu) box.getAccessibleContext().getAccessibleChild(0);
-                    if (popup != null && popup.getComponentCount() > 0) {
-                        JScrollPane sp = (JScrollPane) popup.getComponent(0);
-                        JScrollBar vBar = sp.getVerticalScrollBar();
-                        vBar.setUI(new ModernScrollBarUI());
-                        vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
 
+                    if (popup != null) {
+                        popup.setBorder(BorderFactory.createLineBorder(
+                            new Color(218, 221, 225), 1
+                        ));
 
+                        if (popup.getComponentCount() > 0) {
+                            JScrollPane sp = (JScrollPane) popup.getComponent(0);
+                            JScrollBar vBar = sp.getVerticalScrollBar();
+                            vBar.setUI(new ModernScrollBarUI());
+                            vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+                        }
                     }
                 });
             }
-            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
-            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
-        });
+
+        public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+        public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+    });
+
 
         background.add(sortBox);
 

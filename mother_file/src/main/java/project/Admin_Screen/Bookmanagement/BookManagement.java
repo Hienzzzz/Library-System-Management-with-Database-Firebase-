@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -33,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -46,6 +48,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -482,6 +485,99 @@ public class BookManagement extends JPanel {
          * ===================================================== */
 
         String[] genres = {
+                "Default",
+                "Education",
+                "Fiction",
+                "History",
+                "Non-Fiction",
+                "Science",
+                "Technology"
+        };
+
+        categoryBox = new JComboBox<>(genres);
+        categoryBox.setBounds(680, 414, 150, 26);
+        categoryBox.setFont(new Font("Poppins", Font.PLAIN, 13));
+        categoryBox.setBackground(Color.WHITE);
+        categoryBox.setForeground(new Color(60, 60, 60));
+        categoryBox.setFocusable(false);
+        categoryBox.setOpaque(false);
+        categoryBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color (218, 221, 225), 0),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        categoryBox.setSelectedItem(null);
+
+        categoryBox.setRenderer(new DefaultListCellRenderer(){
+            @Override
+            public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellhasFocus){
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellhasFocus);
+
+                    if(index == -1 && value == null){
+                        setText("Category:");
+                        setForeground(new Color(150, 150, 150));
+                    }else if(index == -1){
+                        setText("Category: " + value);
+                        setForeground(new Color(60, 60, 60));
+                    }else{
+                        setText(value.toString());
+                        setForeground(new Color(60, 60, 60));
+                    }
+                    return this;
+                }
+        });
+
+        categoryBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI(){
+            @Override
+            protected JButton createArrowButton(){
+                JButton b = new JButton();
+                b.setContentAreaFilled(false);
+                b.setBorder(null);
+                b.setFocusable(false);
+                b.setOpaque(false);
+                ImageIcon icon = new ImageIcon(
+                    getClass().getResource("/Images/down-chevron.png")
+                );
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                b.setIcon(new ImageIcon(img));
+                return b;
+            }
+        });
+
+        categoryBox.addActionListener( e -> applySorting());
+
+        categoryBox.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    JComboBox<?> box = (JComboBox<?>) e.getSource();
+                    JPopupMenu popup =
+                        (JPopupMenu) box.getAccessibleContext().getAccessibleChild(0);
+
+                    if (popup != null) {
+
+                        popup.setBorder(BorderFactory.createLineBorder(
+                            new Color(218, 221, 225), 1
+                        ));
+
+                        if (popup.getComponentCount() > 0) {
+                            JScrollPane sp = (JScrollPane) popup.getComponent(0);
+                            JScrollBar vBar = sp.getVerticalScrollBar();
+                            vBar.setUI(new ModernScrollBarUI());
+                            vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+                        }
+                    }
+                });
+            }
+
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+        });
+
+
+        background.add(categoryBox);
+
+   /*     String[] genres = {
                 "All Categories",
                 "Fiction",
                 "Non-Fiction",
@@ -499,55 +595,101 @@ public class BookManagement extends JPanel {
         categoryBox.setFocusable(false);
 
         background.add(categoryBox);
-
+*/ 
 
         /* =====================================================
          * ===================== SORT FILTER ====================
          * ===================================================== */
 
-        String[] sortOption = {
-                "Default",
-                "A to Z",
-                "Book ID",
-                "Low Quantity",
-                "Newest",
-                "Oldest",
-                "Out of Stock"
-        };
+        sortBox = new JComboBox<>(new String[] {
+            "Default",
+            "A to Z",
+            "Newest",
+            "Low Quantity",
+            "Oldest",
+            "Out of Stock"
 
-        sortBox = new JComboBox<>(sortOption);
-        sortBox.setBounds(850, 415, 155, 30);
-        sortBox.setFont(new Font("Sanchez", Font.PLAIN, 13));
+        });
+
+        sortBox.setBounds(848, 417, 158, 24);
+        sortBox.setFont(new Font("Poppins", Font.PLAIN, 13));
         sortBox.setBackground(Color.WHITE);
         sortBox.setForeground(new Color(60, 60, 60));
         sortBox.setFocusable(false);
+        sortBox.setOpaque(false);
+        sortBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color (218, 221, 225), 0),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        sortBox.setSelectedItem(null);
 
-        // sort custom renderer for defalt "sort by" display
-        sortBox.setRenderer(new DefaultListCellRenderer() {
+        sortBox.setRenderer(new DefaultListCellRenderer(){
             @Override
             public Component getListCellRendererComponent(
-                    JList<?> list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
+                JList<?> list, Object value, int index,
+                boolean isSelected, boolean cellhasFocus){
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellhasFocus);
 
-                JLabel label = (JLabel) super.getListCellRendererComponent(
-                        list, value, index, isSelected, cellHasFocus);
-
-                if (index == -1 && value != null) {
-                    // This is the selected value shown in the box
-                    label.setText("Sort by: " + value.toString());
-                } else {
-                    // This is dropdown list items
-                    label.setText(value.toString());
+                    if(index == -1 && value == null){
+                        setText("Sort by:");
+                        setForeground(new Color(150, 150, 150));
+                    }else if(index == -1){
+                        setText("Sort by: " + value);
+                        setForeground(new Color(60, 60, 60));
+                    }else{
+                        setText(value.toString());
+                        setForeground(new Color(60, 60, 60));
+                    }
+                    return this;
                 }
+        });
 
-                label.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
-                return label;
+        sortBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI(){
+            @Override
+            protected JButton createArrowButton(){
+                JButton b = new JButton();
+                b.setContentAreaFilled(false);
+                b.setBorder(null);
+                b.setFocusable(false);
+                b.setOpaque(false);
+                ImageIcon icon = new ImageIcon(
+                    getClass().getResource("/Images/down-chevron.png")
+                );
+                Image img = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                b.setIcon(new ImageIcon(img));
+                return b;
             }
         });
 
+        sortBox.addActionListener( e -> applySorting());
 
+        sortBox.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    JComboBox<?> box = (JComboBox<?>) e.getSource();
+                    JPopupMenu popup =
+                        (JPopupMenu) box.getAccessibleContext().getAccessibleChild(0);
 
-        
+                    if (popup != null) {
+
+                        popup.setBorder(BorderFactory.createLineBorder(
+                            new Color(218, 221, 225), 1
+                        ));
+
+                        if (popup.getComponentCount() > 0) {
+                            JScrollPane sp = (JScrollPane) popup.getComponent(0);
+                            JScrollBar vBar = sp.getVerticalScrollBar();
+                            vBar.setUI(new ModernScrollBarUI()); 
+                            vBar.setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+                        }
+                    }
+                });
+            }
+
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
+        });
+
 
         background.add(sortBox);
 
