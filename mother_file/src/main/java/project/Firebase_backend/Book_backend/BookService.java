@@ -60,11 +60,11 @@ public class BookService {
      * ================= ADD BOOK SECTION ===================
      * ===================================================== */
 
-    public static void addBookWithUniqueId(Books book) {
-        checkAndAdd(book, 0);
+    public static void addBookWithUniqueId(Books book, Runnable onSuccess) {
+        checkAndAdd(book, 0, onSuccess);
     }
 
-    private static void checkAndAdd(Books book, int attempts) {
+    private static void checkAndAdd(Books book, int attempts, Runnable onSuccess) {
 
         if (attempts > 5) {
             System.out.println("Failed to generate unique Book ID");
@@ -84,14 +84,23 @@ public class BookService {
                 if (snapshot.exists()) {
 
                     // Retry if duplicate ID found
-                    checkAndAdd(book, attempts + 1);
+                    checkAndAdd(book, attempts + 1, onSuccess);
 
                 } else {
 
                     // Calculate status before saving
                     book.setStatus(calculateStatus(book.getQuantity()));
 
-                    ref.child(newId).setValueAsync(book);
+                    ref.child(newId).setValueAsync(book).addListener(() -> {
+
+                        System.out.println("Book added with ID: " + newId);
+
+                        if (onSuccess != null) {
+                            onSuccess.run();
+                        }
+
+                    }, Runnable::run);
+
 
                     System.out.println("Book added with ID: " + newId);
                     System.out.println("STATUS BEFORE SAVE: " + book.getStatus());
@@ -116,7 +125,7 @@ public class BookService {
      * ============ DUPLICATE CHECK BEFORE ADDING ==========
      * ===================================================== */
 
-    public static void checkDuplicateAndAdd(Books book) {
+    public static void checkDuplicateAndAdd(Books book, Runnable onSuccess) {
 
         String title = book.getTitle().trim().toLowerCase();
         String author = book.getAuthor().trim().toLowerCase();
@@ -144,7 +153,7 @@ public class BookService {
                 }
 
                 // If no duplicate found → proceed
-                addBookWithUniqueId(book);
+                addBookWithUniqueId(book, onSuccess);
             }
 
             @Override
