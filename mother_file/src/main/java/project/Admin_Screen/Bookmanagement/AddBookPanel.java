@@ -32,6 +32,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.text.NumberFormatter;
@@ -57,6 +59,9 @@ public class AddBookPanel extends JPanel {
 
     private BookManagement parent;
 
+    //loading overlay
+    private LoadingOverLay loading;
+
 
 
     /* =====================================================
@@ -67,6 +72,9 @@ public class AddBookPanel extends JPanel {
 
         this.parent = parent;
 
+        
+
+
         /* =====================================================
          * ===================== BASE PANEL =====================
          * ===================================================== */
@@ -75,6 +83,15 @@ public class AddBookPanel extends JPanel {
         setBounds(439, 308, 762, 587);
         setOpaque(false);
 
+        /* =====================================================
+         * ===================== Loading Overlay =====================
+         * ===================================================== */
+
+        loading = new LoadingOverLay("Adding book, please wait...");
+        loading.setBounds(0,0,762, 587);
+        loading.setVisible(false);
+        add(loading);
+        setComponentZOrder(loading , 0);
 
 
         /* =====================================================
@@ -322,98 +339,124 @@ public class AddBookPanel extends JPanel {
         /* =====================================================
          * ===================== ADD BOOK LOGIC =================
          * ===================================================== */
+addBook_button.addActionListener(e -> {
 
-        addBook_button.addActionListener(e -> {
+    String titleText = Title.getText().trim();
+    String authorText = Author.getText().trim();
+    String genreText = Genre.getText().trim();
+    String descriptionText = description.getText().trim();
 
-            String titleText = Title.getText().trim();
-            String authorText = Author.getText().trim();
-            String genreText = Genre.getText().trim();
-            String descriptionText = description.getText().trim();
+    if (titleText.isEmpty() ||
+        authorText.isEmpty() ||
+        genreText.isEmpty() ||
+        descriptionText.isEmpty()) {
 
-            if (titleText.isEmpty() ||
-                    authorText.isEmpty() ||
-                    genreText.isEmpty() ||
-                    descriptionText.isEmpty()) {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "All fields are required.",
-                        "Missing Information",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            if (selectedFile[0] == null) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Book cover image is REQUIRED before adding a book.",
-                        "Missing Book Cover",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            String coverURL =
-                    ImageService.uploadBookCover(selectedFile[0], null);
-
-            if (coverURL == null) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Image upload failed.\nPlease try again.",
-                        "Upload Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            int confirm = JOptionPane.showConfirmDialog(
+        JOptionPane.showMessageDialog(
                 this,
-                "Are you sure you want to add this Book?\n\n" +
-                "Title: " + titleText + "\n" +
-                "Autor: " + authorText + "\n" +
-                "Quantity: " + quantityButton.getValue(),
-                "Comfirm add Book",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
+                "All fields are required.",
+                "Missing Information",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-            if (confirm != JOptionPane.YES_OPTION){
-                return;
-            }
-            
+    if (selectedFile[0] == null) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Book cover image is REQUIRED before adding a book.",
+                "Missing Book Cover",
+                JOptionPane.ERROR_MESSAGE
+        );
+        return;
+    }
 
-            Books book = new Books(
-                    titleText,
-                    null,
-                    authorText,
-                    (int) quantityButton.getValue(),
-                    genreText,
-                    descriptionText,
-                    coverURL
-            );
+    int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to add this Book?\n\n" +
+        "Title: " + titleText + "\n" +
+        "Author: " + authorText + "\n" +
+        "Quantity: " + quantityButton.getValue(),
+        "Confirm add Book",
+        JOptionPane.YES_NO_OPTION
+    );
 
+    if (confirm != JOptionPane.YES_OPTION) return;
 
-            BookService.checkDuplicateAndAdd(book, () ->{
-                JOptionPane.showMessageDialog(
-                    this, 
-                    "Book added successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
+    loading.setVisible(true);
+
+    // Upload image in background (blocking operation)
+    SwingWorker<String, Void> worker = new SwingWorker<>() {
+
+        @Override
+        protected String doInBackground() throws Exception {
+            return ImageService.uploadBookCover(selectedFile[0], null);
+        }
+
+        @Override
+        protected void done() {
+            try {
+
+                String coverURL = get();
+
+                if (coverURL == null) {
+                    loading.setVisible(false);
+                    JOptionPane.showMessageDialog(
+                            AddBookPanel.this,
+                            "Image upload failed.\nPlease try again.",
+                            "Upload Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                Books book = new Books(
+                        titleText,
+                        null,
+                        authorText,
+                        (int) quantityButton.getValue(),
+                        genreText,
+                        descriptionText,
+                        coverURL
                 );
-            });
-           
 
-            Title.setText("");
-            Author.setText("");
-            Genre.setText("");
-            description.setText("");
-            quantityButton.setValue(1);
-            imgPreview.setIcon(null);
-            selectedFile[0] = null;
+                // 🔥 Firebase async call
+                BookService.checkDuplicateAndAdd(book, () -> {
 
-            parent.closeAddBook();
-        });
+                    SwingUtilities.invokeLater(() -> {
+
+                        loading.setVisible(false);
+
+                        JOptionPane.showMessageDialog(
+                                AddBookPanel.this,
+                                "Book added successfully!",
+                                "Success",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+
+                        Title.setText("");
+                        Author.setText("");
+                        Genre.setText("");
+                        description.setText("");
+                        quantityButton.setValue(1);
+                        imgPreview.setIcon(null);
+                        selectedFile[0] = null;
+                         
+
+                        parent.closeAddBook();
+                    });
+
+                });
+
+            } catch (Exception ex) {
+                loading.stop();
+                loading.setVisible(false);
+                ex.printStackTrace();
+            }
+        }
+    };
+
+    worker.execute();
+});
 
 
 
