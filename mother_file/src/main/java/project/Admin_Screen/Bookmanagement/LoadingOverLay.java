@@ -36,7 +36,10 @@ public class LoadingOverLay extends JPanel {
         progress = new JProgressBar(0, 100);
         progress.setIndeterminate(true);
         progress.setStringPainted(false);
-        progress.setPreferredSize(new Dimension(250, 16));
+        progress.setForeground(new Color(11, 42, 91)); // Navy blue
+        progress.setBackground(new Color(230,230,230));
+        progress.setBorderPainted(false);
+        progress.setPreferredSize(new Dimension(0, 8));
         
 
         box.add(label, BorderLayout.CENTER);
@@ -53,5 +56,5 @@ public class LoadingOverLay extends JPanel {
     public void stop(){
         progress.setIndeterminate(false);
     }
-
+    
 }
