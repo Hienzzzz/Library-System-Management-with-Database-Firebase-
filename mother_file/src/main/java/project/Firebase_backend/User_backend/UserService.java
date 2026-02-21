@@ -92,20 +92,12 @@ public class UserService {
                         usersRef.child(user.getId())
                                 .child("studentData");
 
-                studentRef.child("borrowedCount")
-                        .setValueAsync(0).get();
-
-                studentRef.child("offenseCount")
-                        .setValueAsync(0).get();
-
-                studentRef.child("penaltyAmount")
-                        .setValueAsync(0).get();
-
-                studentRef.child("restricted")
-                        .setValueAsync(false).get();
-
-                studentRef.child("restrictionUntil")
-                        .setValueAsync(0).get();
+                studentRef.child("borrowedCount").setValueAsync(0).get();
+                studentRef.child("offenseCount").setValueAsync(0).get();
+                studentRef.child("totalPenaltyAmount").setValueAsync(0).get();
+                studentRef.child("restrictionLevel").setValueAsync(0).get();
+                studentRef.child("restrictionUntil").setValueAsync(0).get();
+                studentRef.child("permanentlyBlocked").setValueAsync(false).get();
 
                 usersRef.child(user.getId())
                         .child("status")
