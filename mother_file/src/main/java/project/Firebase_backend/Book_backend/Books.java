@@ -36,7 +36,11 @@ public class Books {
      * ===================================================== */
 
     // 📦 Available stock
-    private int quantity;
+    private int totalCopies;
+    private int availableCopies;
+    private boolean archived;
+    private long createdAt;
+    private long updatedAt;
 
     // 📚 How many times borrowed
     private int borrowedCount;
@@ -47,7 +51,7 @@ public class Books {
      * ===================================================== */
 
     // 📊 AVAILABLE, LOW QUANTITY, OUT OF STOCK
-    private String status;
+    
 
 
     /* =====================================================
@@ -71,7 +75,11 @@ public class Books {
         this.title = title;
         this.bookId = bookId; // null for now, Firebase will overwrite
         this.author = author;
-        this.quantity = quantity;
+        this.totalCopies = quantity;
+        this.availableCopies = quantity;
+        this.archived = false;
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
         this.genre = genre;
         this.description = description;
         this.coverURL = coverURL;
@@ -143,16 +151,6 @@ public class Books {
     }
 
 
-    // ===== Quantity =====
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-
     // ===== Borrowed Count =====
     public int getBorrowedCount() {
         return borrowedCount;
@@ -162,14 +160,50 @@ public class Books {
         this.borrowedCount = borrowedCount;
     }
 
-
-    // ===== Status =====
-    public String getStatus() {
-        return status;
+    // ===== Total Copies =====
+    public int getTotalCopies(){
+        return totalCopies;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setTotalCopies(int totalCopies){
+        this.totalCopies = totalCopies;
     }
+
+    // ===== Available Copies =====
+    public int getAvailableCopies(){
+        return availableCopies;
+    }
+
+    public void setAvailableCopies(int availableCopies){
+        this.availableCopies = availableCopies;
+    }
+
+    // ===== Archived =====
+    public boolean isArchived(){
+        return archived;
+    }
+
+    public void setArchived(boolean archived){
+        this.archived = archived;
+    }
+
+    // ===== created at =====
+    public long getCreatedAt(){
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt){
+        this.createdAt = createdAt;
+    }
+
+    // ===== Update at =====
+    public long getUpdateAt(){
+        return updatedAt;
+    }
+
+    public void setUpdateAt(){
+        this.updatedAt = updatedAt;
+    }
+   
 
 }

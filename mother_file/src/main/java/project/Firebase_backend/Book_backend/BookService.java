@@ -17,6 +17,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 
 
 /* =========================================================
@@ -89,7 +92,8 @@ public class BookService {
                 } else {
 
                     // Calculate status before saving
-                    book.setStatus(calculateStatus(book.getQuantity()));
+                    book.setAvailableCopies(book.getTotalCopies());
+                    book.setArchived(false);
 
                     ref.child(newId).setValueAsync(book).addListener(() -> {
 
@@ -102,14 +106,7 @@ public class BookService {
                     }, Runnable::run);
 
 
-                    System.out.println("Book added with ID: " + newId);
-                    System.out.println("STATUS BEFORE SAVE: " + book.getStatus());
-
-                    // For testing only
-                    System.out.println(
-                            "Q=" + book.getQuantity() +
-                            " STATUS=" + book.getStatus()
-                    );
+                    
                 }
             }
 
@@ -173,7 +170,38 @@ public class BookService {
      * ===================================================== */
 
     public static void deleteBook(String bookId) {
-        ref.child(bookId).removeValueAsync();
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("books");
+
+        ref.child(bookId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+
+                if (snapshot.exists()) {
+
+                    String imagePath = snapshot.child("imagePath").getValue(String.class);
+
+                    if (imagePath != null) {
+
+                        Bucket bucket = StorageClient.getInstance().bucket();
+                        Blob blob = bucket.get(imagePath);
+
+                        if (blob != null) {
+                            blob.delete();
+                        }
+                    }
+
+                    ref.child(bookId).removeValueAsync();
+                    System.out.println("Book and image deleted successfully!");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.out.println("Delete failed: " + error.getMessage());
+            }
+        });
     }
 
 
@@ -189,40 +217,19 @@ public class BookService {
         }
 
         // Recalculate status before updating
-        book.setStatus(calculateStatus(book.getQuantity()));
+        book.setAvailableCopies(book.getTotalCopies());
+        book.setArchived(false);
 
         ref.child(book.getBookId()).setValueAsync(book);
 
         System.out.println("Book updated: " + book.getBookId());
     }
 
-
     public static void updateBookFields(String bookId, Map<String, Object> updates) {
-
-        if (updates.containsKey("quantity")) {
-            int qty = (int) updates.get("quantity");
-            updates.put("status", calculateStatus(qty));
-        }
-
+        updates.put("updatedAt", System.currentTimeMillis());
         ref.child(bookId).updateChildrenAsync(updates);
     }
 
 
-    /* =====================================================
-     * ================= STATUS CALCULATION =================
-     * ===================================================== */
-
-    private static String calculateStatus(int quantity) {
-
-        if (quantity == 0) {
-            return "OUT OF STOCK";
-
-        } else if (quantity <= 2) {
-            return "LOW QUANTITY";
-
-        } else {
-            return "AVAILABLE";
-        }
-    }
 
 }
