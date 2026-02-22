@@ -27,34 +27,64 @@ public class BorrowService {
 
         long now = System.currentTimeMillis();
 
-        // 1️⃣ Check active borrow count
-        borrowRef.orderByChild("studentId")
-                .equalTo(studentId)
+        // 1️⃣ Check student restriction first
+        userRef.child(studentId)
+                .child("studentData")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
 
                     @Override
-                    public void onDataChange(DataSnapshot snapshot) {
+                    public void onDataChange(DataSnapshot studentSnap) {
 
-                        int activeBorrows = 0;
-
-                        for (DataSnapshot snap : snapshot.getChildren()) {
-                            BorrowRecord record = snap.getValue(BorrowRecord.class);
-                            if (record != null && "BORROWED".equals(record.getStatus())) {
-                                activeBorrows++;
-                            }
-                        }
-
-                        if (activeBorrows >= BORROW_LIMIT) {
+                        if (!studentSnap.exists()) {
                             JOptionPane.showMessageDialog(
                                     null,
-                                    "Borrow limit reached.",
+                                    "Student data not found.",
                                     "Borrow Failed",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                            return;
+                        }
+
+                        boolean permanentlyBlocked = false;
+                        long restrictionUntil = 0;
+
+                        if (studentSnap.child("permanentlyBlocked").exists()) {
+                            Boolean blocked =
+                                    studentSnap.child("permanentlyBlocked")
+                                            .getValue(Boolean.class);
+                            if (blocked != null) permanentlyBlocked = blocked;
+                        }
+
+                        if (studentSnap.child("restrictionUntil").exists()) {
+                            Long until =
+                                    studentSnap.child("restrictionUntil")
+                                            .getValue(Long.class);
+                            if (until != null) restrictionUntil = until;
+                        }
+
+                        if (permanentlyBlocked) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Your account is permanently blocked.",
+                                    "Borrow Denied",
                                     JOptionPane.WARNING_MESSAGE
                             );
                             return;
                         }
 
-                        proceedBorrow(studentId, bookId, now);
+                        if (restrictionUntil > now) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "You are restricted until: "
+                                            + formatDate(restrictionUntil),
+                                    "Borrow Denied",
+                                    JOptionPane.WARNING_MESSAGE
+                            );
+                            return;
+                        }
+
+                        // 2️⃣ If not restricted → check borrow limit
+                        checkBorrowLimit(studentId, bookId, now);
                     }
 
                     @Override
@@ -328,5 +358,55 @@ public class BorrowService {
                             System.out.println(error.getMessage());
                         }
                     });
+        }
+
+        /* =====================================================
+        * =============== CHECK BORROW LIMITS ======================
+        * ===================================================== */
+        private static void checkBorrowLimit(String studentId, String bookId, long now) {
+
+            borrowRef.orderByChild("studentId")
+                    .equalTo(studentId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+
+                            int activeBorrows = 0;
+
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                BorrowRecord record =
+                                        snap.getValue(BorrowRecord.class);
+
+                                if (record != null &&
+                                        "BORROWED".equals(record.getStatus())) {
+                                    activeBorrows++;
+                                }
+                            }
+
+                            if (activeBorrows >= BORROW_LIMIT) {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "Borrow limit reached (Max 5 books).",
+                                        "Borrow Failed",
+                                        JOptionPane.WARNING_MESSAGE
+                                );
+                                return;
+                            }
+
+                            proceedBorrow(studentId, bookId, now);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError error) {
+                            System.out.println(error.getMessage());
+                        }
+                    });
+        }
+
+        private static  String formatDate(long timestamp){
+            java.text.SimpleDateFormat sdf = 
+                new java.text.SimpleDateFormat("dd/MM/yyyy");
+            return sdf.format(new java.util.Date(timestamp));
         }
 }
