@@ -3,20 +3,30 @@ package project.Admin_Screen.Dashboard;
 
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Bookmanagement.BookManagement;
@@ -26,6 +36,8 @@ import project.Main_System.MainFrame;
 
 public class AdminDashboard extends javax.swing.JPanel {
     private MainFrame frame;
+    private JTable table;
+    private DefaultTableModel model;
 
     public AdminDashboard(MainFrame frame){
         this.frame = frame;
@@ -132,6 +144,178 @@ public class AdminDashboard extends javax.swing.JPanel {
         //=====================end buttons====================
 
 
+         /* =====================================================
+         * =================== TOTAL BOOK OVERVIEW ================
+         * ===================================================== */
+
+        JLabel totalBookOverview = new JLabel("25");
+        totalBookOverview.setBounds(475, 240, 200, 60); // adjust to match your UI card
+        totalBookOverview.setFont(new Font("Sanchez", Font.PLAIN, 40));
+        totalBookOverview.setForeground(Color.WHITE);
+        //totalBookOverview.setHorizontalAlignment(SwingConstants.LEFT);
+
+        background.add(totalBookOverview);
+
+
+        /* =====================================================
+         * ================= AVAILABLE BOOK OVERVIEW ==============
+         * ===================================================== */
+
+        JLabel availableBookOverview = new JLabel("50");
+        availableBookOverview.setBounds(730, 240, 200, 60);
+        availableBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
+        availableBookOverview.setForeground(Color.white);
+
+        background.add(availableBookOverview);
+
+
+        /* =====================================================
+         * ================= BORROWED BOOK OVERVIEW ==============
+         * ===================================================== */
+
+        JLabel borrowedBookOverview = new JLabel("50");
+        borrowedBookOverview.setBounds(1000, 240, 200, 60);
+        borrowedBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
+        borrowedBookOverview.setForeground(Color.white);
+
+        background.add(borrowedBookOverview);
+
+
+        /* =====================================================
+         * ================= TOTAL STUDENTS ==============
+         * ===================================================== */
+
+        JLabel totalStudents = new JLabel("50");
+        totalStudents.setBounds(1275, 240, 200, 60);
+        totalStudents.setFont(new Font("Poppins", Font.PLAIN, 40));
+        totalStudents.setForeground(Color.white);
+
+        background.add(totalStudents);
+
+
+        /* =====================================================
+         * ====================== TABLE SETUP ===================
+         * ===================================================== */
+
+
+        // ================= TABLE MODEL =================
+        String[] columns = {"content"};
+
+        model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table = new JTable(model);
+        table.setRowHeight(28);
+        table.setBackground(Color.LIGHT_GRAY);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0,0));
+
+        // ================= COLUMN WIDTHS =================
+        table.getColorModel().getColumn(0).setPreferredWidth(200);
+
+        // ================= TABLE SELECTION =================
+        table.setRowSelectionAllowed(false);
+        table.setFocusable(false);
+
+
+        /* =====================================================
+         * ===================== SCROLL PANE ====================
+         * ===================================================== */
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(367, 467, 1038, 452);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.LIGHT_GRAY);
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+
+
+
+
+        // need to fix =============================================
+
+
+        
+
+
+    }
+    /* =====================================================
+      * ================= CUSTOM SCROLLBAR UI ===============
+    * ===================================================== */
+
+    private static class ModernScrollBarUI extends BasicScrollBarUI{
+        @Override
+        protected void configureScrollBarColors(){
+            thumbColor = new Color (180, 180, 180);
+            trackColor = new Color(245, 245, 245);
+        }
+
+        @Override
+        protected JButton createDecreaseButton (int orientation){
+            return createZeroButton();
+        }
+
+        private JButton createZeroButton(){
+            JButton b = new JButton();
+            b.setPreferredSize(new Dimension(0, 0));
+            b.setMinimumSize(new Dimension(0,0));
+            b.setMaximumSize(new Dimension(0, 0));
+            return b;
+        }
+
+        @Override
+        protected void paintThumb (Graphics g, JComponent c, Rectangle r){
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            g2.setColor(thumbColor);
+            g2.fillRoundRect(
+                r.x + 2, r.y + 2,
+                r.width - 4, r.height - 4, 
+                10, 10
+            );
+
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, Rectangle r){
+            g.setColor(trackColor);
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+    }
+
+
+
+    /* =====================================================
+     * ================= CUSTOM CELL RENDERER ===============
+     * ===================================================== */
+
+    class CustomCellRenderer extends DefaultTableCellRenderer{
+
+        private final Color EVEN_ROW = new Color(245, 245, 245);
+        private final Color ODD_ROW = Color.WHITE;
+
+        @Override
+        public Component getTAbleCellReneComponent(
+            JTable table, int row, int column){
+                super.getTableCellRendererComponent(table, row, column);
+
+                int modelRow = table.convertColumnIndexToModel(row);
+
+            //alternate Row colom 
+            setBackground(modelRow % 2 == 0? EVEN_ROW : ODD_ROW);
+            setForeground(Color.BLACK);
+
+            }
+        
     }
 
     //====================buttons methods============================
