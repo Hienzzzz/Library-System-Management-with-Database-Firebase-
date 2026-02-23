@@ -26,6 +26,7 @@ public class Books {
     private String author;
     private String genre;
     private String description;
+    private String status; // low copies / Available / no copies
 
     // 🖼 Cover image (Firebase Storage URL)
     private String coverURL;
@@ -120,7 +121,6 @@ public class Books {
         this.author = author;
     }
 
-
     // ===== Genre =====
     public String getGenre() {
         return genre;
@@ -203,6 +203,17 @@ public class Books {
 
     public void setUpdateAt(){
         this.updatedAt = updatedAt;
+    }
+
+    public String getComputedStatus(){
+        if(availableCopies == 0){
+            return "NO COPIES";
+        }
+        else if(availableCopies <= 2){
+            return "LOW COPIES";
+        }else{
+            return "AVAILABLE";
+        }
     }
    
 

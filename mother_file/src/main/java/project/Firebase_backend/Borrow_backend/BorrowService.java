@@ -218,7 +218,7 @@ public class BorrowService {
 
                             BorrowRecord record = snapshot.getValue(BorrowRecord.class);
 
-                            if (record == null || !"BORROWED".equals(record.getStatus())) {
+                            if (record == null || !"BORROWED".equals(record.getBook_Status())) {
                                 JOptionPane.showMessageDialog(
                                         null,
                                         "Invalid return operation.",
@@ -379,7 +379,7 @@ public class BorrowService {
                                         snap.getValue(BorrowRecord.class);
 
                                 if (record != null &&
-                                        "BORROWED".equals(record.getStatus())) {
+                                        "BORROWED".equals(record.getBook_Status())) {
                                     activeBorrows++;
                                 }
                             }
@@ -404,9 +404,54 @@ public class BorrowService {
                     });
         }
 
+        /* =====================================================
+        * =============== DATE FORMATTER ======================
+        * ===================================================== */
         private static  String formatDate(long timestamp){
             java.text.SimpleDateFormat sdf = 
                 new java.text.SimpleDateFormat("dd/MM/yyyy");
             return sdf.format(new java.util.Date(timestamp));
+        }
+
+
+        /* =====================================================
+        * ============= CHECK & UPDATE OVERDUE ====================
+        * ===================================================== */
+
+                
+        public static void checkAndMarkOverdue() {
+
+            long now = System.currentTimeMillis();
+
+            borrowRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+
+                    for (DataSnapshot snap : snapshot.getChildren()) {
+
+                        BorrowRecord record =
+                                snap.getValue(BorrowRecord.class);
+
+                        if (record == null) continue;
+
+                        if ("BORROWED".equals(record.getBook_Status())
+                                && record.getDueDate() < now) {
+
+                            borrowRef.child(snap.getKey())
+                                    .child("status")
+                                    .setValueAsync("OVERDUE");
+
+                            System.out.println("Marked overdue: "
+                                    + snap.getKey());
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    System.out.println(error.getMessage());
+                }
+            });
         }
 }

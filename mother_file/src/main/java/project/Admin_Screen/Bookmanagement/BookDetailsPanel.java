@@ -205,11 +205,12 @@ public class BookDetailsPanel extends JPanel {
         status_textHolder.setBounds(500, 240, 300, 25);
         status_textHolder.setFont(new Font("Poppins", Font.PLAIN, 15));
 
-        JLabel status = new JLabel(book.getStatus());
-        status.setBounds(500, 260, 300, 25);
-        status.setFont(new Font("Poppins", Font.PLAIN, 17));
+        String status = book.getComputedStatus();
+        JLabel Bstatus = new JLabel(status);
+        Bstatus.setBounds(500, 260, 300, 25);
+        Bstatus.setFont(new Font("Poppins", Font.PLAIN, 17));
 
-        JLabel quantity = new JLabel("Quantity: " + book.getQuantity());
+        JLabel quantity = new JLabel("Quantity: " + book.getAvailableCopies());
         quantity.setBounds(500, 290, 300, 25);
         quantity.setFont(new Font("Poppins", Font.PLAIN, 15));
 
@@ -401,7 +402,7 @@ public class BookDetailsPanel extends JPanel {
         background.add(genre_textHolder);
         background.add(author_textHolder);
         background.add(bookId_textHolder);
-        background.add(status);
+        background.add(Bstatus);
         background.add(scrollPane);
         background.add(quantity);
         background.add(genreScroll);

@@ -818,7 +818,7 @@ public class BookManagement extends JPanel {
                                 book.getTitle(),
                                 book.getBookId(),
                                 book.getAuthor(),
-                                book.getQuantity(),
+                                book.getAvailableCopies(),
                                 "•••",
                                 book.getGenre()
                         });
