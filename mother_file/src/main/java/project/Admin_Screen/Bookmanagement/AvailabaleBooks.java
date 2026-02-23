@@ -230,14 +230,14 @@ public class AvailabaleBooks extends JPanel {
                     Books book = data.getValue(Books.class);
                     if (book == null) continue;
 
-                    if (book.getQuantity() <= 0) continue;
+                    if (book.getAvailableCopies() <= 0) continue;
 
                     model.addRow(new Object[]{
                             book.getBookId(),
                             book.getTitle(),
                             book.getAuthor(),
                             book.getGenre(),
-                            book.getQuantity()
+                            book.getAvailableCopies()
                     });
                 }
             }

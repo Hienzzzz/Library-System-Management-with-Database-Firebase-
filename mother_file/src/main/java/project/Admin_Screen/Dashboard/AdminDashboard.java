@@ -29,12 +29,20 @@ public class AdminDashboard extends javax.swing.JPanel {
 
     public AdminDashboard(MainFrame frame){
         this.frame = frame;
-        panel();
+        InitUI();
     }
-    public void panel(){
+
+    /* =====================================================
+     * ===================== UI SECTION =====================
+     * ===================================================== */
+
+    public void InitUI(){
+
+        // ================= BASE PANEL =================
         this.setLayout(null);
         this.setPreferredSize(new Dimension(1512, 982));
         
+        // ================= BACKGROUND =================
         ImageIcon icon = new ImageIcon(
             getClass().getResource("/Images/Admin_dashboard.png")
         );
@@ -44,10 +52,11 @@ public class AdminDashboard extends javax.swing.JPanel {
 
    
         
-        //======================buttons=======================
+        /* =====================================================
+         * ================= SIDEBAR BUTTONS ===================
+         * ===================================================== */
 
     
- 
         TButton dashboard = new TButton("Dashboard");
         dashboard.setBounds(12, 240, 238, 49);
         dashboard.setFont(MainFrame.loadSanchez(15f));
@@ -111,10 +120,8 @@ public class AdminDashboard extends javax.swing.JPanel {
             System.out.println("Switching to admin management screen");
             frame.setContentPane(new Admin_AccountManagement(frame));
             frame.revalidate();
+        
         });
- 
- 
- 
         background.add(dashboard);
         background.add(reports);
         background.add(bookManagement);
@@ -123,6 +130,8 @@ public class AdminDashboard extends javax.swing.JPanel {
         this.add(background);
  
         //=====================end buttons====================
+
+
     }
 
     //====================buttons methods============================

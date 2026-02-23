@@ -346,6 +346,7 @@ addBook_button.addActionListener(e -> {
     String genreText = Genre.getText().trim();
     String descriptionText = description.getText().trim();
 
+
     if (titleText.isEmpty() ||
         authorText.isEmpty() ||
         genreText.isEmpty() ||
@@ -413,6 +414,7 @@ addBook_button.addActionListener(e -> {
                         titleText,
                         null,
                         authorText,
+                       
                         (int) quantityButton.getValue(),
                         genreText,
                         descriptionText,

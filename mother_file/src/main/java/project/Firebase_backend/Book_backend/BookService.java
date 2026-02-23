@@ -171,39 +171,103 @@ public class BookService {
 
     public static void deleteBook(String bookId) {
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("books");
+        DatabaseReference borrowRef =
+                FirebaseDatabase.getInstance().getReference("borrowRecords");
 
-        ref.child(bookId).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference bookRef =
+                FirebaseDatabase.getInstance().getReference("books");
 
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
+        // 1️⃣ Check active borrow records first
+        borrowRef.orderByChild("bookId")
+                .equalTo(bookId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
 
-                if (snapshot.exists()) {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
 
-                    String imagePath = snapshot.child("imagePath").getValue(String.class);
+                        boolean hasActiveBorrow = false;
 
-                    if (imagePath != null) {
+                        for (DataSnapshot snap : snapshot.getChildren()) {
 
-                        Bucket bucket = StorageClient.getInstance().bucket();
-                        Blob blob = bucket.get(imagePath);
+                            String status = snap.child("status")
+                                    .getValue(String.class);
 
-                        if (blob != null) {
-                            blob.delete();
+                            if ("BORROWED".equals(status)
+                                    || "OVERDUE".equals(status)) {
+
+                                hasActiveBorrow = true;
+                                break;
+                            }
+                        }
+
+                        if (hasActiveBorrow) {
+
+                            // 2️⃣ Archive instead of delete
+                            bookRef.child(bookId)
+                                    .child("archived")
+                                    .setValueAsync(true);
+
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Book has active borrowers.\n"
+                                            + "Book archived instead of deleted.",
+                                    "Archived",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+
+                        } else {
+
+                            // 3️⃣ Safe to fully delete
+                            bookRef.child(bookId)
+                                    .addListenerForSingleValueEvent(
+                                            new ValueEventListener() {
+
+                                                @Override
+                                                public void onDataChange(DataSnapshot snap) {
+
+                                                    if (!snap.exists()) return;
+
+                                                    String imagePath =
+                                                            snap.child("imagePath")
+                                                                    .getValue(String.class);
+
+                                                    // Delete storage image if exists
+                                                    if (imagePath != null) {
+                                                        Bucket bucket =
+                                                                StorageClient.getInstance().bucket();
+
+                                                        Blob blob = bucket.get(imagePath);
+
+                                                        if (blob != null) {
+                                                            blob.delete();
+                                                        }
+                                                    }
+
+                                                    bookRef.child(bookId)
+                                                            .removeValueAsync();
+
+                                                    JOptionPane.showMessageDialog(
+                                                            null,
+                                                            "Book deleted successfully.",
+                                                            "Deleted",
+                                                            JOptionPane.INFORMATION_MESSAGE
+                                                    );
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError error) {
+                                                    System.out.println(error.getMessage());
+                                                }
+                                            });
                         }
                     }
 
-                    ref.child(bookId).removeValueAsync();
-                    System.out.println("Book and image deleted successfully!");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.out.println("Delete failed: " + error.getMessage());
-            }
-        });
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        System.out.println(error.getMessage());
+                    }
+                });
     }
-
 
     /* =====================================================
      * ================= UPDATE SECTION =====================

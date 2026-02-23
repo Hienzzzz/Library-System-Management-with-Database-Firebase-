@@ -161,7 +161,7 @@ public class EditBookPanel extends JPanel {
         textField.setBackground(fieldColor);
         textField.setBorder(BorderFactory.createEmptyBorder(5, 2, 5, 5));
 
-        quantityButton.setValue(book.getQuantity());
+        quantityButton.setValue(book.getAvailableCopies());
 
         background.add(quantityButton);
 
@@ -376,7 +376,7 @@ public class EditBookPanel extends JPanel {
             book.setTitle(Title.getText().trim());
             book.setAuthor(Author.getText().trim());
             book.setGenre(Genre.getText().trim());
-            book.setQuantity((int) quantityButton.getValue());
+            book.setAvailableCopies((int) quantityButton.getValue());
             book.setDescription(
                     description.getText().trim()
             );
