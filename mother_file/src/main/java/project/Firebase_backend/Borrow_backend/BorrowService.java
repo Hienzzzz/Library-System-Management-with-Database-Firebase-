@@ -3,6 +3,8 @@ package project.Firebase_backend.Borrow_backend;
 import com.google.firebase.database.*;
 import project.Firebase_backend.Book_backend.Books;
 
+import java.sql.DatabaseMetaData;
+
 import javax.swing.JOptionPane;
 
 public class BorrowService {
@@ -454,4 +456,64 @@ public class BorrowService {
                 }
             });
         }
+
+        /* =====================================================
+        * ========== CLEANUP EXPIRED RESTRICTIONS =============
+        * ===================================================== */
+
+        public static void cleanUpExpiredRestrictions(){
+
+            long now = System.currentTimeMillis();
+
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users");
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot){
+
+                    for (DataSnapshot userSnap : snapshot.getChildren()){
+
+                        DataSnapshot studentData = userSnap.child("studentData");
+
+                        if(!studentData.exists()) continue;
+
+                        Boolean permanentlyBlocked = 
+                            studentData.child("permanentlyBlocked")
+                                .getValue(Boolean.class);
+
+                        Long restrictionUntil =
+                            studentData.child("restrictionUntil")
+                                .getValue(Long.class);
+
+                        if(permanentlyBlocked != null && permanentlyBlocked){
+                            continue; //do not reset permanent block
+                        }
+
+                        if(restrictionUntil != null
+                                && restrictionUntil > 0
+                                && restrictionUntil < now
+                        ){
+                            userRef.child(userSnap.getKey())
+                                .child("studentData")
+                                .child("restrictionLevel")
+                                .setValueAsync(0);
+
+                            userRef.child(userSnap.getKey())
+                                .child("studentData")
+                                .child("restrictionUntil")
+                                .setValueAsync(0);
+
+                            System.out.println("Restriction cleared for: " + userSnap.getKey());
+                            
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error){
+                    System.out.println(error.getMessage());
+                }
+            });
+        }
+
 }
