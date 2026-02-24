@@ -218,7 +218,7 @@ public class BorrowService {
 
                             BorrowRecord record = snapshot.getValue(BorrowRecord.class);
 
-                            if (record == null || !"BORROWED".equals(record.getBook_Status())) {
+                            if (record == null || !"BORROWED".equals(record.getStatus())) {
                                 JOptionPane.showMessageDialog(
                                         null,
                                         "Invalid return operation.",
@@ -379,7 +379,7 @@ public class BorrowService {
                                         snap.getValue(BorrowRecord.class);
 
                                 if (record != null &&
-                                        "BORROWED".equals(record.getBook_Status())) {
+                                        "BORROWED".equals(record.getStatus())) {
                                     activeBorrows++;
                                 }
                             }
@@ -435,7 +435,7 @@ public class BorrowService {
 
                         if (record == null) continue;
 
-                        if ("BORROWED".equals(record.getBook_Status())
+                        if ("BORROWED".equals(record.getStatus())
                                 && record.getDueDate() < now) {
 
                             borrowRef.child(snap.getKey())
