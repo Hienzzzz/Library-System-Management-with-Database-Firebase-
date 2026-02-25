@@ -425,4 +425,27 @@ public class UserService {
         return result.toString().trim();
     }
 
+    /* =====================================================
+    * ================== GET TOTAL BOOKS ===================
+    * ===================================================== */
+
+    public static void getTotalStudents(java.util.function.Consumer<Integer> callback){
+
+        usersRef.orderByChild("role")
+        .equalTo("STUDENT") 
+        .addListenerForSingleValueEvent(new ValueEventListener() {
+            
+            @Override
+            public void onDataChange(DataSnapshot snapshot){
+
+                int count = (int) snapshot.getChildrenCount();
+                callback.accept(count);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error){
+                callback.accept(0);
+            }
+        });
+    }
 }

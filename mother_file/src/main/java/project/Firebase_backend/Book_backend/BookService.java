@@ -294,6 +294,27 @@ public class BookService {
         ref.child(bookId).updateChildrenAsync(updates);
     }
 
+    
+    /* =====================================================
+    * ================== GET TOTAL BOOKS ===================
+    * ===================================================== */
+
+    public static void getTotalBooks(java.util.function.Consumer<Integer> callback){
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            
+            @Override
+            public void onDataChange(DataSnapshot snapshot){
+                int count = (int) snapshot.getChildrenCount();
+                callback.accept(count);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error){
+                callback.accept(0);
+            }
+        });
+    }
 
 
 }
