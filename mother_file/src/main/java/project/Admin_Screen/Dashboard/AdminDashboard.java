@@ -30,7 +30,9 @@ import project.Admin_Screen.Admin_accountManagement.Admin_AccountManagement;
 import project.Admin_Screen.Bookmanagement.BookManagement;
 import project.Admin_Screen.Report_screen.Reports;
 import project.Admin_Screen.Studentmanagement.StudentManagement;
+import project.Firebase_backend.Book_backend.BookService;
 import project.Firebase_backend.Borrow_backend.BorrowService;
+import project.Firebase_backend.User_backend.UserService;
 import project.Main_System.MainFrame;
 
 public class AdminDashboard extends javax.swing.JPanel {
@@ -149,11 +151,13 @@ public class AdminDashboard extends javax.swing.JPanel {
          * =================== TOTAL BOOK OVERVIEW ================
          * ===================================================== */
 
-        JLabel totalBookOverview = new JLabel("25");
+        JLabel totalBookOverview = new JLabel("0");
         totalBookOverview.setBounds(475, 240, 200, 60); // adjust to match your UI card
         totalBookOverview.setFont(new Font("Sanchez", Font.PLAIN, 40));
         totalBookOverview.setForeground(Color.WHITE);
-        //totalBookOverview.setHorizontalAlignment(SwingConstants.LEFT);
+        BookService.getTotalBooks(count ->{
+            totalBookOverview.setText(String.valueOf(count));
+        });
 
         background.add(totalBookOverview);
 
@@ -162,8 +166,8 @@ public class AdminDashboard extends javax.swing.JPanel {
          * ================= AVAILABLE BOOK OVERVIEW ==============
          * ===================================================== */
 
-        JLabel availableBookOverview = new JLabel("50");
-        availableBookOverview.setBounds(730, 240, 200, 60);
+        JLabel availableBookOverview = new JLabel("0");
+        availableBookOverview.setBounds(745, 240, 200, 60);
         availableBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
         availableBookOverview.setForeground(Color.white);
 
@@ -174,10 +178,14 @@ public class AdminDashboard extends javax.swing.JPanel {
          * ================= BORROWED BOOK OVERVIEW ==============
          * ===================================================== */
 
-        JLabel borrowedBookOverview = new JLabel("50");
-        borrowedBookOverview.setBounds(1000, 240, 200, 60);
+        JLabel borrowedBookOverview = new JLabel("0");
+        borrowedBookOverview.setBounds(1015, 240, 200, 60);
         borrowedBookOverview.setFont(new Font("Poppins", Font.PLAIN, 40));
         borrowedBookOverview.setForeground(Color.white);
+
+        BorrowService.getActiveBorrowCount(count -> {
+            borrowedBookOverview.setText(String.valueOf(count));
+        });
 
         background.add(borrowedBookOverview);
 
@@ -186,10 +194,13 @@ public class AdminDashboard extends javax.swing.JPanel {
          * ================= TOTAL STUDENTS ==============
          * ===================================================== */
 
-        JLabel totalStudents = new JLabel("50");
-        totalStudents.setBounds(1275, 240, 200, 60);
+        JLabel totalStudents = new JLabel("0");
+        totalStudents.setBounds(1287, 240, 200, 60);
         totalStudents.setFont(new Font("Poppins", Font.PLAIN, 40));
         totalStudents.setForeground(Color.white);
+        UserService.getTotalStudents(count ->{
+            totalStudents.setText(String.valueOf(count));
+        });
 
         background.add(totalStudents);
 

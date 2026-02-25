@@ -598,7 +598,7 @@ public class BorrowService {
     * ================ REQUEST Rejected  ==================
     * ===================================================== */
    public static void rejectedExtension(String recordId){
-    
+
         borrowRef.child(recordId)
             .child("extensionRequested")
             .setValueAsync(false);
@@ -614,4 +614,28 @@ public class BorrowService {
             JOptionPane.INFORMATION_MESSAGE
         );
    }
+
+   /* =====================================================
+    * ============== GET ACTIVE BORROW COUNT ==============
+    * ===================================================== */
+
+    public static void getActiveBorrowCount(java.util.function.Consumer<Integer> callback) {
+
+        borrowRef.orderByChild("status")
+                .equalTo("BORROWED")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        int count = (int) snapshot.getChildrenCount();
+                        callback.accept(count);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        callback.accept(0);
+                    }
+                });
+    }
+
 }
