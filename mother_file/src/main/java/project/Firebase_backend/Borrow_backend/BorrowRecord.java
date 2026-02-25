@@ -5,6 +5,9 @@ public class BorrowRecord {
     private String recordId;
     private String studentId;
     private String bookId;
+    private String extensionStatus; //pending, approved, rejected
+
+    private boolean extensionRequested;
 
     private long borrowDate;
     private long dueDate;
@@ -15,6 +18,7 @@ public class BorrowRecord {
     private int daysLate;
     private int penaltyAmount;
     private int extensionCount;
+    
 
     public BorrowRecord() {}
 
@@ -35,7 +39,7 @@ public class BorrowRecord {
         this.extensionCount = 0;
     }
 
-    // Generate getters & setters
+    // Generate getters 
     public String getStatus() {
         return status;
     }
@@ -76,7 +80,15 @@ public class BorrowRecord {
         return extensionCount;
     }
 
+    public boolean isExtensionRequested(){
+        return extensionRequested;
+    }
 
+    public String getExtensionStatus(){
+        return extensionStatus;
+    }
+
+    //setterr
     public void setStatus(String status){
         this.status = status;
     }
@@ -108,6 +120,14 @@ public class BorrowRecord {
 
     public void setExtensionCount(int extensionCount){
         this.extensionCount = extensionCount;
+    }
+
+    public void setExtensionRequested(boolean extensionRequested){
+        this.extensionRequested = extensionRequested;
+    }
+
+    public void setExtensionStatus(String extensionStatus){
+        this.extensionStatus = extensionStatus;
     }
 
     

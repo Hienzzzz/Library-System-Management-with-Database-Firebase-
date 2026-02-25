@@ -3,6 +3,7 @@ package project.Firebase_backend.Borrow_backend;
 import com.google.firebase.database.*;
 import project.Firebase_backend.Book_backend.Books;
 
+import java.security.cert.Extension;
 import java.sql.DatabaseMetaData;
 
 import javax.swing.JOptionPane;
@@ -20,6 +21,9 @@ public class BorrowService {
 
     private static final int BORROW_LIMIT = 5;
     private static final int BORROW_DAYS = 7;
+
+    private static final int MAX_EXTENSIONS = 2;
+    private static final int EXTENSION_DAYS = 3;
 
     /* =====================================================
      * ================= BORROW BOOK ========================
@@ -516,4 +520,98 @@ public class BorrowService {
             });
         }
 
+    /* =====================================================
+    * ================ REQUEST EXTENSION ==================
+    * ===================================================== */
+
+    public static void requestExtension(String recordId) {
+
+        borrowRef.child(recordId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        if (!snapshot.exists()) return;
+
+                        BorrowRecord record =
+                                snapshot.getValue(BorrowRecord.class);
+
+                        if (record == null) return;
+
+                        if (!"BORROWED".equals(record.getStatus())) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Only active borrowed books can request extension.",
+                                    "Extension Denied",
+                                    JOptionPane.WARNING_MESSAGE
+                            );
+                            return;
+                        }
+
+                        if (record.getExtensionCount() >= MAX_EXTENSIONS) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Maximum extensions reached.",
+                                    "Extension Denied",
+                                    JOptionPane.WARNING_MESSAGE
+                            );
+                            return;
+                        }
+
+                        if (record.isExtensionRequested()) {
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Extension request already pending.",
+                                    "Extension Pending",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                            return;
+                        }
+
+                        // Set request as pending
+                        borrowRef.child(recordId)
+                                .child("extensionRequested")
+                                .setValueAsync(true);
+
+                        borrowRef.child(recordId)
+                                .child("extensionStatus")
+                                .setValueAsync("PENDING");
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Extension request submitted.\nWaiting for admin approval.",
+                                "Request Sent",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        System.out.println(error.getMessage());
+                    }
+                });
+    }
+
+
+    /* =====================================================
+    * ================ REQUEST Rejected  ==================
+    * ===================================================== */
+   public static void rejectedExtension(String recordId){
+    
+        borrowRef.child(recordId)
+            .child("extensionRequested")
+            .setValueAsync(false);
+
+        borrowRef.child(recordId)
+            .child("extensionStatus")
+            .setValueAsync("REJECTED");
+
+        JOptionPane.showMessageDialog(
+            null,
+             "Extension request rejected.",
+            "Rejected",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+   }
 }
